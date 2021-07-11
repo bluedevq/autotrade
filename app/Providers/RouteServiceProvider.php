@@ -29,18 +29,18 @@ class RouteServiceProvider extends ServiceProvider
     protected function mapBackendRoutes()
     {
         Route::middleware('backend')
-//            ->domain(Common::getBackendDomain())
             ->prefix(Common::getBackendAlias())
-            ->namespace($this->namespace . Common::getBackendNamespace())
+            ->namespace($this->namespace . '\\Module\\' . Common::getBackendNamespace())
+            ->domain(Common::getBackendDomain())
             ->group(base_path('routes/backend.php'));
     }
 
     protected function mapFrontendRoutes()
     {
         Route::middleware('frontend')
-//            ->domain(Common::getFrontendDomain())
             ->prefix(Common::getFrontendAlias())
-            ->namespace($this->namespace . Common::getFrontendNamespace())
+            ->namespace($this->namespace . '\\Module\\' . Common::getFrontendNamespace())
+            ->domain(Common::getFrontendDomain())
             ->group(base_path('routes/frontend.php'));
     }
 

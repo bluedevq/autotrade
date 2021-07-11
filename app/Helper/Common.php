@@ -28,7 +28,7 @@ Class Common
 
     public static function getBackendNamespace()
     {
-        return '';
+        return 'Backend';
     }
 
     public static function getFrontendDomain()
@@ -93,4 +93,15 @@ Class Common
         $telegram = new TelegramNotification();
         $telegram->send($message);
     }
+
+    public static function buildDashBoardUrl()
+    {
+        return route('dashboard.index', self::buildDashBoardParamsDefault());
+    }
+
+    public static function buildDashBoardParamsDefault()
+    {
+        return [];
+    }
+
 }

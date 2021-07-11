@@ -125,3 +125,26 @@ if (!function_exists('public_url')) {
         return $appURL . 'public/' . $url;
     }
 }
+
+if (!function_exists('backendGuard')) {
+
+    /**
+     * @param string $default
+     * @return mixed
+     */
+    function backendGuard($default = 'admins')
+    {
+        return Auth::guard(getSystemConfig('backend_guard', $default));
+    }
+}
+if (!function_exists('frontendGuard')) {
+
+    /**
+     * @param string $default
+     * @return mixed
+     */
+    function frontendGuard($default = 'frontend')
+    {
+        return Auth::guard(getSystemConfig('frontend_guard', $default));
+    }
+}

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Module\Backend;
 
 /**
- * Class TestController
+ * Class HomeController
  * @package App\Http\Controllers\Module\Backend
  */
-class TestController extends BackendController
+class HomeController extends BackendController
 {
     public function __construct()
     {
