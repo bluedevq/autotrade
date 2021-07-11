@@ -1,5 +1,4 @@
-@extends('layout.default')
+@extends('layout.backend.default')
 @section('content')
-    {{ dump($list) }}
     test
 @stop

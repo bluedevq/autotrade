@@ -2,4 +2,4 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::resource('test', 'Module\Backend\TestController');
+Route::get('/', 'Module\Backend\TestController@index');

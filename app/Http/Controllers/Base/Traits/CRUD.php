@@ -10,7 +10,6 @@ trait CRUD
 {
     public function index()
     {
-        $this->setViewData(['list' => $this->getRepository()->getList()]);
         return $this->render();
     }
 

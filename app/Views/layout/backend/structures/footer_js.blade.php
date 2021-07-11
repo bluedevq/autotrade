@@ -10,7 +10,7 @@ $jsFiles = [
 ];
 ?>
 {!! loadFiles($jsFiles, $area, 'js') !!}
-@include('layout.structures.footer_autoload')
+@include('layout.backend.structures.footer_autoload')
 <script>
     $('#sandbox-container .input-daterange').datepicker({
         language: "ja",

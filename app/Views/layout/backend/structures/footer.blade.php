@@ -8,5 +8,5 @@
         </div>
     </footer>
 </div>
-@include('layout.structures.footer_js')
-@include('layout.elements.trans')
+@include('layout.backend.structures.footer_js')
+@include('layout.backend.elements.trans')
