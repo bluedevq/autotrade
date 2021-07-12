@@ -6,7 +6,9 @@ use App\Helper\Common;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -104,5 +106,25 @@ class BaseController extends Controller
         $currentRoute = Route::currentRouteAction();
         $currentRoute = explode('@', $currentRoute);
         return Str::lower(last($currentRoute));
+    }
+
+    protected function _back()
+    {
+        return Redirect::back();
+    }
+
+    protected function _to($url, $params = array())
+    {
+        $data = ['url' => $url, 'params' => $params];
+        $url = $data['url'];
+        $params = $data['params'];
+        if (strpos($url, 'http') !== false) {
+            return new RedirectResponse(url($url, $params));
+        }
+        if (strpos($url, '.') !== false) {
+            $url = route($url, $params);
+        }
+
+        return Redirect::to($url)->with($params);
     }
 }

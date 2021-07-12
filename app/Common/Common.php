@@ -83,14 +83,15 @@ if (!function_exists('getBodyClass')) {
 }
 if (!function_exists('loadFile')) {
 
-    function loadFiles($files, $area, $type = 'css')
+    function loadFiles($files, $area = '', $type = 'css')
     {
         if (empty($files)) {
             return '';
         }
         $result = '';
         foreach ($files as $item) {
-            $filePath = $type . DIRECTORY_SEPARATOR . $area . DIRECTORY_SEPARATOR . $item . '.' . $type;
+            $type = $area ? ($type . DIRECTORY_SEPARATOR . $area) : $type;
+            $filePath = $type . DIRECTORY_SEPARATOR . $item . '.' . $type;
             if (!file_exists(public_path($filePath))) {
                 continue;
             }

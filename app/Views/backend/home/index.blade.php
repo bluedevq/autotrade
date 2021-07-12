@@ -1,4 +1,4 @@
-@extends('layout.backend.default')
+@extends('layouts.backend.default')
 @section('content')
     test
 @stop
