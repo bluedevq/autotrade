@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Module\Backend;
 use App\Helper\Common;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\MessageBag;
 
 /**
@@ -36,17 +37,8 @@ class LoginController extends BackendController
 
     public function logout()
     {
-    }
-
-    protected function _backWithError($errors)
-    {
-        return $this->_back()->withErrors($errors)->withInput(request()->all());
-    }
-
-    protected function _redirectToHome()
-    {
-        $url = request()->get('return_url', Common::buildDashBoardUrl());
-        $url = empty($url) ? Common::buildDashBoardUrl() : $url;
-        return $this->_to($url);
+        backendGuard()->logout();
+        Session::flush();
+        return $this->_redirectToHome();
     }
 }

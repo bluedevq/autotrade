@@ -18,6 +18,7 @@ Route::middleware(['auth.backend'])->post('logout', [
 
 // backend
 Route::middleware(['auth.backend'])->group(function () {
+    // home
     Route::get('/', [
         'as' => 'dashboard.index',
         'uses' => 'HomeController@index'
@@ -25,5 +26,21 @@ Route::middleware(['auth.backend'])->group(function () {
     Route::get('/home', [
         'as' => 'home.index',
         'uses' => 'HomeController@index'
+    ]);
+
+    // bot
+    Route::get('/bot', [
+        'as' => 'bot.index',
+        'uses' => 'BotController@index'
+    ]);
+
+    Route::post('/bot/getToken', [
+        'as' => 'bot.token',
+        'uses' => 'BotController@getToken'
+    ]);
+
+    Route::get('/bot/clearToken', [
+        'as' => 'bot.clear_token',
+        'uses' => 'BotController@clearToken'
     ]);
 });

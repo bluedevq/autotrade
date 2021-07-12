@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Base;
 
 use App\Helper\Common;
+use App\Http\Supports\ApiResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -12,9 +13,14 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
+/**
+ * Class BaseController
+ * @package App\Http\Controllers\Base
+ */
 class BaseController extends Controller
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    use ApiResponse;
 
     protected $_title = '';
 
@@ -126,5 +132,17 @@ class BaseController extends Controller
         }
 
         return Redirect::to($url)->with($params);
+    }
+
+    protected function _backWithError($errors)
+    {
+        return $this->_back()->withErrors($errors)->withInput(request()->all());
+    }
+
+    protected function _redirectToHome()
+    {
+        $url = request()->get('return_url', Common::buildDashBoardUrl());
+        $url = empty($url) ? Common::buildDashBoardUrl() : $url;
+        return $this->_to($url);
     }
 }

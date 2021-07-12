@@ -11,6 +11,7 @@
     ];
     $jsFiles = [
         'lib/bootstrap.min',
+        'lib/bootstrap.bundle.min',
     ];
     ?>
     {!! loadFiles($jsFiles, '', 'js') !!}
