@@ -23,7 +23,7 @@
             <div class="container m-1">
                 <div class="row mx-auto col-md-6">
                     <div class="col-md-2">
-                        <label for="password" class="form-label" aria-hidden="true">Password</label>
+                        <label for="password" class="form-label" aria-hidden="true">Mật khẩu</label>
                     </div>
                     <div class="col-md-10">
                         <input type="password" name="password" class="form-control" id="password">

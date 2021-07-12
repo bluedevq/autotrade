@@ -1,11 +1,12 @@
 <div class="container mt-5" style="background-color: #171b2c;border-color: #303539;border-radius: 20px;color: #fff">
     <div class="row pt-2">
         <div class="col-md-4 col-sm-12">
-            <a href="{{ route('bot.clear_token') }}" class="btn btn-secondary">Đăng xuất</a>
+            <a href="{{ route('bot.clear_token') }}" class="btn btn-secondary float-md-start float-sm-end">Đăng xuất</a>
         </div>
     </div>
     <div class="row mt-1 text-center col-md-12">
-        <h3>Thông tin tài khoản AresBO của bạn</h3>
+        <img height="50" src="{{ public_url('images/backend/logo.601a65eb.svg') }}" alt="Aresbo" style="height: 50px;">
+        <h3 class="mt-5">Thông tin tài khoản AresBO của bạn</h3>
     </div>
     <div class="list-group mt-5">
         <div class="row col-md-12">
