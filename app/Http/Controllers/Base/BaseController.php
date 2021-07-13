@@ -104,7 +104,7 @@ class BaseController extends Controller
         $controller = explode('\\', $controller);
         $controller = last($controller);
         $controller = str_replace('Controller', '', $controller);
-        return Str::lower($controller);
+        return Str::snake($controller);
     }
 
     public function getCurrentActionName()

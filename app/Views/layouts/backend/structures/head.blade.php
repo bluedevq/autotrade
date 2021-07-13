@@ -8,6 +8,9 @@
     <?php $cssFiles = [
         'lib/bootstrap.min',
         'lib/bootstrap-theme.min',
+        'lib/fontawesome.min',
+        'lib/solid',
+        'backend/custom',
     ];
     $jsFiles = [
         'lib/bootstrap.min',

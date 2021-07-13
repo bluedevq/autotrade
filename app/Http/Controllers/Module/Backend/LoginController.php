@@ -31,7 +31,7 @@ class LoginController extends BackendController
         if (backendGuard()->attempt($userData)) {
             return $this->_redirectToHome();
         }
-        $errors = new MessageBag(['login_password' => ['Password error']]);
+        $errors = new MessageBag(['login_password' => ['Sai mật khẩu']]);
         return $this->_backWithError($errors);
     }
 

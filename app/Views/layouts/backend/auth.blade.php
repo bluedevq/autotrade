@@ -7,6 +7,7 @@
         @yield('content')
     </div>
 </div>
+@include('layouts.backend.elements.modal')
 @include('layouts.backend.structures.footer_js')
 @stack('scripts')
 </body>

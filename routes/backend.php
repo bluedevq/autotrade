@@ -31,16 +31,21 @@ Route::middleware(['auth.backend'])->group(function () {
     // bot
     Route::get('/bot', [
         'as' => 'bot.index',
-        'uses' => 'BotController@index'
+        'uses' => 'BotAresController@index'
     ]);
 
-    Route::post('/bot/getToken', [
+    Route::post('/bot/token', [
         'as' => 'bot.token',
-        'uses' => 'BotController@getToken'
+        'uses' => 'BotAresController@getToken'
     ]);
 
-    Route::get('/bot/clearToken', [
+    Route::post('/bot/token-2fa', [
+        'as' => 'bot.token2fa',
+        'uses' => 'BotAresController@getToken2Fa'
+    ]);
+
+    Route::get('/bot/clear-token', [
         'as' => 'bot.clear_token',
-        'uses' => 'BotController@clearToken'
+        'uses' => 'BotAresController@clearToken'
     ]);
 });
