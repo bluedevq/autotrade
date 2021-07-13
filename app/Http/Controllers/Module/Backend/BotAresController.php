@@ -15,7 +15,6 @@ class BotAresController extends BackendController
 {
     const ACCESS_TOKEN = 'access_token';
     const REFRESH_TOKEN = 'refresh_token';
-    const PROFILE_INFO = 'profile_info';
     const TWOFA_TOKEN = '2fa_token';
     const TWOFA_REQUIRED = '2fa_required';
 
@@ -27,18 +26,14 @@ class BotAresController extends BackendController
     public function index()
     {
         if (Session::has(self::TWOFA_REQUIRED)) {
-            // clear 2fa required
-            //Session::forget(self::TWOFA_REQUIRED);
-            //Session::forget(self::TWOFA_TOKEN);
-
             $this->setViewData([
                 'require2Fa' => Session::get(self::TWOFA_REQUIRED)
             ]);
         }
-        if (Session::has(self::ACCESS_TOKEN)) {
+        if (Session::has(self::REFRESH_TOKEN)) {
             $userInfo = $this->_getUserInfo();
             if (blank($userInfo)) {
-                Session::forget(self::ACCESS_TOKEN);
+                Session::forget(self::REFRESH_TOKEN);
                 return $this->_to('bot.index');
             }
             $this->setViewData([
@@ -123,18 +118,14 @@ class BotAresController extends BackendController
     {
         Session::forget(self::ACCESS_TOKEN);
         Session::forget(self::REFRESH_TOKEN);
-        Session::forget(self::PROFILE_INFO);
 
         return $this->_to('bot.index');
     }
 
     protected function _getUserInfo()
     {
-        if (Session::has(self::PROFILE_INFO)) {
-            return Session::get(self::PROFILE_INFO);
-        }
         try {
-            $accessToken = Session::get(self::ACCESS_TOKEN);
+            $accessToken = Session::get(self::REFRESH_TOKEN);
             $headers = ['Authorization' => 'Bearer ' . $accessToken];
 
             // get profile
@@ -149,7 +140,6 @@ class BotAresController extends BackendController
             $response = $this->requestApi(Common::getConfig('aresbo.get_overview'), [], 'GET', $headers, true);
             $profile['rank'] = Arr::get($response, 'd.rank');
             $profile['sponsor'] = Arr::get($response, 'd.sponsor');
-            Session::put(self::PROFILE_INFO, $profile);
 
             return $profile;
         } catch (\Exception $exception) {

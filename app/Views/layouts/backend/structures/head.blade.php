@@ -13,8 +13,8 @@
         'backend/custom',
     ];
     $jsFiles = [
-        'lib/bootstrap.min',
-        'lib/bootstrap.bundle.min',
+//        'lib/bootstrap.min',
+//        'lib/bootstrap.bundle.min',
     ];
     ?>
     {!! loadFiles($jsFiles, '', 'js') !!}

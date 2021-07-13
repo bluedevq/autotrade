@@ -2,9 +2,10 @@
 $jsFiles = [
     'lib/jquery.min',
     'lib/bootstrap.min',
-    'lib/bootstrap-datepicker.min',
-    'lib/bootstrap-datepicker.ja.min',
-    'lib/bootstrap-timepicker.min',
+    'lib/bootstrap.bundle.min',
+//    'lib/bootstrap-datepicker.min',
+//    'lib/bootstrap-datepicker.ja.min',
+//    'lib/bootstrap-timepicker.min',
     'lib/loadingoverlay.min',
     'lib/fontawesome.min',
     'common/xhr',
