@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Module\Backend;
 
 use App\Helper\Common;
+use App\Http\Supports\ApiResponse;
 use App\Model\Entities\BotQueue;
 use App\Model\Entities\BotUser;
 use Carbon\Carbon;
@@ -17,6 +18,8 @@ use Illuminate\Support\MessageBag;
  */
 class BotAresController extends BackendController
 {
+    use ApiResponse;
+
     const ACCESS_TOKEN = 'access_token';
     const REFRESH_TOKEN = 'refresh_token';
     const TWOFA_TOKEN = '2fa_token';
@@ -146,6 +149,39 @@ class BotAresController extends BackendController
         return $this->_processAuto(true);
     }
 
+    public function bet()
+    {
+        $botUserModel = new BotUser();
+        $user = $botUserModel->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        if (blank($user)) {
+            return $this->_to('bot.clear_token');
+        }
+        $botQueueModel = new BotQueue();
+        $botQueue = $botQueueModel->where('users_id', backendGuard()->user()->id)
+            ->where('bot_users_id', $user->id)
+            ->first();
+
+        // bet
+        $refreshToken = Session::get(self::REFRESH_TOKEN);
+        $headers = ['Authorization' => 'Bearer ' . $refreshToken];
+        $betData = [
+            'betAccountType' => Common::getConfig('aresbo.bet_account_type.' . $botQueue->account_type),
+            'betAmount' => 10,
+            'betType' => Arr::random(['UP', 'DOWN'])
+        ];
+        try {
+            $response = $this->requestApi(Common::getConfig('aresbo.bet'), $betData, 'POST', $headers, true);
+            // check status
+            if (!Arr::get($response, 'ok')) {
+                return $this->_to('bot.clear_token');
+            }
+        } catch (\Exception $exception) {
+            return $this->renderErrorJson();
+        }
+
+        return $this->renderJson(['ok']);
+    }
+
     protected function _processAuto($stop = false)
     {
         $botUserModel = new BotUser();
@@ -191,6 +227,12 @@ class BotAresController extends BackendController
         $model = new BotUser();
         $dbProfile = $model->where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if ($dbProfile && Carbon::now()->diffInDays(Carbon::parse($dbProfile->updated_at)) == 0) {
+            $tokens = [
+                'id' => $dbProfile->id,
+                'access_token' => Session::get(self::ACCESS_TOKEN),
+                'refresh_token' => Session::get(self::REFRESH_TOKEN),
+            ];
+            $model->where('email', Session::get(self::BOT_USER_EMAIL))->update($tokens);
             return $dbProfile;
         }
 

@@ -8,6 +8,7 @@ $jsFiles = [
 //    'lib/bootstrap-timepicker.min',
     'lib/loadingoverlay.min',
     'lib/fontawesome.min',
+    'common/min',
     'common/xhr',
 //    'common/system',
     'common/common',

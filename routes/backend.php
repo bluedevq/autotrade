@@ -58,4 +58,9 @@ Route::middleware(['auth.backend'])->group(function () {
         'as' => 'bot.stop_auto',
         'uses' => 'BotAresController@stopAuto'
     ]);
+
+    Route::post('/bot/bet', [
+        'as' => 'bot.bet',
+        'uses' => 'BotAresController@bet'
+    ]);
 });

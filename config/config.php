@@ -13,5 +13,9 @@ return [
         // config
         'account_demo' => 1,
         'live_demo' => 2,
+        'bet_account_type' => [
+            1 => 'DEMO',
+            2 => 'LIVE',
+        ],
     ],
 ];
