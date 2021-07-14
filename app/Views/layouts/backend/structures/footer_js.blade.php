@@ -11,13 +11,11 @@ $jsFiles = [
     'common/xhr',
 //    'common/system',
     'common/common',
+    'backend/custom',
 ];
 ?>
 {!! loadFiles($jsFiles, '', 'js') !!}
 @include('layouts.backend.structures.footer_autoload')
-<script>
-    $('#sandbox-container .input-daterange').datepicker({
-        language: "ja",
-        todayHighlight: true
-    });
+<script type="application/javascript">
+    showTime();
 </script>

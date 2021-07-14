@@ -48,4 +48,14 @@ Route::middleware(['auth.backend'])->group(function () {
         'as' => 'bot.clear_token',
         'uses' => 'BotAresController@clearToken'
     ]);
+
+    Route::post('/bot/start-auto', [
+        'as' => 'bot.start_auto',
+        'uses' => 'BotAresController@startAuto'
+    ]);
+
+    Route::post('/bot/stop-auto', [
+        'as' => 'bot.stop_auto',
+        'uses' => 'BotAresController@stopAuto'
+    ]);
 });

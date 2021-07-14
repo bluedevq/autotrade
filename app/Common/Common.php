@@ -126,7 +126,6 @@ if (!function_exists('public_url')) {
         return $appURL . 'public/' . $url;
     }
 }
-
 if (!function_exists('backendGuard')) {
 
     /**
@@ -147,5 +146,62 @@ if (!function_exists('frontendGuard')) {
     function frontendGuard($default = 'frontend')
     {
         return Auth::guard(getSystemConfig('frontend_guard', $default));
+    }
+}
+// migrate
+if (!function_exists('getUpdatedAtColumn')) {
+
+    function getUpdatedAtColumn($key = 'field')
+    {
+        return getSystemConfig('updated_at_column.' . $key);
+    }
+}
+if (!function_exists('getCreatedAtColumn')) {
+
+    function getCreatedAtColumn($key = 'field')
+    {
+        return getSystemConfig('created_at_column.' . $key);
+    }
+}
+if (!function_exists('getDeletedAtColumn')) {
+
+    function getDeletedAtColumn($key = 'field')
+    {
+        return getSystemConfig('deleted_at_column.' . $key, '');
+    }
+}
+if (!function_exists('getDelFlagColumn')) {
+
+    function getDelFlagColumn($key = 'field')
+    {
+        return getSystemConfig('del_flag_column.' . $key);
+    }
+}
+if (!function_exists('getCreatedByColumn')) {
+
+    function getCreatedByColumn($key = 'field')
+    {
+        return getSystemConfig('created_by_column.' . $key);
+    }
+}
+if (!function_exists('getUpdatedByColumn')) {
+
+    function getUpdatedByColumn($key = 'field')
+    {
+        return getSystemConfig('updated_by_column.' . $key);
+    }
+}
+if (!function_exists('getDeletedByColumn')) {
+
+    function getDeletedByColumn($key = 'field')
+    {
+        return getSystemConfig('deleted_by_column.' . $key, getUpdatedByColumn());
+    }
+}
+if (!function_exists('getStatusColumn')) {
+
+    function getStatusColumn($key = 'field')
+    {
+        return getSystemConfig('status_column.' . $key);
     }
 }
