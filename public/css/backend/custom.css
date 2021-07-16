@@ -29,6 +29,11 @@ a {
     letter-spacing: 7px;
 }
 
+.bet-result {
+    height: 100px;
+    overflow: scroll;
+}
+
 @media (min-width: 767px) {
     .sp {
         display: none;

@@ -25,6 +25,8 @@ class BotAresController extends BackendController
     const TWOFA_TOKEN = '2fa_token';
     const TWOFA_REQUIRED = '2fa_required';
     const BOT_USER_EMAIL = 'bot_user_email';
+    const CURRENT_AMOUNT = 'current_amount';
+    const LAST_AMOUNT = 'last_amount';
 
     public function __construct()
     {
@@ -151,6 +153,9 @@ class BotAresController extends BackendController
 
     public function bet()
     {
+        if (date('s') > 30) {
+            return $this->renderErrorJson(200, ['data' => ['url' => route('bot.index')]]);
+        }
         $botUserModel = new BotUser();
         $user = $botUserModel->where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if (blank($user)) {
@@ -169,17 +174,50 @@ class BotAresController extends BackendController
             'betAmount' => 10,
             'betType' => Arr::random(['UP', 'DOWN'])
         ];
+
         try {
-            $response = $this->requestApi(Common::getConfig('aresbo.bet'), $betData, 'POST', $headers, true);
+            // get current amount
+            $wallet = $this->requestApi(Common::getConfig('aresbo.get_balance'), [], 'GET', $headers, true);
+            $wallet = Arr::get($wallet, 'd');
+            $currentAmount = Arr::get($wallet, $botQueue->account_type == Common::getConfig('aresbo.account_demo') ? 'demoBalance' : 'availableBalance');
+
+            // get last order
+            $lastResult = (intval($currentAmount) - intval(Session::get(self::LAST_AMOUNT))) > 0 ? 1 : 0;
+
+            // update last order status
+
+            // bet new order
+            $response = $this->requestApi(Common::getConfig('aresbo.bet'), $betData, 'POST', $headers);
+
             // check status
             if (!Arr::get($response, 'ok')) {
-                return $this->_to('bot.clear_token');
+                return $this->renderErrorJson(200, ['data' => ['url' => route('bot.clear_token')]]);
             }
-        } catch (\Exception $exception) {
-            return $this->renderErrorJson();
-        }
 
-        return $this->renderJson(['ok']);
+            // set last amount
+            $lastAmount = $currentAmount - 10;
+            Session::put(self::LAST_AMOUNT, $lastAmount);
+
+            // save order
+
+        } catch (\Exception $exception) {
+            return $this->renderErrorJson(200, ['data' => ['url' => route('bot.index')]]);
+        }
+        $betOrder = [
+            'bet_ss' => Arr::get($response, 'd.ss'),
+            'bet_time' => date('H:i'),
+            'bet_amount' => number_format(Arr::get($response, 'd.amt'), 2),
+            'bet_type' => Arr::get($response, 'd.type'),
+            'bet_account_type' => $botQueue->account_type,
+            'bet_tk_amount' => Arr::get($response, 'd.tk_amount'),
+            'bet_method' => Arr::random(['Ngẫu nhiên']),
+            'bet_last_result' => $lastResult,
+            'last_amount' => number_format($currentAmount, 2),
+            'current_amount' => number_format($lastAmount, 2),
+        ];
+
+
+        return $this->renderJson(['data' => $betOrder]);
     }
 
     protected function _processAuto($stop = false)

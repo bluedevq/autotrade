@@ -12,14 +12,6 @@
             <div class="col-md-6 col-12">
                 <div class="row">
                     <div class="col-6 col-md-4">
-                        <label class="form-label" aria-hidden="true"><i class="fas fa-envelope">&nbsp;&nbsp;</i>Email</label>
-                    </div>
-                    <div class="col-6 col-md-8">
-                        <span class="fw-bold">{{ $userInfo->email }}</span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-6 col-md-4">
                         <label class="form-label" aria-hidden="true"><i class="fas fa-user">&nbsp;&nbsp;</i>Biệt danh</label>
                     </div>
                     <div class="col-6 col-md-8">
@@ -47,18 +39,46 @@
                         @endif
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-6 col-md-4">
+                        <label class="form-label" aria-hidden="true"><i class="fas fa-clock">&nbsp;&nbsp;</i>Hết hạn</label>
+                    </div>
+                    <div class="col-6 col-md-8">
+                        <span class="fw-bold text-danger">Dùng thử</span>
+                    </div>
+                </div>
             </div>
             <div class="col-md-6 col-12">
                 <div class="row">
                     <div class="col-6 col-md-4">
-                        <label class="form-label" aria-hidden="true"><i class="fas fa-money-bill-alt">&nbsp;</i>Thông tin ví</label>
+                        <label class="form-label" aria-hidden="true"><i class="fas fa-money-bill-alt">&nbsp;</i>Số dư ban đầu</label>
                     </div>
                     <div class="col-6 col-md-8">
-                        Tổng tài sản (USDT): <br class="sp"><i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info">{{ number_format($userInfo->usdt_available_balance, 2) }}</span>
-                        <br>
-                        Tài khoản Demo: <br class="sp"><i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info">{{ number_format($userInfo->demo_balance, 2) }}</span>
-                        <br>
-                        Tài khoản Live: <br class="sp"><i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info">{{ number_format($userInfo->available_balance, 2) }}</span>
+                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info last-amount">{{ number_format($userInfo->demo_balance, 2) }}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 col-md-4">
+                        <label class="form-label" aria-hidden="true"><i class="fas fa-funnel-dollar">&nbsp;</i>Số dư hiện tại</label>
+                    </div>
+                    <div class="col-6 col-md-8">
+                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info current-amount">{{ number_format($userInfo->demo_balance, 2) }}</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 col-md-4">
+                        <label class="form-label" aria-hidden="true"><i class="fas fa-hand-holding-usd">&nbsp;</i>Tổng lãi</label>
+                    </div>
+                    <div class="col-6 col-md-8">
+                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info profit">0</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 col-md-4">
+                        <label class="form-label" aria-hidden="true"><i class="fas fa-donate">&nbsp;</i>Tổng giao dịch</label>
+                    </div>
+                    <div class="col-6 col-md-8">
+                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info volume">0</span>
                     </div>
                 </div>
             </div>
@@ -113,14 +133,7 @@
                     <th>Tiền</th>
                     <th>Kết quả</th>
                     </thead>
-                    <tbody>
-                    <tr>
-                        <td>00:02</td>
-                        <td>NBB_1</td>
-                        <td>Giảm</td>
-                        <td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">2</span></td>
-                        <td class="text-success fw-bold">Win</td>
-                    </tr>
+                    <tbody class="bet-result">
                     </tbody>
                 </table>
             </div>
@@ -136,8 +149,7 @@
 
         // bet
         if (2 < s && s < 30) {
-            if (!localStorage.hasBet) {
-                console.log('auto bet');
+            if (localStorage.hasBet === 'false') {
                 sendRequest({
                     url: '{{ route('bot.bet') }}',
                     type: 'POST',
@@ -145,12 +157,34 @@
                     beforeSend: function () {},
                     complete: function () {}
                 }, function (response) {
+                    var betOrder = response.data;
+
                     if (!response.status) {
-                        window.location.href = '{{ route('bot.clear_token') }}';
+                        window.location.href = betOrder.url;
+                        return false;
                     }
+
+                    // update last result
+                    var firstChild = $('.bet-result tr:first-child'),
+                        lastResult = (betOrder.bet_last_result == 1) ? '<span class="fw-bold text-success">Thắng</span>' : '<span class="fw-bold text-danger">Thua</span>';
+                    firstChild.length > 0 ? firstChild.find('.bet-order-result').empty().html(lastResult) : null;
+
+                    // add new order
+                    var newOrder = "<tr>\n" +
+                        '<td>' + betOrder.bet_time + '</td>\n' +
+                        '<td>' + betOrder.bet_method + '</td>\n' +
+                        '<td>' + (betOrder.bet_type == 'UP' ? '<span class="fw-bold">Mua</span>' : '<span class="fw-bold">Bán</span>') + '</td>\n' +
+                        '<td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + betOrder.bet_amount + '</span></td>\n' +
+                        '<td class="fw-bold bet-order-result">Đang đợi</td>\n' +
+                        '</tr>';
+                    $('.bet-result').prepend(newOrder);
+
+                    // update amount
+                    $('.last-amount').empty().text(betOrder.last_amount);
+                    $('.current-amount').empty().text(betOrder.current_amount);
                 });
+                localStorage.hasBet = true;
             }
-            localStorage.hasBet = true;
         } else {
             localStorage.hasBet = false;
         }
@@ -161,7 +195,7 @@
 
         // show time
         s = (s > 30) ? (60 - s) : (30 - s);
-        s = (s == 30) ? "0" : s;
+        s = (s == 0) ? "30" : s;
         s = (s < 10) ? "0" + s : s;
         document.getElementById('clock-countdown').innerText = s;
         document.getElementById('clock-countdown').textContent = s;
