@@ -49,9 +49,15 @@ class BotAresController extends BackendController
             $botQueue = BotQueue::where('users_id', backendGuard()->user()->id)
                 ->where('bot_users_id', $userInfo->id)
                 ->first();
+            $startAmount = 0;
+            if ($botQueue) {
+                $botQueue->account_type == Common::getConfig('aresbo.account_demo') ? $userInfo->demo_balance : $userInfo->available_balance;
+            }
+            Session::put(self::CURRENT_AMOUNT, $startAmount);
             $this->setViewData([
                 'userInfo' => $userInfo,
-                'botQueue' => $botQueue
+                'botQueue' => $botQueue,
+                'startAmount' => $startAmount,
             ]);
         }
 
@@ -205,14 +211,12 @@ class BotAresController extends BackendController
         }
         $betOrder = [
             'bet_ss' => Arr::get($response, 'd.ss'),
-            'bet_time' => date('H:i'),
-            'bet_amount' => number_format(Arr::get($response, 'd.amt'), 2),
-            'bet_type' => Arr::get($response, 'd.type'),
-            'bet_account_type' => $botQueue->account_type,
+            'time' => date('H:i'),
+            'amount' => number_format(Arr::get($response, 'd.amt'), 2),
+            'type' => Arr::get($response, 'd.type'),
             'bet_tk_amount' => Arr::get($response, 'd.tk_amount'),
-            'bet_method' => Arr::random(['Ngẫu nhiên']),
-            'bet_last_result' => $lastResult,
-            'last_amount' => number_format($currentAmount, 2),
+            'method' => Arr::random(['Ngẫu nhiên']),
+            'last_result' => $lastResult,
             'current_amount' => number_format($lastAmount, 2),
         ];
 
@@ -313,14 +317,16 @@ class BotAresController extends BackendController
             if ($dbProfile && $dbProfile->id) {
                 $dataProfile['id'] = $dbProfile->id;
                 unset($dataProfile['created_at']);
+                $model->fill($dataProfile)->update();
+            } else {
+                $model->fill($dataProfile)->save();
             }
-            $model->fill($dataProfile)->save();
             DB::commit();
 
             return $model;
         } catch (\Exception $exception) {
             DB::rollBack();
-            return $model;
+            return [];
         }
     }
 }

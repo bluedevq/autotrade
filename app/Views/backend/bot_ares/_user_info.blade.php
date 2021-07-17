@@ -31,7 +31,7 @@
                         <label class="form-label" aria-hidden="true"><i class="fas fa-medal">&nbsp;&nbsp;</i>Cấp bậc</label>
                     </div>
                     <div class="col-6 col-md-8">
-                        @php $rank = $userInfo->rank @endphp
+                        @php $rank = isset($userInfo) ? $userInfo->rank : 0 @endphp
                         @if($rank)
                             <span class="fw-bold text-warning">{{ $rank }}</span>
                         @else
@@ -54,7 +54,7 @@
                         <label class="form-label" aria-hidden="true"><i class="fas fa-money-bill-alt">&nbsp;</i>Số dư ban đầu</label>
                     </div>
                     <div class="col-6 col-md-8">
-                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info last-amount">{{ number_format($userInfo->demo_balance, 2) }}</span>
+                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info last-amount">{{ number_format($startAmount, 2) }}</span>
                     </div>
                 </div>
                 <div class="row">
@@ -140,65 +140,11 @@
         </div>
     </div>
 </div>
-<script>
-    localStorage.hasBet = false;
 
-    function showTime() {
-        var date = new Date(),
-            s = date.getSeconds();
-
-        // bet
-        if (2 < s && s < 30) {
-            if (localStorage.hasBet === 'false') {
-                sendRequest({
-                    url: '{{ route('bot.bet') }}',
-                    type: 'POST',
-                    data: {},
-                    beforeSend: function () {},
-                    complete: function () {}
-                }, function (response) {
-                    var betOrder = response.data;
-
-                    if (!response.status) {
-                        window.location.href = betOrder.url;
-                        return false;
-                    }
-
-                    // update last result
-                    var firstChild = $('.bet-result tr:first-child'),
-                        lastResult = (betOrder.bet_last_result == 1) ? '<span class="fw-bold text-success">Thắng</span>' : '<span class="fw-bold text-danger">Thua</span>';
-                    firstChild.length > 0 ? firstChild.find('.bet-order-result').empty().html(lastResult) : null;
-
-                    // add new order
-                    var newOrder = "<tr>\n" +
-                        '<td>' + betOrder.bet_time + '</td>\n' +
-                        '<td>' + betOrder.bet_method + '</td>\n' +
-                        '<td>' + (betOrder.bet_type == 'UP' ? '<span class="fw-bold">Mua</span>' : '<span class="fw-bold">Bán</span>') + '</td>\n' +
-                        '<td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + betOrder.bet_amount + '</span></td>\n' +
-                        '<td class="fw-bold bet-order-result">Đang đợi</td>\n' +
-                        '</tr>';
-                    $('.bet-result').prepend(newOrder);
-
-                    // update amount
-                    $('.last-amount').empty().text(betOrder.last_amount);
-                    $('.current-amount').empty().text(betOrder.current_amount);
-                });
-                localStorage.hasBet = true;
-            }
-        } else {
-            localStorage.hasBet = false;
-        }
-
-        // show title
-        document.getElementById('clock-title').innerText = (s < 30) ? 'Có thể đặt lệnh' : 'Đang chờ kết quả';
-        document.getElementById('clock-title').textContent = (s < 30) ? 'Có thể đặt lệnh' : 'Đang chờ kết quả';
-
-        // show time
-        s = (s > 30) ? (60 - s) : (30 - s);
-        s = (s == 0) ? "30" : s;
-        s = (s < 10) ? "0" + s : s;
-        document.getElementById('clock-countdown').innerText = s;
-        document.getElementById('clock-countdown').textContent = s;
-        setTimeout(showTime, 1000);
-    }
+<script type="application/javascript">
+    $(document).ready(function () {
+        BotController.canBet = '{{ $isRunning ? 'true' : 'false' }}';
+        BotController.betUrl = '{{ route('bot.bet') }}';
+        BotController.showTime();
+    });
 </script>

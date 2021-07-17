@@ -1,6 +1,6 @@
 <div class="container p-2 border border-1 rounded-3" style="border-color: #303539">
     <div class="row pt-2 text-center col-12">
-        <img height="50" src="{{ public_url('images/backend/logo.601a65eb.svg') }}" alt="Aresbo" style="height: 50px;">
+        <img height="50" src="{{ public_url('images/backend/logo.svg') }}" alt="Aresbo" style="height: 50px;">
         <h3 class="mt-5">Đăng nhập vào Tài khoản của bạn</h3>
     </div>
     <form method="post" action="{{ route('bot.token') }}" class="form-horizontal" enctype="multipart/form-data">
@@ -27,12 +27,12 @@
         </div>
         <div class="row mt-md-2">
             <div class="col-md-5 col-0">&nbsp;</div>
-            <div class="col-md-2 col-12">
+            <div class="col-md-4 col-12">
                 <button class="btn btn-lg btn-danger btn-block col-12" name="submit" type="submit">
                     <span class="fas fa-sign-in-alt" aria-hidden="true">&nbsp;</span>Đăng nhập
                 </button>
             </div>
-            <div class="col-md-5 col-0">&nbsp;</div>
+            <div class="col-md-3 col-0">&nbsp;</div>
         </div>
     </form>
 </div>

@@ -2,9 +2,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title }}</title>
+    <title>Autotrade{{ $title ? (' - ' . $title) : '' }}</title>
     <meta name="description" content="">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ public_url('favicon.png') }}">
     <?php $cssFiles = [
         'lib/bootstrap.min',
         'lib/bootstrap-theme.min',
@@ -13,8 +13,11 @@
         'backend/custom',
     ];
     $jsFiles = [
-//        'lib/bootstrap.min',
-//        'lib/bootstrap.bundle.min',
+        'lib/jquery.min',
+        'lib/bootstrap.min',
+        'lib/bootstrap.bundle.min',
+        'lib/loadingoverlay.min',
+        'lib/fontawesome.min',
     ];
     ?>
     {!! loadFiles($jsFiles, '', 'js') !!}

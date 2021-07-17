@@ -11,9 +11,6 @@
                 <span class="icon-bar">
 						</span>
             </button>
-            <a class="navbar-brand" href="{{route('dashboard.index')}}">
-                <img src="/public/css/frontend/img/logo.png" height="45" alt="{{$title}}">
-            </a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">

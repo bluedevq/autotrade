@@ -1,6 +1,6 @@
 <div class="container p-2 border border-1 rounded-3" style="border-color: #303539">
     <div class="row pt-2 text-center col-12">
-        <img height="50" src="{{ public_url('images/backend/logo.601a65eb.svg') }}" alt="Aresbo" style="height: 50px;">
+        <img height="50" src="{{ public_url('images/backend/logo.svg') }}" alt="Aresbo" style="height: 50px;">
         <h3>Xác minh bảo mật</h3>
     </div>
     <form method="post" action="{{ route('bot.token2fa') }}" class="form-horizontal" enctype="multipart/form-data">
