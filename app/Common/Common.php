@@ -132,7 +132,7 @@ if (!function_exists('backendGuard')) {
      * @param string $default
      * @return mixed
      */
-    function backendGuard($default = 'admins')
+    function backendGuard($default = 'backend')
     {
         return Auth::guard(getSystemConfig('backend_guard', $default));
     }

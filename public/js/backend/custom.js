@@ -2,6 +2,8 @@ var BotController = {
     betUrl: null,
     canBet: false,
     hasOrder: false,
+    profit: 0,
+    volume: 0,
     bet: function () {
         sendRequest({
             url: BotController.betUrl,
@@ -15,28 +17,57 @@ var BotController = {
             var betOrder = response.data;
 
             if (!response.status) {
-                window.location.href = betOrder.url;
+                if (betOrder.url) {
+                    window.location.href = betOrder.url;
+                }
                 return false;
             }
 
             // update last result
-            var firstChild = $('.bet-result tr:first-child'),
-                lastResult = (betOrder.last_result == 1) ? '<span class="fw-bold text-success">Thắng</span>' : '<span class="fw-bold text-danger">Thua</span>';
-            firstChild.length > 0 ? firstChild.find('.bet-order-result').empty().html(lastResult) : null;
+            var listClosedOrders = betOrder.closed_orders;
+            if (typeof listClosedOrders != 'undefined') {
+                BotController.updateLastOrders(listClosedOrders);
+            }
 
-            // add new order
-            var newOrder = "<tr>\n" +
-                '<td>' + betOrder.time + '</td>\n' +
-                '<td>' + betOrder.method + '</td>\n' +
-                '<td>' + BotController.getBetTypeText(betOrder.type) + '</td>\n' +
-                '<td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + betOrder.amount + '</span></td>\n' +
-                '<td class="fw-bold bet-order-result">Đang đợi</td>\n' +
-                '</tr>';
-            $('.bet-result').prepend(newOrder);
+            // update new orders
+            var listOpenOrders = betOrder.open_orders;
+            if (typeof listOpenOrders != 'undefined') {
+                BotController.updateNewOrders(listOpenOrders);
+            }
 
             // update amount
             $('.current-amount').empty().text(betOrder.current_amount);
         });
+    },
+    updateLastOrders: function (listClosedOrders) {
+        var childrens = $('.bet-result tr');
+        if (typeof childrens !== 'undefined' && childrens.length > 0) {
+            for (var i = 0; i < listClosedOrders.length; i++) {
+                // update status
+                var result = (listClosedOrders[i].result === 'WIN') ? '<span class="fw-bold text-success">Thắng</span>' : '<span class="fw-bold text-danger">Thua</span>';
+                $(childrens[i]).length > 0 ? $(childrens[i]).find('.bet-order-result').empty().html(result) : null;
+
+                // update profit
+                BotController.profit += listClosedOrders[i].win_amount;
+
+                // update volume
+                BotController.volume += listClosedOrders[i].amount;
+            }
+            $('.profit').empty().html(BotController.profit > 0 ? ('<span class="text-success">' + BotController.profit + '</span>') : ('<span class="text-danger">' + BotController.profit + '</span>'));
+            $('.volume').empty().text(BotController.volume);
+        }
+    },
+    updateNewOrders: function (listOpenOrders) {
+        for (var i = 0; i < listOpenOrders.length; i++) {
+            var newOrder = "<tr>\n" +
+                '<td>' + listOpenOrders[i].time + '</td>\n' +
+                '<td>' + listOpenOrders[i].method + '</td>\n' +
+                '<td>' + BotController.getBetTypeText(listOpenOrders[i].type) + '</td>\n' +
+                '<td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + listOpenOrders[i].amount + '</span></td>\n' +
+                '<td class="fw-bold bet-order-result">Đang đợi</td>\n' +
+                '</tr>';
+            $('.bet-result').prepend(newOrder);
+        }
     },
     getBetTypeText: function (betType) {
         return (betType == 'UP' ? '<span class="fw-bold">Mua</span>' : '<span class="fw-bold">Bán</span>')
@@ -46,7 +77,7 @@ var BotController = {
             s = date.getSeconds();
 
         // bet
-        if (2 < s && s < 30) {
+        if (0 < s && s < 30) {
             if (BotController.hasOrder === false && BotController.canBet === 'true') {
                 BotController.bet();
                 BotController.hasOrder = true;

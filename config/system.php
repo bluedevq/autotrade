@@ -10,6 +10,9 @@ return [
     'updated_by_column' => ['field' => 'upd_id'],
     'deleted_by_column' => [],
     'status_column' => [],
+    // guard
+    'frontend_guard' => 'frontend',
+    'backend_guard' => 'backend',
     // route
     'backend_domain' => env('BACKEND_DOMAIN', ''),
     'backend_alias' => env('BACKEND_ALIAS', 'admin'),

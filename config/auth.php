@@ -2,14 +2,14 @@
 
 return [
     'defaults' => [
-        'guard' => 'admins',
+        'guard' => 'backend',
         'passwords' => 'users',
     ],
 
     'guards' => [
-        'admins' => [
+        'backend' => [
             'driver' => 'session',
-            'provider' => 'admins',
+            'provider' => 'backend',
         ],
         'frontend' => [
             'driver' => 'session',
@@ -26,7 +26,7 @@ return [
             'driver' => 'eloquent',
             'model' => App\Model\Entities\User::class,
         ],
-        'admins' => [
+        'backend' => [
             'driver' => 'eloquent',
             'model' => App\Model\Entities\User::class,
         ],
@@ -39,8 +39,8 @@ return [
             'expire' => 1440,
             'throttle' => 60,
         ],
-        'admins' => [
-            'provider' => 'admins',
+        'backend' => [
+            'provider' => 'backend',
             'table' => 'password_resets',
             'expire' => 1440,
             'throttle' => 60,

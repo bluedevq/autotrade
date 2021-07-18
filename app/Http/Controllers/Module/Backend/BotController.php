@@ -25,8 +25,7 @@ class BotController extends BackendController
     const TWOFA_TOKEN = '2fa_token';
     const TWOFA_REQUIRED = '2fa_required';
     const BOT_USER_EMAIL = 'bot_user_email';
-    const CURRENT_AMOUNT = 'current_amount';
-    const LAST_AMOUNT = 'last_amount';
+    const TOTAL_OPEN_ORDER = 'total_open_order';
 
     public function __construct()
     {
@@ -53,7 +52,6 @@ class BotController extends BackendController
             if ($botQueue) {
                 $botQueue->account_type == Common::getConfig('aresbo.account_demo') ? $userInfo->demo_balance : $userInfo->available_balance;
             }
-            Session::put(self::CURRENT_AMOUNT, $startAmount);
             $this->setViewData([
                 'userInfo' => $userInfo,
                 'botQueue' => $botQueue,
@@ -78,13 +76,11 @@ class BotController extends BackendController
 
         // get token from AresBO
         $loginData = [
-            'captcha' => Common::getConfig('aresbo.captcha_token'),
-            'client_id' => 'aresbo-web',
+            'captcha' => Common::getConfig('aresbo.api_url.captcha_token'),
             'email' => $email,
-            'grant_type' => 'password',
             'password' => $password
         ];
-        $response = $this->requestApi(Common::getConfig('aresbo.get_token_url'), $loginData);
+        $response = $this->_getNewToken($loginData, true);
 
         // check status
         if (!Arr::get($response, 'ok')) {
@@ -122,7 +118,7 @@ class BotController extends BackendController
             'td_p_code' => '',
             'token' => Session::get(self::TWOFA_TOKEN)
         ];
-        $response = $this->requestApi(Common::getConfig('aresbo.get_token2fa_url'), $loginData);
+        $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_token2fa_url'), $loginData);
 
         // clear 2fa required
         Session::forget(self::TWOFA_REQUIRED);
@@ -161,11 +157,13 @@ class BotController extends BackendController
 
     public function bet()
     {
+        // check time to bet
         if (date('s') > 30) {
-            return $this->renderErrorJson(200, ['data' => ['url' => route('bot.index')]]);
+            return $this->renderErrorJson();
         }
-        $botUserModel = new BotUser();
-        $user = $botUserModel->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+
+        // check bot queue has running
+        $user = BotUser::where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if (blank($user)) {
             return $this->_to('bot.clear_token');
         }
@@ -173,57 +171,57 @@ class BotController extends BackendController
         $botQueue = $botQueueModel->where('users_id', backendGuard()->user()->id)
             ->where('bot_users_id', $user->id)
             ->first();
-
-        // bet
-        $refreshToken = Session::get(self::REFRESH_TOKEN);
-        $headers = ['Authorization' => 'Bearer ' . $refreshToken];
-        $betData = [
-            'betAccountType' => Common::getConfig('aresbo.bet_account_type.' . $botQueue->account_type),
-            'betAmount' => 10,
-            'betType' => Arr::random(['UP', 'DOWN'])
-        ];
-
-        try {
-            // get current amount
-            $wallet = $this->requestApi(Common::getConfig('aresbo.get_balance'), [], 'GET', $headers, true);
-            $wallet = Arr::get($wallet, 'd');
-            $currentAmount = Arr::get($wallet, $botQueue->account_type == Common::getConfig('aresbo.account_demo') ? 'demoBalance' : 'availableBalance');
-
-            // get last order
-            $lastResult = (intval($currentAmount) - intval(Session::get(self::LAST_AMOUNT))) > 0 ? 1 : 0;
-
-            // update last order status
-
-            // bet new order
-            $response = $this->requestApi(Common::getConfig('aresbo.bet'), $betData, 'POST', $headers);
-
-            // check status
-            if (!Arr::get($response, 'ok')) {
-                return $this->renderErrorJson(200, ['data' => ['url' => route('bot.clear_token')]]);
-            }
-
-            // set last amount
-            $lastAmount = $currentAmount - 10;
-            Session::put(self::LAST_AMOUNT, $lastAmount);
-
-            // save order
-
-        } catch (\Exception $exception) {
-            return $this->renderErrorJson(200, ['data' => ['url' => route('bot.index')]]);
+        if (blank($botQueue) || $botQueue->status = Common::getConfig('aresbo.bot_status.stop')) {
+            return $this->renderErrorJson();
         }
-        $betOrder = [
-            'bet_ss' => Arr::get($response, 'd.ss'),
-            'time' => date('H:i'),
-            'amount' => number_format(Arr::get($response, 'd.amt'), 2),
-            'type' => Arr::get($response, 'd.type'),
-            'bet_tk_amount' => Arr::get($response, 'd.tk_amount'),
-            'method' => Arr::random(['Ngẫu nhiên']),
-            'last_result' => $lastResult,
-            'current_amount' => number_format($lastAmount, 2),
-        ];
 
+        // get list closed orders
+        $closedOrders = $this->_getListOrders([
+            'betAccountType' => $botQueue->account_type,
+            'size' => Session::get(self::TOTAL_OPEN_ORDER)
+        ], false);
 
-        return $this->renderJson(['data' => $betOrder]);
+        // get new refresh token
+        $newRefreshToken = $this->_getNewToken();
+        // check status
+        if (!Arr::get($newRefreshToken, 'ok')) {
+            return $this->_to('bot.clear_token');
+        }
+        // save token
+        Session::put(self::ACCESS_TOKEN, Arr::get($newRefreshToken, 'd.access_token'));
+        Session::put(self::REFRESH_TOKEN, Arr::get($newRefreshToken, 'd.refresh_token'));
+
+        // research method to get bet order data
+        $orderData = $this->_getOrderData($botQueue->account_type);
+
+        // bet new order
+        $betResult = $this->_betProcess($orderData);
+        if ($betResult !== true) {
+            return $betResult;
+        }
+
+        // get current balance after bet
+        $currentAmount = $this->requestApi(Common::getConfig('aresbo.api_url.get_balance'), [], 'GET', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)], true);
+
+        // get list open orders
+        $openOrders = $this->_getListOrders([
+            'betAccountType' => $botQueue->account_type,
+            'size' => Session::get(self::TOTAL_OPEN_ORDER)
+        ]);
+        Session::put(self::TOTAL_OPEN_ORDER, count($openOrders));
+
+        // save bet new order
+
+        // mapping result
+        $result = $this->_mapOpenOrders([
+            'list_open_orders' => $openOrders,
+            'list_closed_orders' => $closedOrders,
+            'order_data' => $orderData,
+            'current_amount' => $currentAmount,
+            'account_type' => $botQueue->account_type
+        ]);
+
+        return $this->renderJson(['data' => $result]);
     }
 
     protected function _processAuto($stop = false)
@@ -286,15 +284,15 @@ class BotController extends BackendController
             $headers = ['Authorization' => 'Bearer ' . $refreshToken];
 
             // get profile
-            $response = $this->requestApi(Common::getConfig('aresbo.get_profile'), [], 'GET', $headers, true);
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_profile'), [], 'GET', $headers, true);
             $profile = Arr::get($response, 'd');
 
             // get balance
-            $response = $this->requestApi(Common::getConfig('aresbo.get_balance'), [], 'GET', $headers, true);
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_balance'), [], 'GET', $headers, true);
             $profile += Arr::get($response, 'd');
 
             // get rank
-            $response = $this->requestApi(Common::getConfig('aresbo.get_overview'), [], 'GET', $headers, true);
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_overview'), [], 'GET', $headers, true);
             $profile['rank'] = Arr::get($response, 'd.rank');
             $profile['sponsor'] = Arr::get($response, 'd.sponsor');
 
@@ -343,9 +341,105 @@ class BotController extends BackendController
         }
     }
 
-    protected function _saveUser() {}
+    protected function _getListOrders($params = [], $open = true)
+    {
+        $params['page'] = 1;
+        if (!isset($params['size']) || !$params['size']) {
+            $params['size'] = 20;
+        }
+        if (!isset($params['betAccountType'])) {
+            $params['betAccountType'] = 1;
+        }
+        $params['betAccountType'] = Common::getConfig('aresbo.bet_account_type.' . $params['betAccountType']);
+        $url = $open ? Common::getConfig('aresbo.api_url.open_order') : Common::getConfig('aresbo.api_url.close_order');
+        $response = $this->requestApi($url, $params, 'GET', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
+        // check status
+        if (!Arr::get($response, 'ok')) {
+            return $this->renderErrorJson(200, ['data' => ['url' => route('bot.clear_token')]]);
+        }
+        $result = [];
+        $listOrders = Arr::get($response, 'd.c');
+        foreach ($listOrders as $item) {
+            $result[] = [
+                'amount' => Arr::get($item, 'betAmount'),
+                'win_amount' => Arr::get($item, 'winAmount') - Arr::get($item, 'betAmount'),
+                'type' => Arr::get($item, 'betType'),
+                'result' => Arr::get($item, 'result'),
+                'time' => Arr::get($item, 'createdDatetime'),
+            ];
+        }
 
-    protected function _updateBotQueue($botUser) {
+        return $result;
+    }
+
+    protected function _getNewToken($params = [], $isLogin = false)
+    {
+        $params['client_id'] = 'aresbo-web';
+        $params['grant_type'] = $isLogin ? 'password' : 'refresh_token';
+        if (!$isLogin) {
+            $params['refresh_token'] = Session::get(self::REFRESH_TOKEN);
+        }
+
+        return $this->requestApi(Common::getConfig('aresbo.api_url.get_token_url'), $params);
+    }
+
+    protected function _betProcess($orderData = [])
+    {
+        // bet new order
+        foreach ($orderData as $betData) {
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.bet'), $betData, 'POST', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
+            // check status
+            if (!Arr::get($response, 'ok')) {
+                return $this->renderErrorJson(200, ['data' => ['url' => route('bot.clear_token')]]);
+            }
+        }
+        return true;
+    }
+
+    protected function _getOrderData($accountType)
+    {
+        return [
+            [
+                'betAccountType' => Common::getConfig('aresbo.bet_account_type.' . $accountType),
+                'betAmount' => 10,
+                'betType' => Arr::random(['UP', 'DOWN']),
+                'method' => 'Ngẫu nhiên',
+            ]
+        ];
+    }
+
+    protected function _mapOpenOrders($params = [])
+    {
+        $listOpenOrders = Arr::get($params, 'list_open_orders');
+        $listClosedOrders = Arr::get($params, 'list_closed_orders');
+        $orderData = Arr::get($params, 'order_data');
+        $orderData = array_reverse($orderData);
+
+        $currentAmount = Arr::get($params, 'current_amount');
+        $accountType = Arr::get($params, 'account_type');
+        $result['current_amount'] = $accountType == Common::getConfig('aresbo.account_demo') ? Arr::get($currentAmount, 'd.demoBalance') : Arr::get($currentAmount, 'd.availableBalance');
+        $result['current_amount'] = number_format($result['current_amount'], 2);
+
+        $result['closed_orders'] = $listClosedOrders;
+
+        foreach ($listOpenOrders as $index => $openOrder) {
+            $result['open_orders'][] = [
+                'time' => $openOrder['time'],
+                'amount' => $openOrder['amount'],
+                'type' => $openOrder['type'],
+                'method' => Arr::get($orderData, $index . '.method'),
+            ];
+        }
+
+        return $result;
+    }
+
+    protected function _saveUser()
+    {
+    }
+
+    protected function _updateBotQueue($botUser)
+    {
         // update bot queue
         $botQueue = BotQueue::where('users_id', backendGuard()->user()->id)
             ->where('bot_users_id', $botUser->id)

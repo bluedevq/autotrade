@@ -3,6 +3,7 @@
 namespace App\Http\Supports;
 
 use GuzzleHttp\Client;
+use Illuminate\Support\Str;
 
 /**
  * Trait ApiResponse
@@ -196,6 +197,9 @@ trait ApiResponse
     {
         if (!$forceHeader) {
             $headers['Content-Type'] = 'application/json';
+        }
+        if (Str::lower($method) == 'get') {
+            $url = $url . '?' . http_build_query($params);
         }
 
         $client = new Client();
