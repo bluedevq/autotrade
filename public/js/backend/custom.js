@@ -59,8 +59,9 @@ var BotController = {
     },
     updateNewOrders: function (listOpenOrders) {
         for (var i = 0; i < listOpenOrders.length; i++) {
+            var dateTime = new Date(listOpenOrders[i].time);
             var newOrder = "<tr>\n" +
-                '<td>' + listOpenOrders[i].time + '</td>\n' +
+                '<td>' + BotController.pad(dateTime.getHours()) + ':' + BotController.pad(dateTime.getMinutes()) + '</td>\n' +
                 '<td>' + listOpenOrders[i].method + '</td>\n' +
                 '<td>' + BotController.getBetTypeText(listOpenOrders[i].type) + '</td>\n' +
                 '<td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + listOpenOrders[i].amount + '</span></td>\n' +
@@ -68,6 +69,14 @@ var BotController = {
                 '</tr>';
             $('.bet-result').prepend(newOrder);
         }
+    },
+    pad: function (t) {
+        var st = "" + t;
+        while (st.length < 2) {
+            st = "0" + st;
+        }
+
+        return st;
     },
     getBetTypeText: function (betType) {
         return (betType == 'UP' ? '<span class="fw-bold">Mua</span>' : '<span class="fw-bold">Bán</span>')
