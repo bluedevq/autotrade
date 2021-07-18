@@ -50,7 +50,7 @@ class BotController extends BackendController
                 ->first();
             $startAmount = 0;
             if ($botQueue) {
-                $botQueue->account_type == Common::getConfig('aresbo.account_demo') ? $userInfo->demo_balance : $userInfo->available_balance;
+                $startAmount = $botQueue->account_type == Common::getConfig('aresbo.account_demo') ? $userInfo->demo_balance : $userInfo->available_balance;
             }
             $this->setViewData([
                 'userInfo' => $userInfo,

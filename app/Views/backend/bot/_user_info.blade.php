@@ -51,18 +51,10 @@
             <div class="col-md-6 col-12">
                 <div class="row">
                     <div class="col-6 col-md-4">
-                        <label class="form-label" aria-hidden="true"><i class="fas fa-money-bill-alt">&nbsp;</i>Số dư ban đầu</label>
-                    </div>
-                    <div class="col-6 col-md-8">
-                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info last-amount">{{ number_format($startAmount, 2) }}</span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-6 col-md-4">
                         <label class="form-label" aria-hidden="true"><i class="fas fa-funnel-dollar">&nbsp;</i>Số dư hiện tại</label>
                     </div>
                     <div class="col-6 col-md-8">
-                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info current-amount">{{ number_format($userInfo->demo_balance, 2) }}</span>
+                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ number_format($startAmount, 2) }}</span>
                     </div>
                 </div>
                 <div class="row">
@@ -70,7 +62,7 @@
                         <label class="form-label" aria-hidden="true"><i class="fas fa-hand-holding-usd">&nbsp;</i>Tổng lãi</label>
                     </div>
                     <div class="col-6 col-md-8">
-                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info profit">0</span>
+                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="profit">0</span>
                     </div>
                 </div>
                 <div class="row">
@@ -78,7 +70,7 @@
                         <label class="form-label" aria-hidden="true"><i class="fas fa-donate">&nbsp;</i>Tổng giao dịch</label>
                     </div>
                     <div class="col-6 col-md-8">
-                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="text-info volume">0</span>
+                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="volume">0</span>
                     </div>
                 </div>
             </div>
