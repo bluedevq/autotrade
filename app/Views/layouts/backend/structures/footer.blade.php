@@ -3,7 +3,7 @@
     <footer>
         <div class="row">
             <div class="col-lg-12" align="center">
-                <p>Copyright© by Sparta Group {{ date('Y') }}</p>
+                <p>Copyright© by bluedevq {{ date('Y') }}</p>
             </div>
         </div>
     </footer>

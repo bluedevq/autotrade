@@ -3,10 +3,7 @@
     <div class="wrapper">
         <div class="container mt-5">
             <div class="row pt-2 text-center col-12">
-                <div class="mx-auto">
-                    <img src="{{ public_url('images/backend/logo.jpg') }}" alt="Aresbo" style="height: 100px;">
-                </div>
-                <h3 class="mt-5">Đăng nhập vào hệ thống Sparta</h3>
+                <h3 class="mt-5">Đăng nhập vào hệ thống</h3>
             </div>
             <form method="post" action="{{ route('backend.auth') }}" class="form-horizontal mt-5" enctype="multipart/form-data">
                 @csrf

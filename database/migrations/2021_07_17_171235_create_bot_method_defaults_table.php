@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUsersTable extends Migration
+class CreateBotMethodDefaultsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,14 @@ class CreateUsersTable extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('bot_method_defaults', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('email', 256);
-            $table->string('password', 64);
-            $table->text('photo')->nullable();
-            $table->string('name')->nullable();
-            $table->string('phone', 14)->nullable();
-            $table->smallInteger('sex')->nullable();
-            $table->text('address')->nullable();
+            $table->string('name');
+            $table->smallInteger('type');
+            $table->text('signal');
+            $table->text('order_pattern');
+            $table->float('stop_loss', 13)->nullable();
+            $table->float('stop_win', 13)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -34,6 +33,6 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('bot_method_defaults');
     }
 }

@@ -4,12 +4,12 @@
         <div class="mt-2">&nbsp;</div>
         @include('layouts.backend.elements.messages')
         @if(isset($require2Fa) && $require2Fa)
-            @include('backend.bot_ares._2falogin')
+            @include('backend.bot._2falogin')
         @else
             @if(!isset($userInfo) || blank($userInfo))
-                @include('backend.bot_ares._login')
+                @include('backend.bot._login')
             @else
-                @include('backend.bot_ares._user_info')
+                @include('backend.bot._user_info')
             @endif
         @endif
     </div>

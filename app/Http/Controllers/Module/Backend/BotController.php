@@ -13,10 +13,10 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\MessageBag;
 
 /**
- * Class BotAresController
+ * Class BotController
  * @package App\Http\Controllers\Module\Backend
  */
-class BotAresController extends BackendController
+class BotController extends BackendController
 {
     use ApiResponse;
 
@@ -106,6 +106,8 @@ class BotAresController extends BackendController
         // save token
         Session::put(self::ACCESS_TOKEN, Arr::get($response, 'd.access_token'));
         Session::put(self::REFRESH_TOKEN, Arr::get($response, 'd.refresh_token'));
+
+        // change bot queue after login
 
         return $this->_to('bot.index');
     }
@@ -266,15 +268,14 @@ class BotAresController extends BackendController
     protected function _getUserInfo()
     {
         // check profile in database
-        $model = new BotUser();
-        $dbProfile = $model->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        $dbProfile = BotUser::where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if ($dbProfile && Carbon::now()->diffInDays(Carbon::parse($dbProfile->updated_at)) == 0) {
             $tokens = [
                 'id' => $dbProfile->id,
                 'access_token' => Session::get(self::ACCESS_TOKEN),
                 'refresh_token' => Session::get(self::REFRESH_TOKEN),
             ];
-            $model->where('email', Session::get(self::BOT_USER_EMAIL))->update($tokens);
+            BotUser::where('email', Session::get(self::BOT_USER_EMAIL))->update($tokens);
             return $dbProfile;
         }
 
@@ -314,19 +315,44 @@ class BotAresController extends BackendController
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
+            $botUser = new BotUser();
             if ($dbProfile && $dbProfile->id) {
                 $dataProfile['id'] = $dbProfile->id;
                 unset($dataProfile['created_at']);
-                $model->fill($dataProfile)->update();
+                $botUser->exists = true;
+                $botUser->fill($dataProfile)->save(['id' => $dbProfile->id]);
             } else {
-                $model->fill($dataProfile)->save();
+                $botUser->fill($dataProfile)->save();
             }
+
+            // update bot queue
+            $botQueue = BotQueue::where('users_id', backendGuard()->user()->id)
+                ->where('bot_users_id', $botUser->id)
+                ->first();
+            if ($botQueue) {
+                $botQueue->status = 0;
+                $botQueue->save();
+            }
+
             DB::commit();
 
-            return $model;
+            return $botUser;
         } catch (\Exception $exception) {
             DB::rollBack();
             return [];
+        }
+    }
+
+    protected function _saveUser() {}
+
+    protected function _updateBotQueue($botUser) {
+        // update bot queue
+        $botQueue = BotQueue::where('users_id', backendGuard()->user()->id)
+            ->where('bot_users_id', $botUser->id)
+            ->first();
+        if ($botQueue) {
+            $botQueue->status = 0;
+            $botQueue->save();
         }
     }
 }

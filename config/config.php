@@ -17,5 +17,19 @@ return [
             1 => 'DEMO',
             2 => 'LIVE',
         ],
+        'method' => [
+            'stop' => 0,
+            'active' => 1,
+            'text' => [
+                0 => 'Dừng',
+                1 => 'Hoạt động',
+            ],
+        ],
+        'method_type' => [
+            'text' => [
+                1 => 'PAROLI',
+                2 => 'MARTINGALE',
+            ],
+        ],
     ],
 ];

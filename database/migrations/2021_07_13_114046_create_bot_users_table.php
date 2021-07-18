@@ -20,12 +20,12 @@ class CreateBotUsersTable extends Migration
             $table->string('last_name')->nullable();
             $table->string('nick_name')->nullable();
             $table->string('reference_name')->nullable();
-            $table->integer('rank')->nullable();
-            $table->string('access_token')->nullable();
-            $table->string('refresh_token')->nullable();
-            $table->float('demo_balance')->nullable();
-            $table->float('available_balance')->nullable();
-            $table->float('usdt_available_balance')->nullable();
+            $table->smallInteger('rank')->nullable();
+            $table->text('access_token')->nullable();
+            $table->text('refresh_token')->nullable();
+            $table->float('demo_balance', 13)->nullable();
+            $table->float('available_balance', 13)->nullable();
+            $table->float('usdt_available_balance', 13)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

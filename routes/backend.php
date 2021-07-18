@@ -28,39 +28,63 @@ Route::middleware(['auth.backend'])->group(function () {
         'uses' => 'HomeController@index'
     ]);
 
-    // bot
-    Route::get('/bot', [
-        'as' => 'bot.index',
-        'uses' => 'BotAresController@index'
-    ]);
+    // bot auto trade
+    Route::prefix('bot')->group(function () {
+        Route::get('/', [
+            'as' => 'bot.index',
+            'uses' => 'BotController@index'
+        ]);
+        // get token to login aresbo
+        Route::post('/token', [
+            'as' => 'bot.token',
+            'uses' => 'BotController@getToken'
+        ]);
+        Route::post('/token-2fa', [
+            'as' => 'bot.token2fa',
+            'uses' => 'BotController@getToken2Fa'
+        ]);
+        // clear token and logout aresbo
+        Route::get('/clear-token', [
+            'as' => 'bot.clear_token',
+            'uses' => 'BotController@clearToken'
+        ]);
+        // start-stop auto trade
+        Route::post('/start-auto', [
+            'as' => 'bot.start_auto',
+            'uses' => 'BotController@startAuto'
+        ]);
+        Route::post('/stop-auto', [
+            'as' => 'bot.stop_auto',
+            'uses' => 'BotController@stopAuto'
+        ]);
+        // bet auto
+        Route::post('/bet', [
+            'as' => 'bot.bet',
+            'uses' => 'BotController@bet'
+        ]);
+    });
 
-    Route::post('/bot/token', [
-        'as' => 'bot.token',
-        'uses' => 'BotAresController@getToken'
-    ]);
-
-    Route::post('/bot/token-2fa', [
-        'as' => 'bot.token2fa',
-        'uses' => 'BotAresController@getToken2Fa'
-    ]);
-
-    Route::get('/bot/clear-token', [
-        'as' => 'bot.clear_token',
-        'uses' => 'BotAresController@clearToken'
-    ]);
-
-    Route::post('/bot/start-auto', [
-        'as' => 'bot.start_auto',
-        'uses' => 'BotAresController@startAuto'
-    ]);
-
-    Route::post('/bot/stop-auto', [
-        'as' => 'bot.stop_auto',
-        'uses' => 'BotAresController@stopAuto'
-    ]);
-
-    Route::post('/bot/bet', [
-        'as' => 'bot.bet',
-        'uses' => 'BotAresController@bet'
-    ]);
+    // method trade
+    Route::prefix('method-trade')->group(function () {
+        Route::get('/', [
+            'as' => 'method-trade.index',
+            'uses' => 'MethodTradeController@index'
+        ]);
+        Route::get('/create', [
+            'as' => 'method-trade.create',
+            'uses' => 'MethodTradeController@create'
+        ]);
+        Route::get('/edit/{id}', [
+            'as' => 'method-trade.edit',
+            'uses' => 'MethodTradeController@edit'
+        ]);
+        Route::post('/valid', [
+            'as' => 'method-trade.valid',
+            'uses' => 'MethodTradeController@valid'
+        ]);
+        Route::post('/delete/{id}', [
+            'as' => 'method-trade.delete',
+            'uses' => 'MethodTradeController@destroy'
+        ]);
+    });
 });

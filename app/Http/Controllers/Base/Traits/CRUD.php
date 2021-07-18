@@ -15,18 +15,22 @@ trait CRUD
 
     public function create()
     {
+        return $this->render();
     }
 
     public function edit($id)
     {
+        return $this->render();
     }
 
     public function show($id)
     {
+        return $this->render();
     }
 
     public function confirm()
     {
+        return $this->render();
     }
 
     public function update()

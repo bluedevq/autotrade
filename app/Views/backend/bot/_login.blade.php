@@ -25,7 +25,7 @@
             </div>
             <div class="col-md-3 pc">&nbsp;</div>
         </div>
-        <div class="row mt-md-2">
+        <div class="row mt-2">
             <div class="col-md-5 col-0">&nbsp;</div>
             <div class="col-md-4 col-12">
                 <button class="btn btn-lg btn-danger btn-block col-12" name="submit" type="submit">

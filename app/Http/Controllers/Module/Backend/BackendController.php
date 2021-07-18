@@ -20,4 +20,20 @@ class BackendController extends BaseController
     {
         parent::__construct();
     }
+
+    public function create()
+    {
+        $this->_prepareForm();
+        return $this->render();
+    }
+
+    public function edit($id)
+    {
+        $this->_prepareForm($id);
+        return $this->render();
+    }
+
+    protected function _prepareForm($id = null)
+    {
+    }
 }
