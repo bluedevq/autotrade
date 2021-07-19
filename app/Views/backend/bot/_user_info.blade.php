@@ -32,11 +32,7 @@
                     </div>
                     <div class="col-6 col-md-8">
                         @php $rank = isset($userInfo) ? $userInfo->rank : 0 @endphp
-                        @if($rank)
-                            <span class="fw-bold text-warning">{{ $rank }}</span>
-                        @else
-                            <span class="fw-bold text-danger">Chưa kích hoạt đại lý</span>
-                        @endif
+                        <span class="fw-bold text-warning">{{ $rank }}</span>
                     </div>
                 </div>
                 <div class="row">
@@ -54,7 +50,13 @@
                         <label class="form-label" aria-hidden="true"><i class="fas fa-funnel-dollar">&nbsp;</i>Số dư hiện tại</label>
                     </div>
                     <div class="col-6 col-md-8">
-                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ number_format($startAmount, 2) }}</span>
+                        @php $liveAccount = isset($botQueue) && $botQueue && $botQueue->account_type == \App\Helper\Common::getConfig('aresbo.account_live') ? true: false; @endphp
+                        <div class="account-balance demo-balance {{ $liveAccount ? 'hide' : ''}}">
+                            <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ $userInfo->demo_balance > 0 ? number_format($userInfo->demo_balance, 2) : 0 }}</span>
+                        </div>
+                        <div class="account-balance live-balance {{ $liveAccount ? '' : 'hide'}}">
+                            <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ $userInfo->available_balance > 0 ? number_format($userInfo->available_balance, 2) : 0 }}</span>
+                        </div>
                     </div>
                 </div>
                 <div class="row">
@@ -83,7 +85,7 @@
                 @php
                     $accountType = isset($botQueue) && $botQueue ? $botQueue->account_type : 0;
                     $demoType = \App\Helper\Common::getConfig('aresbo.account_demo');
-                    $liveType = \App\Helper\Common::getConfig('aresbo.live_demo');
+                    $liveType = \App\Helper\Common::getConfig('aresbo.account_live');
                     $isRunning = isset($botQueue) && $botQueue->status ? true : false;
                 @endphp
                 <form method="post" action="{{ $isRunning ? route('bot.stop_auto') : route('bot.start_auto') }}" class="form-horizontal" enctype="multipart/form-data">
@@ -91,7 +93,7 @@
                     <h3>Chọn tài khoản để chạy auto</h3>
                     <div class="row">
                         <div class="col-md-6 col-12">
-                            <select class="form-select form-select-lg {{ $isRunning ? 'disabled' : '' }}" name="account_type" {{ $isRunning ? 'disabled' : '' }}>
+                            <select onchange="BotController.changeAccountBalance(this)" class="form-select form-select-lg {{ $isRunning ? 'disabled' : '' }}" name="account_type" {{ $isRunning ? 'disabled' : '' }}>
                                 <option value="{{ $demoType }}" {{ $isRunning && $accountType ==  $demoType ? 'selected="selected' : ''}}>DEMO</option>
                                 <option value="{{ $liveType }}" {{ $isRunning && $accountType ==  $liveType ? 'selected="selected' : ''}}>LIVE</option>
                             </select>
@@ -116,10 +118,10 @@
     <div class="mt-2">
         <h3>Lịch sử lệnh đặt</h3>
         <div class="row">
-            <div class="col-12">
+            <div class="col-12 bet-result-scroll">
                 <table class="table-bordered text-center col-12">
                     <thead>
-                    <th width="100">Thời gian</th>
+                    <th>Thời gian</th>
                     <th>Phương pháp</th>
                     <th>Lệnh</th>
                     <th>Tiền</th>

@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row top-menu">
     <div class="col-md-2 col-12">
         <a class="btn btn-info col-12" href="{{ route('dashboard.index') }}"><span class="fas fa-home">&nbsp;</span>Trang chủ</a>
     </div>

@@ -48,14 +48,9 @@ class BotController extends BackendController
             $botQueue = BotQueue::where('users_id', backendGuard()->user()->id)
                 ->where('bot_users_id', $userInfo->id)
                 ->first();
-            $startAmount = 0;
-            if ($botQueue) {
-                $startAmount = $botQueue->account_type == Common::getConfig('aresbo.account_demo') ? $userInfo->demo_balance : $userInfo->available_balance;
-            }
             $this->setViewData([
                 'userInfo' => $userInfo,
                 'botQueue' => $botQueue,
-                'startAmount' => $startAmount,
             ]);
         }
 
@@ -185,7 +180,8 @@ class BotController extends BackendController
         $newRefreshToken = $this->_getNewToken();
         // check status
         if (!Arr::get($newRefreshToken, 'ok')) {
-            return $this->_to('bot.clear_token');
+            $this->setData(['url' => route('bot.clear_token')]);
+            return $this->renderErrorJson();
         }
         // save token
         Session::put(self::ACCESS_TOKEN, Arr::get($newRefreshToken, 'd.access_token'));
@@ -220,8 +216,9 @@ class BotController extends BackendController
             'current_amount' => $currentAmount,
             'account_type' => $botQueue->account_type
         ]);
+        $this->setData($result);
 
-        return $this->renderJson(['data' => $result]);
+        return $this->renderJson();
     }
 
     protected function _processAuto($stop = false)
@@ -352,7 +349,7 @@ class BotController extends BackendController
         }
         $params['betAccountType'] = Common::getConfig('aresbo.bet_account_type.' . $params['betAccountType']);
         $url = $open ? Common::getConfig('aresbo.api_url.open_order') : Common::getConfig('aresbo.api_url.close_order');
-        $response = $this->requestApi($url, $params, 'GET', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
+        $response = $this->requestApi($url, $params, 'GET', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)], true);
         // check status
         if (!Arr::get($response, 'ok')) {
             return $this->renderErrorJson(200, ['data' => ['url' => route('bot.clear_token')]]);
@@ -390,6 +387,10 @@ class BotController extends BackendController
             $response = $this->requestApi(Common::getConfig('aresbo.api_url.bet'), $betData, 'POST', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
             // check status
             if (!Arr::get($response, 'ok')) {
+                $errorCode = Arr::get($response, 'd.err_code');
+                if ($errorCode == 'insufficient_bet_balance') {
+                    return $this->renderErrorJson();
+                }
                 return $this->renderErrorJson(200, ['data' => ['url' => route('bot.clear_token')]]);
             }
         }

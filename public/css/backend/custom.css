@@ -19,6 +19,10 @@ a {
     display: none;
 }
 
+.hide {
+    display: none;
+}
+
 .form-select:disabled {
     background-color: #bbb;
     cursor: not-allowed;
@@ -29,9 +33,13 @@ a {
     letter-spacing: 7px;
 }
 
-.bet-result {
-    height: 100px;
-    overflow: scroll;
+.bet-result-scroll {
+    max-height: 300px;
+    overflow: auto;
+}
+
+.top-menu a {
+    text-align: left;
 }
 
 @media (min-width: 767px) {
@@ -41,5 +49,9 @@ a {
 
     .pc {
         display: block;
+    }
+
+    .top-menu a {
+        text-align: center;
     }
 }

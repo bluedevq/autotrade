@@ -20,7 +20,7 @@ return [
             'start' => 1,
         ],
         'account_demo' => 1,
-        'live_demo' => 2,
+        'account_live' => 2,
         'bet_account_type' => [
             1 => 'DEMO',
             2 => 'LIVE',
