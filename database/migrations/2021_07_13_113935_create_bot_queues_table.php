@@ -15,8 +15,8 @@ class CreateBotQueuesTable extends Migration
     {
         Schema::create('bot_queues', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('users_id');
-            $table->integer('bot_users_id');
+            $table->integer('user_id');
+            $table->integer('bot_user_id');
             $table->smallInteger('account_type');
             $table->smallInteger('status');
             $table->timestamps();

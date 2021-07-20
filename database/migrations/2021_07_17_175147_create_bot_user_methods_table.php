@@ -16,6 +16,7 @@ class CreateBotUserMethodsTable extends Migration
         Schema::create('bot_user_methods', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('bot_method_default_id');
+            $table->integer('bot_user_id');
             $table->string('name');
             $table->smallInteger('type');
             $table->text('signal');

@@ -12,6 +12,7 @@ return [
             'bet' => 'https://aresbo.com/api/wallet/binaryoption/bet',
             'open_order' => 'https://aresbo.com/api/wallet/binaryoption/transaction/open',
             'close_order' => 'https://aresbo.com/api/wallet/binaryoption/transaction/close',
+            'get_prices' => 'https://aresbo.com/api/wallet/binaryoption/prices',
         ],
 
         // config
@@ -35,9 +36,19 @@ return [
         ],
         'method_type' => [
             'text' => [
-                1 => 'PAROLI',
-                2 => 'MARTINGALE',
+                1 => 'All in',
+                2 => 'Gấp thếp',
             ],
+        ],
+        'order_signal_delimiter' => '-',
+        'order_pattern_delimiter' => '-',
+        'order_type_pattern' => [
+            'T' => 'UP',
+            'G' => 'DOWN',
+        ],
+        'order_type_text' => [
+            'up' => 'T',
+            'down' => 'G',
         ],
     ],
 ];
