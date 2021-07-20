@@ -4,6 +4,7 @@ namespace App\Model\Entities;
 
 use App\Helper\Common;
 use App\Model\Base\BaseModel;
+use Illuminate\Support\Str;
 
 /**
  * Class BotUserMethod
@@ -29,12 +30,25 @@ class BotUserMethod extends BaseModel
 
     public function getSignalText()
     {
-        return $this->signal;
+        $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $this->signal);
+        $text = [];
+        foreach ($signals as $signal) {
+            $text[] = $signal == 'T' ? ('<span class="fw-bold text-success"> ' . $signal . '</span>') : ('<span class="fw-bold text-danger"> ' . $signal . '</span>');
+        }
+        return implode(Common::getConfig('aresbo.order_signal_delimiter'), $text);
     }
 
     public function getOrderPatternText()
     {
-        return $this->order_pattern;
+        $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $this->order_pattern);
+        $text = [];
+        foreach ($orderPatterns as $orderPattern) {
+            $order = Str::substr($orderPattern, 0, 1);
+            $amount = Str::substr($orderPattern, 1, Str::length($orderPattern) - 1);
+            $textTmp = $order == 'T' ? ('<span class="fw-bold text-success"> ' . $order . $amount . '</span>') : ('<span class="fw-bold text-danger"> ' . $order . $amount . '</span>');
+            $text[] = $textTmp;
+        }
+        return implode(Common::getConfig('aresbo.order_pattern_delimiter'), $text);
     }
 
     public function getStopLossText()

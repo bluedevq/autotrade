@@ -27,8 +27,8 @@
                             <tr>
                                 <td>{{ $entity->getNameText() }}</td>
                                 <td>{{ $entity->getTypeText() }}</td>
-                                <td>{{ $entity->getSignalText() }}</td>
-                                <td>{{ $entity->getOrderPatternText() }}</td>
+                                <td>{!! $entity->getSignalText() !!}</td>
+                                <td>{!! $entity->getOrderPatternText() !!}</td>
                                 <td>{{ $entity->getStopLossText() }}</td>
                                 <td>{{ $entity->getStopWinText() }}</td>
                                 <td>{{ $entity->getMethodText() }}</td>

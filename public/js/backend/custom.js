@@ -4,6 +4,9 @@ let BotController = {
     hasOrder: false,
     profit: 0,
     volume: 0,
+    newOrderStatus: 'Đang đợi',
+    winStatus: 'Thắng',
+    loseStatus: 'Thua',
     bet: function () {
         sendRequest({
             url: BotController.betUrl,
@@ -43,32 +46,40 @@ let BotController = {
         let childrens = $('.bet-result tr');
         if (typeof childrens !== 'undefined' && childrens.length > 0) {
             for (let i = 0; i < listClosedOrders.length; i++) {
-                // update status
-                let result = (listClosedOrders[i].result === 'WIN') ? '<span class="fw-bold text-success">Thắng</span>' : '<span class="fw-bold text-danger">Thua</span>';
-                $(childrens[i]).length > 0 ? $(childrens[i]).find('.bet-order-result').empty().html(result) : null;
+                let timeOrder = $(childrens[i]).find('.time-order').text(),
+                    lastTimeOrder = listClosedOrders[i].time,
+                    lastOrderStatus = $(childrens[i]).find('.bet-order-result').text(),
+                    result = (listClosedOrders[i].result === 'WIN') ? '<span class="fw-bold text-success">' + BotController.winStatus + '</span>' : '<span class="fw-bold text-danger">' + BotController.loseStatus + '</span>';
 
-                // update profit
-                BotController.profit += listClosedOrders[i].win_amount;
-
-                // update volume
-                BotController.volume += listClosedOrders[i].amount;
+                lastTimeOrder = new Date(lastTimeOrder);
+                lastTimeOrder = BotController.pad(lastTimeOrder.getHours()) + ':' + BotController.pad(lastTimeOrder.getMinutes());
+                if (timeOrder == lastTimeOrder && lastOrderStatus == BotController.newOrderStatus) {
+                    // update status
+                    $(childrens[i]).length > 0 ? $(childrens[i]).find('.bet-order-result').empty().html(result) : null;
+                    // update profit
+                    BotController.profit += listClosedOrders[i].win_amount;
+                }
             }
             $('.profit').empty().html(BotController.profit > 0 ? ('<span class="text-success">' + BotController.profit + '</span>') : ('<span class="text-danger">' + BotController.profit + '</span>'));
-            $('.volume').empty().text(BotController.volume);
         }
     },
     updateNewOrders: function (listOpenOrders) {
         for (let i = 0; i < listOpenOrders.length; i++) {
-            let dateTime = new Date(listOpenOrders[i].time);
-            let newOrder = "<tr>\n" +
-                '<td>' + BotController.pad(dateTime.getHours()) + ':' + BotController.pad(dateTime.getMinutes()) + '</td>\n' +
-                '<td>' + listOpenOrders[i].method + '</td>\n' +
-                '<td>' + BotController.getBetTypeText(listOpenOrders[i].type) + '</td>\n' +
-                '<td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + listOpenOrders[i].amount + '</span></td>\n' +
-                '<td class="fw-bold bet-order-result">Đang đợi</td>\n' +
-                '</tr>';
+            let dateTime = new Date(listOpenOrders[i].time),
+                newOrder = "<tr>\n" +
+                    '<td class="time-order">' + BotController.pad(dateTime.getHours()) + ':' + BotController.pad(dateTime.getMinutes()) + '</td>\n' +
+                    '<td>' + listOpenOrders[i].method + '</td>\n' +
+                    '<td>' + BotController.getBetTypeText(listOpenOrders[i].type) + '</td>\n' +
+                    '<td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + listOpenOrders[i].amount + '</span></td>\n' +
+                    '<td class="fw-bold bet-order-result">' + BotController.newOrderStatus + '</td>\n' +
+                    '</tr>';
+
             $('.bet-result').prepend(newOrder);
+
+            // update volume
+            BotController.volume += listOpenOrders[i].amount;
         }
+        $('.volume').empty().text(BotController.volume);
     },
     pad: function (t) {
         let st = "" + t;
