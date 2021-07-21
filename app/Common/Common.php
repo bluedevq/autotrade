@@ -148,6 +148,20 @@ if (!function_exists('frontendGuard')) {
         return Auth::guard(getSystemConfig('frontend_guard', $default));
     }
 }
+if (!function_exists('getSortLink')) {
+    function getSortLink($text, $sortField, $sortType = 'asc')
+    {
+        $currentRoute = \Illuminate\Support\Facades\Route::currentRouteName();
+        $currentSortField = request()->get('sort_field');
+        $currentSortType = request()->get('sort_type');
+        $sortType = $currentSortField == $sortField && $currentSortType == 'asc' ? 'desc' : 'asc';
+        $arrow = $sortField == $currentSortField ? ('&nbsp;<span class="fas fa-arrow-' . ($sortType == 'asc' ? 'down' : 'up') . '"></span>') : '';
+
+        $html = '<a href="' . route($currentRoute, ['sort_field' => $sortField, 'sort_type' => $sortType]) . '" class="text-decoration-none">' . $text . $arrow . '</a>';;
+
+        return $html;
+    }
+}
 // migrate
 if (!function_exists('getUpdatedAtColumn')) {
 

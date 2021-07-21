@@ -24,7 +24,9 @@ class MethodTradeController extends BackendController
         $methodDefaults = $this->getModel()->where(function ($q) {
             $q->orWhere('deleted_at', '');
             $q->orWhereNull('deleted_at');
-        })->get();
+        })
+            ->orderBy($this->getParam('sort_field', 'id'), $this->getParam('sort_type', 'asc'))
+            ->get();
         $this->setViewData(['entities' => $methodDefaults]);
 
         return $this->render();
