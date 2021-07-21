@@ -114,6 +114,16 @@ class BaseController extends Controller
         return Str::lower(last($currentRoute));
     }
 
+    public function getParams()
+    {
+        return request()->all();
+    }
+
+    public function getParam($key, $default = null)
+    {
+        return request()->get($key, $default);
+    }
+
     protected function _back()
     {
         return Redirect::back();

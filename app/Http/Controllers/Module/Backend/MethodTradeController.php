@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Module\Backend;
 
 use App\Model\Entities\BotUserMethod;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\MessageBag;
 
 /**
  * Class MethodTradeController
@@ -10,14 +13,15 @@ use App\Model\Entities\BotUserMethod;
  */
 class MethodTradeController extends BackendController
 {
-    public function __construct()
+    public function __construct(BotUserMethod $botUserMethod)
     {
         parent::__construct();
+        $this->setModel($botUserMethod);
     }
 
     public function index()
     {
-        $methodDefaults = BotUserMethod::where(function ($q) {
+        $methodDefaults = $this->getModel()->where(function ($q) {
             $q->orWhere('deleted_at', '');
             $q->orWhereNull('deleted_at');
         })->get();
@@ -29,17 +33,33 @@ class MethodTradeController extends BackendController
     public function valid()
     {
         // validate data
+        $validator = Validator::make($this->getParams(), $this->getModel()->rules());
+        if ($validator->fails()) {
+            return $this->_to('method-trade.index')->withErrors($validator)->withInput();
+        }
 
         // save data
+        DB::beginTransaction();
+        try {
+            $entity = $this->getModel()->fill($this->getParams());
+            if ($entity->id) {
+                $entity->exists = true;
+            }
+            $entity->save();
 
-        return $this->_to('method-trade.index');
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+        }
+
+        return $this->_to('method-trade.index')->withSuccess(new MessageBag(['success' => 'Lưu thành công']));
     }
 
     protected function _prepareForm($id = null)
     {
-        $entity = new BotUserMethod();
+        $entity = $this->getModel();
         if ($id) {
-            $entity = BotUserMethod::where('id', $id)->first();
+            $entity = $this->getModel()->where('id', $id)->first();
         }
 
         $this->setViewData(['entity' => $entity]);

@@ -1,5 +1,7 @@
 @extends('layouts.backend.default')
 @section('content')
+    <div class="mt-2">&nbsp;</div>
+    @include('layouts.backend.elements.messages')
     <div class="mt-2">
         <h3>Danh sách các phương pháp</h3>
         <div class="row">

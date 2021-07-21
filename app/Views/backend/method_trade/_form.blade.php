@@ -54,6 +54,19 @@
         </div>
     </div>
     <div class="row mt-2">
+        <div class="col-md-2">
+            <label for="type" class="form-label" aria-hidden="true">Trạng thái</label>
+        </div>
+        <div class="col-md-4">
+            <select name="status" class="form-select form-select-lg">
+                @php $methodStatus = \App\Helper\Common::getConfig('aresbo.method.text') @endphp
+                @foreach($methodStatus as $statusValue => $statusName)
+                    <option value="{{ $statusValue }}" {{ $statusValue == $entity->status ? 'selected="selected' : '' }}>{{ $statusName }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+    <div class="row mt-2">
         <div class="col-md-2">&nbsp;</div>
         <div class="col-md-4">
             <input type="hidden" name="id" value="{{ $entity->id }}">

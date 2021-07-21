@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Module\Backend;
 
 use App\Http\Controllers\Base\BaseController;
 use App\Http\Controllers\Base\Traits\CRUD;
-use App\Http\Controllers\Base\Traits\Repository;
+use App\Http\Controllers\Base\Traits\Model;
 
 /**
  * Class BackendController
@@ -12,7 +12,7 @@ use App\Http\Controllers\Base\Traits\Repository;
  */
 class BackendController extends BaseController
 {
-    use CRUD, Repository;
+    use CRUD, Model;
 
     protected $_area = 'backend';
 

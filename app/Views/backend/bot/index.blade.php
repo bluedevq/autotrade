@@ -3,6 +3,7 @@
     <div class="wrapper">
         <div class="mt-2">&nbsp;</div>
         @include('layouts.backend.elements.messages')
+        <div class="mt-2">&nbsp;</div>
         @if(isset($require2Fa) && $require2Fa)
             @include('backend.bot._2falogin')
         @else

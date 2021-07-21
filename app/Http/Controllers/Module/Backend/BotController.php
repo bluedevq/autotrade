@@ -29,9 +29,11 @@ class BotController extends BackendController
     const BOT_USER_EMAIL = 'bot_user_email';
     const TOTAL_OPEN_ORDER = 'total_open_order';
 
-    public function __construct()
+    public function __construct(BotUser $botUser, BotQueue $botQueue, BotUserMethod $botUserMethod)
     {
         parent::__construct();
+        $this->setModel($botUser);
+        $this->registModel($botQueue, $botUserMethod);
     }
 
     public function index()
@@ -47,7 +49,7 @@ class BotController extends BackendController
                 Session::forget(self::REFRESH_TOKEN);
                 return $this->_to('bot.index');
             }
-            $botQueue = BotQueue::where('user_id', backendGuard()->user()->id)
+            $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
                 ->where('bot_user_id', $userInfo->id)
                 ->first();
             $this->setViewData([
@@ -62,13 +64,12 @@ class BotController extends BackendController
     public function getToken()
     {
         // get data
-        $email = request()->get('email');
-        $password = request()->get('password');
+        $email = $this->getParam('email');
+        $password = $this->getParam('password');
 
         // validate
         if (blank($email) || blank($password)) {
-            $errors = new MessageBag(['Email hoặc mật khẩu sai. Vui lòng thử lại.']);
-            return $this->_backWithError($errors);
+            return $this->_backWithError(new MessageBag(['Vui lòng nhập email']));
         }
 
         // get token from AresBO
@@ -82,7 +83,7 @@ class BotController extends BackendController
         // check status
         if (!Arr::get($response, 'ok')) {
             $errors = new MessageBag(['Email hoặc mật khẩu sai. Vui lòng thử lại.']);
-            return $this->_to('bot.index')->withErrors($errors)->withInput(request()->all());
+            return $this->_to('bot.index')->withErrors($errors)->withInput($this->getParams());
         }
 
         // save session email login
@@ -110,7 +111,7 @@ class BotController extends BackendController
         // get token from AresBO
         $loginData = [
             'client_id' => 'aresbo-web',
-            'code' => request()->get('code'),
+            'code' => $this->getParam('code'),
             'td_code' => '',
             'td_p_code' => '',
             'token' => Session::get(self::TWOFA_TOKEN)
@@ -160,12 +161,11 @@ class BotController extends BackendController
         }
 
         // check bot queue has running
-        $user = BotUser::where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if (blank($user)) {
             return $this->_to('bot.clear_token');
         }
-        $botQueueModel = new BotQueue();
-        $botQueue = $botQueueModel->where('user_id', backendGuard()->user()->id)
+        $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
             ->where('bot_user_id', $user->id)
             ->first();
         if (blank($botQueue) || $botQueue->status = Common::getConfig('aresbo.bot_status.stop')) {
@@ -228,20 +228,18 @@ class BotController extends BackendController
 
     protected function _processAuto($stop = false)
     {
-        $botUserModel = new BotUser();
-        $user = $botUserModel->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if (blank($user)) {
             return $this->_to('bot.clear_token');
         }
-        $botQueueModel = new BotQueue();
-        $botQueueData = $botQueueModel->where('user_id', backendGuard()->user()->id)
+        $botQueueData = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
             ->where('bot_user_id', $user->id)
             ->first();
         $now = Carbon::now();
         $botQueue = [
             'user_id' => backendGuard()->user()->id,
             'bot_user_id' => $user->id,
-            'account_type' => request()->get('account_type', Common::getConfig('aresbo.account_demo')),
+            'account_type' => $this->getParam('account_type', Common::getConfig('aresbo.account_demo')),
             'status' => $stop ? 0 : 1,
             'created_at' => $now,
             'updated_at' => $now,
@@ -254,7 +252,7 @@ class BotController extends BackendController
 
         DB::beginTransaction();
         try {
-            $botQueueData ? $botQueueModel->where('id', $botQueueData->id)->update($botQueue) : $botQueueModel->insert($botQueue);
+            $botQueueData ? $this->fetchModel(BotQueue::class)->where('id', $botQueueData->id)->update($botQueue) : $this->fetchModel(BotQueue::class)->insert($botQueue);
             DB::commit();
         } catch (\Exception $exception) {
             DB::rollBack();
@@ -268,14 +266,14 @@ class BotController extends BackendController
     protected function _getUserInfo()
     {
         // check profile in database
-        $dbProfile = BotUser::where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        $dbProfile = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if ($dbProfile && Carbon::now()->diffInDays(Carbon::parse($dbProfile->updated_at)) == 0) {
             $tokens = [
                 'id' => $dbProfile->id,
                 'access_token' => Session::get(self::ACCESS_TOKEN),
                 'refresh_token' => Session::get(self::REFRESH_TOKEN),
             ];
-            BotUser::where('email', Session::get(self::BOT_USER_EMAIL))->update($tokens);
+            $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->update($tokens);
             return $dbProfile;
         }
 
@@ -315,19 +313,18 @@ class BotController extends BackendController
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
-            $botUser = new BotUser();
             if ($dbProfile && $dbProfile->id) {
                 $dataProfile['id'] = $dbProfile->id;
                 unset($dataProfile['created_at']);
-                $botUser->exists = true;
-                $botUser->fill($dataProfile)->save(['id' => $dbProfile->id]);
+                $this->getModel()->exists = true;
+                $this->getModel()->fill($dataProfile)->save(['id' => $dbProfile->id]);
             } else {
-                $botUser->fill($dataProfile)->save();
+                $this->getModel()->fill($dataProfile)->save();
             }
 
             // update bot queue
             $botQueue = BotQueue::where('user_id', backendGuard()->user()->id)
-                ->where('bot_user_id', $botUser->id)
+                ->where('bot_user_id', $this->getModel()->id)
                 ->first();
             if ($botQueue) {
                 $botQueue->status = 0;
@@ -336,7 +333,7 @@ class BotController extends BackendController
 
             DB::commit();
 
-            return $botUser;
+            return $this->getModel();
         } catch (\Exception $exception) {
             DB::rollBack();
             return [];
@@ -405,7 +402,7 @@ class BotController extends BackendController
     protected function _getOrderData($botQueue)
     {
         // get method order from database
-        $methods = BotUserMethod::where('bot_user_id', $botQueue->bot_user_id)
+        $methods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botQueue->bot_user_id)
             ->where('status', 1)
             ->where(function ($q) {
                 $q->orWhere('deleted_at', '');
@@ -515,7 +512,7 @@ class BotController extends BackendController
     protected function _updateBotQueue($botUser)
     {
         // update bot queue
-        $botQueue = BotQueue::where('user_id', backendGuard()->user()->id)
+        $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
             ->where('bot_user_id', $botUser->id)
             ->first();
         if ($botQueue) {
