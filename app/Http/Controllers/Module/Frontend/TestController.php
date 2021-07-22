@@ -15,6 +15,6 @@ class TestController extends FrontendController
 
     public function index()
     {
-        return $this->render();
+        return $this->_to('bot.index');
     }
 }
