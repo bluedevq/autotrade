@@ -12,4 +12,9 @@ class HomeController extends BackendController
     {
         parent::__construct();
     }
+
+    public function index()
+    {
+        return $this->_to('bot.index');
+    }
 }

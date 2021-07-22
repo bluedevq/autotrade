@@ -1,8 +1,7 @@
 <div class="container">
-    <hr>
-    <footer>
+    <footer class="mt-5">
         <div class="row">
-            <div class="col-lg-12" align="center">
+            <div class="text-center col-12">
                 <p>Copyright© by bluedevq {{ date('Y') }}</p>
             </div>
         </div>

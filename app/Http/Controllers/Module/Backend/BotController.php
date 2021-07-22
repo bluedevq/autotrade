@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 
@@ -52,9 +53,18 @@ class BotController extends BackendController
             $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
                 ->where('bot_user_id', $userInfo->id)
                 ->first();
+            $methods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $userInfo->id)
+                ->where(function ($q) {
+                    $q->orWhere('deleted_at', '');
+                    $q->orWhereNull('deleted_at');
+                })
+                ->orderBy($this->getParam('sort_field', 'id'), $this->getParam('sort_type', 'asc'))
+                ->get();
+
             $this->setViewData([
                 'userInfo' => $userInfo,
                 'botQueue' => $botQueue,
+                'methods' => $methods,
             ]);
         }
 
@@ -223,6 +233,95 @@ class BotController extends BackendController
         ]);
         $this->setData($result);
 
+        return $this->renderJson();
+    }
+
+    public function createMethod()
+    {
+        $entity = $this->_prepareFormMethod();
+        return $this->renderJson();
+    }
+
+    public function editMethod($id)
+    {
+        $entity = $this->_prepareFormMethod($id);
+        $this->setData($entity);
+        return $this->renderJson();
+    }
+
+    public function validateMethod()
+    {
+        // validate data
+        $validator = Validator::make($this->getParams(), $this->fetchModel(BotUserMethod::class)->rules());
+        if ($validator->fails()) {
+            return $this->renderErrorJson();
+        }
+        $userInfo = $this->_getUserInfo();
+        if (blank($userInfo)) {
+            return $this->renderErrorJson();
+        }
+
+        // save data
+        DB::beginTransaction();
+        try {
+            $entity = $this->fetchModel(BotUserMethod::class)->fill($this->getParams());
+            $isCreate = true;
+            if ($entity->id) {
+                $entity->exists = true;
+                $isCreate = false;
+            }
+            $entity->bot_user_id = $userInfo->id;
+            $entity->save();
+            DB::commit();
+            $this->setData([
+                'create' => $isCreate ? 1 : 0,
+                'id' => $entity->id,
+                'name' => $entity->getNameText(),
+                'type' => $entity->getTypeText(),
+                'signal' => $entity->getSignalText(),
+                'pattern' => $entity->getOrderPatternText(),
+                'stop' => [
+                    'loss' => $entity->getStopLossText(),
+                    'win' => $entity->getStopWinText(),
+                ],
+                'status' => $entity->getMethodStatusText(),
+                'url' => [
+                    'edit' => route('bot_method.edit', $entity->id)
+                ],
+            ]);
+
+            return $this->renderJson();
+//            new MessageBag(['success' => 'Lưu thành công']);
+        } catch (\Exception $exception) {
+            DB::rollBack();
+        }
+
+        return $this->renderErrorJson();
+    }
+
+    public function deleteMethod()
+    {
+        // validate data
+        $id = request()->get('id');
+        $entity = $this->fetchModel(BotUserMethod::class)->where('id', $id)->first();
+        if (blank($entity)) {
+            return $this->renderErrorJson();
+        }
+
+        // delete data
+        DB::beginTransaction();
+        try {
+            $entity->delete();
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+        }
+
+        return $this->renderJson();
+    }
+
+    public function research()
+    {
         return $this->renderJson();
     }
 
@@ -503,6 +602,16 @@ class BotController extends BackendController
             'betType' => Common::getConfig('aresbo.order_type_pattern.' . Str::substr($orderPattern, 0, 1)),
             'method' => $method->name,
         ];
+    }
+
+    protected function _prepareFormMethod($id = null)
+    {
+        $entity = $this->fetchModel(BotUserMethod::class);
+        if ($id) {
+            $entity = $this->fetchModel(BotUserMethod::class)->where('id', $id)->first();
+        }
+
+        return $entity;
     }
 
     protected function _saveUser()

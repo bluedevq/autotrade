@@ -36,7 +36,7 @@
                     <div class="row mx-auto col-md-6">
                         <div class="col-md-4 col-0">&nbsp;</div>
                         <div class="col-md-4 col-12">
-                            <button class="btn btn-lg btn-danger btn-block col-12" name="submit" type="submit">
+                            <button class="btn btn-lg btn-danger btn-block col-12" type="submit" onclick="showLoading()">
                                 <span class="ls-icon ls-icon-login" aria-hidden="true">Đăng nhập</span>
                             </button>
                             <input type="hidden" name="return_url" value="{{ request()->get('return_url') }}">

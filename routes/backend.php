@@ -62,29 +62,30 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot.bet',
             'uses' => 'BotController@bet'
         ]);
-    });
-
-    // method trade
-    Route::prefix('method-trade')->group(function () {
-        Route::get('/', [
-            'as' => 'method-trade.index',
-            'uses' => 'MethodTradeController@index'
+        // create method
+        Route::get('/create-method', [
+            'as' => 'bot_method.create',
+            'uses' => 'BotController@createMethod'
         ]);
-        Route::get('/create', [
-            'as' => 'method-trade.create',
-            'uses' => 'MethodTradeController@create'
+        // edit method
+        Route::get('/edit-method/{id}', [
+            'as' => 'bot_method.edit',
+            'uses' => 'BotController@editMethod'
         ]);
-        Route::get('/edit/{id}', [
-            'as' => 'method-trade.edit',
-            'uses' => 'MethodTradeController@edit'
+        // validation method
+        Route::post('/validate-method', [
+            'as' => 'bot_method.valid',
+            'uses' => 'BotController@validateMethod'
         ]);
-        Route::post('/valid', [
-            'as' => 'method-trade.valid',
-            'uses' => 'MethodTradeController@valid'
+        // delete method
+        Route::post('/delete-method', [
+            'as' => 'bot_method.delete',
+            'uses' => 'BotController@deleteMethod'
         ]);
-        Route::post('/delete/{id}', [
-            'as' => 'method-trade.delete',
-            'uses' => 'MethodTradeController@destroy'
+        // research method
+        Route::get('/research', [
+            'as' => 'bot_method.research',
+            'uses' => 'BotController@research'
         ]);
     });
 });

@@ -16,6 +16,6 @@ class BotUserMethod extends BaseModel
     protected $table = 'bot_user_methods';
 
     protected $fillable = [
-        'id', 'bot_method_default_id', 'bot_user_id', 'name', 'type', 'signal', 'order_pattern', 'stop_loss', 'stop_win', 'status', 'created_at', 'updated_at', 'deleted_at'
+        'id', 'bot_user_id', 'name', 'type', 'signal', 'order_pattern', 'stop_loss', 'stop_win', 'status', 'created_at', 'updated_at', 'deleted_at'
     ];
 }

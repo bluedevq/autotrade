@@ -50,7 +50,7 @@ trait BotUserMethod
         return $this->stop_win ? $this->stop_win : '∞';
     }
 
-    public function getMethodText()
+    public function getMethodStatusText()
     {
         return Common::getConfig('aresbo.method.text.' . $this->status);
     }

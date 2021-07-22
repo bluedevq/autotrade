@@ -12,11 +12,19 @@ a {
 }
 
 .sp {
-    display: block;
+    display: revert;
 }
 
 .pc {
     display: none;
+}
+
+.mt-sp-2 {
+    margin-top: .5rem;
+}
+
+.bg-ares {
+    background-color: #171b2c;
 }
 
 .hide {
@@ -35,11 +43,20 @@ a {
 
 .bet-result-scroll {
     max-height: 300px;
-    overflow: auto;
+    overflow-y: auto;
+}
+
+.list-methods-scroll {
+    max-height: 390px;
+    overflow-y: auto;
 }
 
 .top-menu a {
     text-align: left;
+}
+
+.modal {
+    color: #212529;
 }
 
 @media (min-width: 767px) {
@@ -48,7 +65,11 @@ a {
     }
 
     .pc {
-        display: block;
+        display: revert;
+    }
+
+    .mt-sp-2 {
+        margin-top: auto;
     }
 
     .top-menu a {

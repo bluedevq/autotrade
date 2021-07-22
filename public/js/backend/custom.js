@@ -1,5 +1,18 @@
+$(document).ready(function () {
+    $('form').on('submit', function (e) {
+        e.preventDefault();
+        $(this).attr('show-loading') == 1 ? showLoading() : null;
+        $(this).off('submit').submit();
+    });
+
+    $('#form-method').on('hide.bs.modal', function (e) {
+        BotController.resetForm();
+    })
+});
+
 let BotController = {
     betUrl: null,
+    researchUrl: null,
     canBet: false,
     hasOrder: false,
     profit: 0,
@@ -60,10 +73,16 @@ let BotController = {
                     BotController.profit += listClosedOrders[i].win_amount;
                 }
             }
-            $('.profit').empty().html(BotController.profit > 0 ? ('<span class="text-success">' + BotController.profit + '</span>') : ('<span class="text-danger">' + BotController.profit + '</span>'));
+            if (BotController.profit > 0) {
+                $('.profit').empty().html('<span class="text-success">' + BotController.profit + '</span>');
+            }
+            if (BotController.profit < 0) {
+                $('.profit').empty().html('<span class="text-danger">' + BotController.profit + '</span>');
+            }
         }
     },
     updateNewOrders: function (listOpenOrders) {
+        $('.no-item').remove();
         for (let i = 0; i < listOpenOrders.length; i++) {
             let dateTime = new Date(listOpenOrders[i].time),
                 newOrder = "<tr>\n" +
@@ -131,5 +150,164 @@ let BotController = {
             $('.demo-balance').addClass('hide');
             $('.live-balance').removeClass('hide');
         }
+    },
+    research: function () {
+        sendRequest({
+            url: BotController.researchUrl,
+            type: 'GET',
+            data: {},
+        }, function (response) {
+            if (!response.status) {
+                return false;
+            }
+            $('#research-method').modal('show');
+            let data = response.data,
+                ctx = document.getElementById('chart-method').getContext('2d'),
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                        datasets: [
+                            {
+                                label: 'Sparta 22',
+                                data: [0, 20, 20, 60, 60, 120, 140, 180, 120, 125, 105, 110, 170],
+                                fill: false,
+                                borderColor: "rgb(255,0,0)",
+                                tension: 0.2
+                            },
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: {
+                            intersect: false,
+                        },
+                        scales: {
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true
+                                }
+                            },
+                            y: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Value'
+                                },
+                                suggestedMin: -10,
+                                suggestedMax: 200
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                position: 'bottom',
+                                display: true,
+                                text: 'Sparta Chart'
+                            },
+                            legend: {
+                                position: 'bottom',
+                            },
+                        }
+                    },
+                });
+
+            $('#research-method').on('hide.bs.modal', function (e) {
+                myChart.destroy();
+            })
+        });
+    },
+    createMethod: function () {
+        $('#form-method .modal-title').empty().text('Thêm mới phương pháp');
+        BotController.resetForm();
+        $('#form-method').modal('show');
+    },
+    editMethod: function (button) {
+        let url = $(button).data('href');
+        sendRequest({
+            url: url,
+            type: 'GET',
+            data: {},
+        }, function (response) {
+            if (!response.status) {
+                return false;
+            }
+            let entity = response.data;
+            $('#form-method .modal-title').empty().text('Sửa phương pháp');
+            $('#form-method #id').val(entity.id);
+            $('#form-method #name').val(entity.name);
+            document.getElementById('type').selectedIndex = entity.type - 1;
+            $('#form-method #signal').val(entity.signal);
+            $('#form-method #order_pattern').val(entity.order_pattern);
+            $('#form-method #stop_loss').val(entity.stop_loss);
+            $('#form-method #stop_win').val(entity.stop_win);
+            document.getElementById('status').selectedIndex = entity.type - 1;
+            $('#form-method').modal('show');
+        });
+    },
+    validateMethod: function () {
+        let url = $('#form-method form').data('action');
+        sendRequest({
+            url: url,
+            type: 'POST',
+            data: {
+                id: $('#form-method #id').val(),
+                name: $('#form-method #name').val(),
+                type: $('#form-method #type').val(),
+                signal: $('#form-method #signal').val(),
+                order_pattern: $('#form-method #order_pattern').val(),
+                stop_loss: $('#form-method #stop_loss').val(),
+                stop_win: $('#form-method #stop_win').val(),
+                status: $('#form-method #status').val(),
+            },
+        }, function (response) {
+            if (!response.status) {
+                return false;
+            }
+            let entity = response.data,
+                methodItemHtml = '<td>' + entity.name + '</td>' +
+                '<td class="pc">' + entity.type + '</td>' +
+                '<td>' + entity.signal + '</td>' +
+                '<td>' + entity.pattern + '</td>' +
+                '<td class="pc">' + entity.stop.loss + '</td>' +
+                '<td class="pc">' + entity.stop.win + '</td>' +
+                '<td>' + entity.status + '</td>' +
+                '<td><div class="pc">' +
+                '<a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a>' +
+                '&nbsp;<a class="btn btn-danger" onclick="BotController.deleteMethodConfirm(\''+ entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a>' +
+                '</div><div class="sp" style="min-width: 70px;"><ul class="list-inline">' +
+                '<li class="list-inline-item"><a class="text-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit"></span></a></li>' +
+                '<li class="list-inline-item"><a class="text-danger" onclick="BotController.deleteMethodConfirm(\''+ entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash"></span></a></li>' +
+                '</ul></div></td>';
+            if (entity.create) {
+                $('.method-item').append('<tr id="method_' + entity.id + '">' + methodItemHtml + '</tr>');
+            } else {
+                $('.method-item tr#method_' + entity.id).empty().html(methodItemHtml);
+            }
+            $('#form-method').modal('hide');
+            BotController.resetForm();
+        });
+    },
+    resetForm: function () {
+        $('#form-method form').get(0).reset();
+    },
+    deleteMethodConfirm: function (title, id) {
+        $('#delete-method .method-title').empty().text(title);
+        $('#delete-method #delete_method_id').val(id);
+        $('#delete-method').modal('show');
+    },
+    deleteMethod: function () {
+        let url = $('#delete-method form').data('action'),
+            id = $('#delete-method #delete_method_id').val();
+        sendRequest({
+            url: url,
+            type: 'POST',
+            data: {
+                id: id
+            },
+        }, function (response) {
+            $('#delete-method').modal('hide');
+            $('.method-item tr#method_' + id).remove();
+        });
     },
 };

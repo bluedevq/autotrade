@@ -18,6 +18,7 @@
         'lib/bootstrap.bundle.min',
         'lib/loadingoverlay.min',
         'lib/fontawesome.min',
+        'lib/chart.min',
     ];
     ?>
     {!! loadFiles($jsFiles, '', 'js') !!}
