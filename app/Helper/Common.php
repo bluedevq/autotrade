@@ -28,7 +28,7 @@ Class Common
 
     public static function getBackendNamespace()
     {
-        return 'backend';
+        return 'Backend';
     }
 
     public static function getFrontendDomain()
@@ -43,7 +43,7 @@ Class Common
 
     public static function getFrontendNamespace()
     {
-        return 'frontend';
+        return 'Frontend';
     }
 
     public static function getApiDomain()
