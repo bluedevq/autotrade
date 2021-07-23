@@ -54,4 +54,9 @@ trait BotUserMethod
     {
         return Common::getConfig('aresbo.method.text.' . $this->status);
     }
+
+    public function getColorText()
+    {
+        return '#' . $this->color;
+    }
 }

@@ -272,6 +272,7 @@ class BotController extends BackendController
                 $isCreate = false;
             }
             $entity->bot_user_id = $userInfo->id;
+            $entity->color = $this->_randomColor();
             $entity->save();
             DB::commit();
             $this->setData([
@@ -325,6 +326,8 @@ class BotController extends BackendController
 
     public function research()
     {
+        $responseData = $datasets = [];
+
         // get bot user
         $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if (blank($user)) {
@@ -342,19 +345,20 @@ class BotController extends BackendController
         // get price & candles
         list($orderCandles, $resultCandles) = $this->_getListPrices();
 
-        $responseData = ['label' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]];
-
+        // get label
+        $resultCandles = array_reverse($resultCandles);
         foreach ($resultCandles as $resultCandle) {
-
+            $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
         }
-        $datasets = [];
+
+        // get data
         foreach ($methods as $method) {
             $datasets[] = [
                 'label' => $method->getNameText(),
-                'data' => [0, 20, 20, 60, 60, 120, 140, 180, 120, 125, 105, 110, 170],
+                'data' => $this->_getProfitData($method, $resultCandles),
                 'fill' => false,
-                'borderColor' => $this->_randomColor(),
-                'tension' => '0.2',
+                'borderColor' => $method->getColorText(),
+                'tension' => '0.4',
             ];
         }
         $responseData['datasets'] = $datasets;
@@ -363,14 +367,40 @@ class BotController extends BackendController
         return $this->renderJson();
     }
 
-    protected function _randomColorPart()
+    protected function _getProfitData($method, $candles)
     {
-        return str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
+        $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
+        $profitData = [];
+
+        foreach ($candles as $index => $candle) {
+            $profitData[$index] = Arr::get($profitData, $index - 1) + $this->_simulateBet($signals, $candles, $this->_getBetPattern($method->order_pattern, 'type', false), $this->_getBetPattern($method->order_pattern, 'amount'));
+            unset($candles[$index]);
+        }
+
+        return $profitData;
+    }
+
+    protected function _simulateBet($signals, $candles, $orderType, $amount)
+    {
+        $candles = array_values($candles);
+        foreach ($signals as $index => $signal) {
+            if (Str::lower($signal) != Str::lower(Arr::get($candles, $index . '.order_result'))) {
+                return false;
+            }
+        }
+        $win = $orderType == Str::lower(Arr::get($candles, (count($signals) + 1) . '.order_result'));
+
+        return $win ? $amount * 0.95 : $amount * -1;
     }
 
     protected function _randomColor()
     {
         return $this->_randomColorPart() . $this->_randomColorPart() . $this->_randomColorPart();
+    }
+
+    protected function _randomColorPart()
+    {
+        return str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
     }
 
     protected function _processAuto($stop = false)
@@ -637,15 +667,24 @@ class BotController extends BackendController
 
     protected function _getOrder($method, $accountType)
     {
-        $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
-        $orderPattern = $orderPatterns[0];
-
         return [
             'betAccountType' => Common::getConfig('aresbo.bet_account_type.' . $accountType),
-            'betAmount' => Str::substr($orderPattern, 1, Str::length($orderPattern) - 1),
-            'betType' => Common::getConfig('aresbo.order_type_pattern.' . Str::lower(Str::substr($orderPattern, 0, 1))),
+            'betAmount' => $this->_getBetPattern($method->order_pattern, 'amount'),
+            'betType' => $this->_getBetPattern($method->order_pattern, 'type'),
             'method' => $method->name,
         ];
+    }
+
+    protected function _getBetPattern($orderPattern, $key = '', $convertType = true)
+    {
+        $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $orderPattern);
+        $orderPattern = $orderPatterns[0];
+        $order = [
+            'type' => $convertType ? Common::getConfig('aresbo.order_type_pattern.' . Str::lower(Str::substr($orderPattern, 0, 1))) : Str::lower(Str::substr($orderPattern, 0, 1)),
+            'amount' => Str::substr($orderPattern, 1, Str::length($orderPattern) - 1)
+        ];
+
+        return Arr::get($order, $key, $order);
     }
 
     protected function _prepareFormMethod($id = null)
@@ -656,21 +695,5 @@ class BotController extends BackendController
         }
 
         return $entity;
-    }
-
-    protected function _saveUser()
-    {
-    }
-
-    protected function _updateBotQueue($botUser)
-    {
-        // update bot queue
-        $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
-            ->where('bot_user_id', $botUser->id)
-            ->first();
-        if ($botQueue) {
-            $botQueue->status = 0;
-            $botQueue->save();
-        }
     }
 }

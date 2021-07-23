@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-danger">
             <div class="modal-header">
-                <h4 class="modal-title">Phân tích thị trường</h4>
+                <h4 class="modal-title">Phân tích thị trường 50 lệnh gần nhất</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
