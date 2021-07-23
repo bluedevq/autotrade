@@ -1,4 +1,7 @@
 <div class="container mt-2 border border-1 rounded-3" style="border-color: #303539">
+    <div class="row pt-2 text-center col-12">
+        <h3>Đăng nhập vào tài khoản ARESBO</h3>
+    </div>
     <div class="row mt-2 mb-2">
         <form method="post" action="{{ route('bot.token') }}" class="form-horizontal" enctype="multipart/form-data">
             @csrf
