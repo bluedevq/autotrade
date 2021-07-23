@@ -100,7 +100,7 @@
                         <div class="col-md-5">&nbsp;</div>
                         <div class="col-md-4">
                             <input type="hidden" name="id" id="id" value="">
-                            <button class="btn btn-lg btn-primary btn-block col-12" name="submit" onclick="BotController.validateMethod()">
+                            <button class="btn btn-lg btn-primary btn-block col-12" type="button" onclick="BotController.validateMethod()">
                                 <span class="fas fa-save" aria-hidden="true">&nbsp;</span>Lưu lại
                             </button>
                         </div>
@@ -125,7 +125,7 @@
                     <div class="row mt-2">
                         <div class="col-12 text-center">
                             <input type="hidden" name="id" id="delete_method_id" value="">
-                            <button class="btn btn-lg btn-danger btn-block col-md-2 col-12" name="submit" onclick="BotController.deleteMethod()">
+                            <button class="btn btn-lg btn-danger btn-block col-md-2 col-12" type="button" onclick="BotController.deleteMethod()">
                                 <span class="fas fa-trash" aria-hidden="true">&nbsp;</span>Xóa
                             </button>
                         </div>

@@ -241,7 +241,7 @@ let BotController = {
             $('#form-method #order_pattern').val(entity.order_pattern);
             $('#form-method #stop_loss').val(entity.stop_loss);
             $('#form-method #stop_win').val(entity.stop_win);
-            document.getElementById('status').selectedIndex = entity.type - 1;
+            document.getElementById('status').selectedIndex = entity.status;
             $('#form-method').modal('show');
         });
     },
@@ -266,19 +266,19 @@ let BotController = {
             }
             let entity = response.data,
                 methodItemHtml = '<td>' + entity.name + '</td>' +
-                '<td class="pc">' + entity.type + '</td>' +
-                '<td>' + entity.signal + '</td>' +
-                '<td>' + entity.pattern + '</td>' +
-                '<td class="pc">' + entity.stop.loss + '</td>' +
-                '<td class="pc">' + entity.stop.win + '</td>' +
-                '<td>' + entity.status + '</td>' +
-                '<td><div class="pc">' +
-                '<a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a>' +
-                '&nbsp;<a class="btn btn-danger" onclick="BotController.deleteMethodConfirm(\''+ entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a>' +
-                '</div><div class="sp" style="min-width: 70px;"><ul class="list-inline">' +
-                '<li class="list-inline-item"><a class="text-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit"></span></a></li>' +
-                '<li class="list-inline-item"><a class="text-danger" onclick="BotController.deleteMethodConfirm(\''+ entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash"></span></a></li>' +
-                '</ul></div></td>';
+                    '<td class="pc">' + entity.type + '</td>' +
+                    '<td>' + entity.signal + '</td>' +
+                    '<td>' + entity.pattern + '</td>' +
+                    '<td class="pc">' + entity.stop.loss + '</td>' +
+                    '<td class="pc">' + entity.stop.win + '</td>' +
+                    '<td>' + entity.status + '</td>' +
+                    '<td><div class="pc">' +
+                    '<a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a>' +
+                    '&nbsp;<a class="btn btn-danger" onclick="BotController.deleteMethodConfirm(\'' + entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a>' +
+                    '</div><div class="sp" style="min-width: 70px;"><ul class="list-inline">' +
+                    '<li class="list-inline-item"><a class="text-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit"></span></a></li>' +
+                    '<li class="list-inline-item"><a class="text-danger" onclick="BotController.deleteMethodConfirm(\'' + entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash"></span></a></li>' +
+                    '</ul></div></td>';
             if (entity.create) {
                 $('.method-item').append('<tr id="method_' + entity.id + '">' + methodItemHtml + '</tr>');
             } else {
@@ -290,6 +290,7 @@ let BotController = {
     },
     resetForm: function () {
         $('#form-method form').get(0).reset();
+        $('#form-method #id').val('');
     },
     deleteMethodConfirm: function (title, id) {
         $('#delete-method .method-title').empty().text(title);
