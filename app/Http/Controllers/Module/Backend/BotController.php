@@ -373,14 +373,14 @@ class BotController extends BackendController
         $profitData = [];
 
         foreach ($candles as $index => $candle) {
-            $profitData[$index] = Arr::get($profitData, $index - 1) + $this->_simulateBet($signals, $candles, $this->_getBetPattern($method->order_pattern, 'type', false), $this->_getBetPattern($method->order_pattern, 'amount'));
+            $profitData[$index] = Arr::get($profitData, $index - 1) + $this->_simulationBet($signals, $candles, $this->_getBetPattern($method->order_pattern, 'type', false), $this->_getBetPattern($method->order_pattern, 'amount'));
             unset($candles[$index]);
         }
 
         return $profitData;
     }
 
-    protected function _simulateBet($signals, $candles, $orderType, $amount)
+    protected function _simulationBet($signals, $candles, $orderType, $amount)
     {
         $candles = array_values($candles);
         foreach ($signals as $index => $signal) {
