@@ -46,8 +46,8 @@ return [
         'order_signal_delimiter' => '-',
         'order_pattern_delimiter' => '-',
         'order_type_pattern' => [
-            'T' => 'UP',
-            'G' => 'DOWN',
+            't' => 'UP',
+            'g' => 'DOWN',
         ],
         'order_type_text' => [
             'up' => 'T',

@@ -643,7 +643,7 @@ class BotController extends BackendController
         return [
             'betAccountType' => Common::getConfig('aresbo.bet_account_type.' . $accountType),
             'betAmount' => Str::substr($orderPattern, 1, Str::length($orderPattern) - 1),
-            'betType' => Common::getConfig('aresbo.order_type_pattern.' . Str::substr($orderPattern, 0, 1)),
+            'betType' => Common::getConfig('aresbo.order_type_pattern.' . Str::lower(Str::substr($orderPattern, 0, 1))),
             'method' => $method->name,
         ];
     }
