@@ -217,6 +217,13 @@ let BotController = {
             })
         });
     },
+    showHideMethod: function () {
+        if ($('.list-method').hasClass('not-active')) {
+            $('.list-method').removeClass('not-active').slideDown(500);
+        } else {
+            $('.list-method').addClass('not-active').slideUp(500);
+        }
+    },
     createMethod: function () {
         $('#form-method .modal-title').empty().text('Thêm mới phương pháp');
         BotController.resetForm();

@@ -1,8 +1,8 @@
 <div class="row mt-2">
     <div class="col-md-3 col-12">
-        <button class="btn btn-primary col-12" type="button" data-bs-toggle="collapse" data-bs-target="#list-method" aria-expanded="false" aria-controls="list-method"><span class="fas fa-list-alt">&nbsp;</span>Danh sách phương pháp</button>
+        <button class="btn btn-primary col-12" type="button" onclick="BotController.showHideMethod()"><span class="fas fa-list-alt">&nbsp;</span>Danh sách phương pháp</button>
     </div>
-    <div class="collapse" id="list-method">
+    <div class="list-method not-active" style="display: none">
         <div class="row mt-2">
             <div class="col-md-3 col-12">
                 <a class="btn btn-danger col-12" href="javascript:void(0)" onclick="BotController.research()"><span class="fas fa-chart-line">&nbsp;</span>Phân tích thị trường</a>
