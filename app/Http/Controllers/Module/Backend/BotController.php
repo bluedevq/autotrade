@@ -627,7 +627,7 @@ class BotController extends BackendController
     protected function _mapMethod($signals, $candles)
     {
         foreach ($signals as $index => $signal) {
-            if ($signal != Arr::get($candles, $index . '.order_result')) {
+            if (Str::lower($signal) != Str::lower(Arr::get($candles, $index . '.order_result'))) {
                 return false;
             }
         }
