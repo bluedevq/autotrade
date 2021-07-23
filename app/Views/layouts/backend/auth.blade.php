@@ -8,7 +8,7 @@
     </div>
 </div>
 @include('layouts.backend.elements.modal')
-@include('layouts.backend.structures.footer_js')
+@include('layouts.backend.structures.footer')
 @stack('scripts')
 </body>
 </html>

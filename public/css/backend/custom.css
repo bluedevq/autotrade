@@ -59,6 +59,10 @@ a {
     color: #212529;
 }
 
+.password-hover {
+    cursor: pointer;
+}
+
 @media (min-width: 767px) {
     .sp {
         display: none;

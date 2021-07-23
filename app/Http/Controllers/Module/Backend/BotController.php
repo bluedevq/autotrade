@@ -10,6 +10,7 @@ use App\Model\Entities\BotUserMethod;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\MessageBag;
@@ -294,6 +295,7 @@ class BotController extends BackendController
 //            new MessageBag(['success' => 'Lưu thành công']);
         } catch (\Exception $exception) {
             DB::rollBack();
+            Log::error($exception);
         }
 
         return $this->renderErrorJson();
@@ -315,6 +317,7 @@ class BotController extends BackendController
             DB::commit();
         } catch (\Exception $exception) {
             DB::rollBack();
+            Log::error($exception);
         }
 
         return $this->renderJson();
@@ -322,7 +325,52 @@ class BotController extends BackendController
 
     public function research()
     {
+        // get bot user
+        $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        if (blank($user)) {
+            return $this->renderErrorJson();
+        }
+
+        // get method active from database
+        $methods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $user->id)
+            ->where('status', Common::getConfig('aresbo.method.active'))
+            ->where(function ($q) {
+                $q->orWhere('deleted_at', '');
+                $q->orWhereNull('deleted_at');
+            })->get();
+
+        // get price & candles
+        list($orderCandles, $resultCandles) = $this->_getListPrices();
+
+        $responseData = ['label' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]];
+
+        foreach ($resultCandles as $resultCandle) {
+
+        }
+        $datasets = [];
+        foreach ($methods as $method) {
+            $datasets[] = [
+                'label' => $method->getNameText(),
+                'data' => [0, 20, 20, 60, 60, 120, 140, 180, 120, 125, 105, 110, 170],
+                'fill' => false,
+                'borderColor' => $this->_randomColor(),
+                'tension' => '0.2',
+            ];
+        }
+        $responseData['datasets'] = $datasets;
+        $this->setData($responseData);
+
         return $this->renderJson();
+    }
+
+    protected function _randomColorPart()
+    {
+        return str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
+    }
+
+    protected function _randomColor()
+    {
+        return $this->_randomColorPart() . $this->_randomColorPart() . $this->_randomColorPart();
     }
 
     protected function _processAuto($stop = false)
@@ -355,6 +403,7 @@ class BotController extends BackendController
             DB::commit();
         } catch (\Exception $exception) {
             DB::rollBack();
+            Log::error($exception);
             $errors = new MessageBag([($stop ? 'Dừng' : 'Chạy') . ' auto thất bại, vui lòng thử lại.']);
             return $this->_to('bot.index')->withErrors($errors);
         }
@@ -366,15 +415,6 @@ class BotController extends BackendController
     {
         // check profile in database
         $dbProfile = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
-        if ($dbProfile && Carbon::now()->diffInDays(Carbon::parse($dbProfile->updated_at)) == 0) {
-            $tokens = [
-                'id' => $dbProfile->id,
-                'access_token' => Session::get(self::ACCESS_TOKEN),
-                'refresh_token' => Session::get(self::REFRESH_TOKEN),
-            ];
-            $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->update($tokens);
-            return $dbProfile;
-        }
 
         // begin transaction
         DB::beginTransaction();
@@ -421,20 +461,12 @@ class BotController extends BackendController
                 $this->getModel()->fill($dataProfile)->save();
             }
 
-            // update bot queue
-            $botQueue = BotQueue::where('user_id', backendGuard()->user()->id)
-                ->where('bot_user_id', $this->getModel()->id)
-                ->first();
-            if ($botQueue) {
-                $botQueue->status = 0;
-                $botQueue->save();
-            }
-
             DB::commit();
 
             return $this->getModel();
         } catch (\Exception $exception) {
             DB::rollBack();
+            Log::error($exception);
             return [];
         }
     }
@@ -502,7 +534,7 @@ class BotController extends BackendController
     {
         // get method order from database
         $methods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botQueue->bot_user_id)
-            ->where('status', 1)
+            ->where('status', Common::getConfig('aresbo.method.active'))
             ->where(function ($q) {
                 $q->orWhere('deleted_at', '');
                 $q->orWhereNull('deleted_at');
@@ -511,34 +543,7 @@ class BotController extends BackendController
         $accountType = $botQueue->account_type;
 
         // get price & candles
-        $prices = $this->requestApi(Common::getConfig('aresbo.api_url.get_prices'), [], 'GET', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
-        if (!Arr::get($prices, 'ok')) {
-            return $this->renderErrorJson(200, ['data' => ['url' => route('bot.clear_token')]]);
-        }
-        $listCandles = array_reverse(Arr::get($prices, 'd'));
-        $orderCandles = $resultCandles = [];
-        $candlesKey = [
-            'open_order',
-            'open_price',
-            'high_price',
-            'low_price',
-            'close_price',
-            'base_volume',
-            'close_order',
-            'xxx',
-            'order_type', // 1: order, 0: result
-            'session',
-        ];
-        foreach ($listCandles as $item) {
-            $candleTmp = array_combine($candlesKey, $item);
-            $orderResult = Arr::get($candleTmp, 'close_price') - Arr::get($candleTmp, 'open_price');
-            $candleTmp['order_result'] = $orderResult > 0 ? Common::getConfig('aresbo.order_type_text.up') : Common::getConfig('aresbo.order_type_text.down');
-            if (Arr::get($candleTmp, 'order_type') == 1) {
-                $orderCandles[] = $candleTmp;
-                continue;
-            }
-            $resultCandles[] = $candleTmp;
-        }
+        list($orderCandles, $resultCandles) = $this->_getListPrices();
 
         // research and order
         $result = [];
@@ -552,6 +557,45 @@ class BotController extends BackendController
         }
 
         return $result;
+    }
+
+    protected function _getListPrices()
+    {
+        $orderCandles = $resultCandles = [];
+        try {
+            // get price & candles
+            $prices = $this->requestApi(Common::getConfig('aresbo.api_url.get_prices'), [], 'GET', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
+            if (!Arr::get($prices, 'ok')) {
+                return [$orderCandles, $resultCandles];
+            }
+            $listCandles = array_reverse(Arr::get($prices, 'd'));
+            $candlesKey = [
+                'open_order',
+                'open_price',
+                'high_price',
+                'low_price',
+                'close_price',
+                'base_volume',
+                'close_order',
+                'xxx',
+                'order_type', // 1: order, 0: result
+                'session',
+            ];
+            foreach ($listCandles as $item) {
+                $candleTmp = array_combine($candlesKey, $item);
+                $orderResult = Arr::get($candleTmp, 'close_price') - Arr::get($candleTmp, 'open_price');
+                $candleTmp['order_result'] = $orderResult > 0 ? Common::getConfig('aresbo.order_type_text.up') : Common::getConfig('aresbo.order_type_text.down');
+                if (Arr::get($candleTmp, 'order_type') == 1) {
+                    $orderCandles[] = $candleTmp;
+                    continue;
+                }
+                $resultCandles[] = $candleTmp;
+            }
+        } catch (\Exception $exception) {
+            Log::error($exception);
+        }
+
+        return [$orderCandles, $resultCandles];
     }
 
     protected function _mapOpenOrders($params = [])

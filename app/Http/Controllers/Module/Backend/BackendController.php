@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Module\Backend;
 
+use App\Helper\Common;
 use App\Http\Controllers\Base\BaseController;
 use App\Http\Controllers\Base\Traits\CRUD;
 use App\Http\Controllers\Base\Traits\Model;
@@ -35,5 +36,11 @@ class BackendController extends BaseController
 
     protected function _prepareForm($id = null)
     {
+    }
+
+    public function render($view = null, $params = array(), $mergeData = array())
+    {
+        $this->setTitle(Common::getConfig('aresbo.bot_title'));
+        return parent::render($view, $params, $mergeData);
     }
 }

@@ -20,6 +20,16 @@ let BotController = {
     newOrderStatus: 'Đang đợi',
     winStatus: 'Thắng',
     loseStatus: 'Thua',
+    showHidePassword: function(button) {
+        let passwordInput = $(button).parent('.input-group').find('input#password');console.log($(passwordInput).attr('type'));
+        if($(passwordInput).attr('type') == 'text'){
+            $(passwordInput).attr('type', 'password');
+            $(button).find('.show-hide-password').addClass('fa-eye').removeClass('fa-eye-slash');
+        }else if($(passwordInput).attr('type') == 'password'){
+            $(passwordInput).attr('type', 'text');
+            $(button).find('.show-hide-password').addClass('fa-eye-slash').removeClass('fa-eye');
+        }
+    },
     bet: function () {
         sendRequest({
             url: BotController.betUrl,
@@ -166,16 +176,8 @@ let BotController = {
                 myChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                        datasets: [
-                            {
-                                label: 'Sparta 22',
-                                data: [0, 20, 20, 60, 60, 120, 140, 180, 120, 125, 105, 110, 170],
-                                fill: false,
-                                borderColor: "rgb(255,0,0)",
-                                tension: 0.2
-                            },
-                        ]
+                        labels: response.data.label,
+                        datasets: response.data.datasets
                     },
                     options: {
                         responsive: true,
