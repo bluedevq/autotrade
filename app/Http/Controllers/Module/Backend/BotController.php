@@ -270,9 +270,10 @@ class BotController extends BackendController
             if ($entity->id) {
                 $entity->exists = true;
                 $isCreate = false;
+            } else {
+                $entity->color = $this->_randomColor();
             }
             $entity->bot_user_id = $userInfo->id;
-            $entity->color = $this->_randomColor();
             $entity->save();
             DB::commit();
             $this->setData([
@@ -358,7 +359,7 @@ class BotController extends BackendController
                 'data' => $this->_getProfitData($method, $resultCandles),
                 'fill' => false,
                 'borderColor' => $method->getColorText(),
-                'tension' => '0.4',
+                'tension' => '1',
             ];
         }
         $responseData['datasets'] = $datasets;
