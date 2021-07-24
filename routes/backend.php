@@ -35,13 +35,13 @@ Route::middleware(['auth.backend'])->group(function () {
             'uses' => 'BotController@index'
         ]);
         // get token to login aresbo
-        Route::post('/token', [
-            'as' => 'bot.token',
-            'uses' => 'BotController@getToken'
+        Route::post('/login', [
+            'as' => 'bot.login',
+            'uses' => 'BotController@login'
         ]);
-        Route::post('/token-2fa', [
-            'as' => 'bot.token2fa',
-            'uses' => 'BotController@getToken2Fa'
+        Route::post('/login-2fa', [
+            'as' => 'bot.loginWith2FA',
+            'uses' => 'BotController@loginWith2FA'
         ]);
         // clear token and logout aresbo
         Route::get('/clear-token', [

@@ -53,5 +53,6 @@ return [
             'up' => 'T',
             'down' => 'G',
         ],
+        'chart_tension' => '0.4',
     ],
 ];

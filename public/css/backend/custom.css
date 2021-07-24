@@ -27,10 +27,6 @@ a {
     background-color: #171b2c;
 }
 
-.hide {
-    display: none;
-}
-
 .form-select:disabled {
     background-color: #bbb;
     cursor: not-allowed;
@@ -61,6 +57,22 @@ a {
 
 .password-hover {
     cursor: pointer;
+}
+
+.top-10 {
+    top: 10px !important;
+}
+
+.end-10 {
+    right: 10px !important;
+}
+
+.loadingoverlay {
+    opacity: 0.4 !important;
+}
+
+.hide {
+    display: none;
 }
 
 @media (min-width: 767px) {

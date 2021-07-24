@@ -27,7 +27,6 @@ class BotController extends BackendController
     const ACCESS_TOKEN = 'access_token';
     const REFRESH_TOKEN = 'refresh_token';
     const TWOFA_TOKEN = '2fa_token';
-    const TWOFA_REQUIRED = '2fa_required';
     const BOT_USER_EMAIL = 'bot_user_email';
     const TOTAL_OPEN_ORDER = 'total_open_order';
 
@@ -40,11 +39,6 @@ class BotController extends BackendController
 
     public function index()
     {
-        if (Session::has(self::TWOFA_REQUIRED)) {
-            $this->setViewData([
-                'require2Fa' => Session::get(self::TWOFA_REQUIRED)
-            ]);
-        }
         if (Session::has(self::REFRESH_TOKEN)) {
             $userInfo = $this->_getUserInfo();
             if (blank($userInfo)) {
@@ -72,77 +66,86 @@ class BotController extends BackendController
         return $this->render();
     }
 
-    public function getToken()
+    public function login()
     {
-        // get data
-        $email = $this->getParam('email');
-        $password = $this->getParam('password');
+        try {
+            // get data
+            $email = $this->getParam('email');
+            $password = $this->getParam('password');
 
-        // validate
-        if (blank($email) || blank($password)) {
-            return $this->_backWithError(new MessageBag(['Vui lòng nhập email']));
+            // validate
+            if (blank($email) || blank($password)) {
+                $this->setData(['errors' => 'Vui lòng nhập email và mật khẩu.']);
+                return $this->renderErrorJson();
+            }
+
+            // get token from AresBO
+            $loginData = [
+                'captcha' => Common::getConfig('aresbo.api_url.captcha_token'),
+                'email' => $email,
+                'password' => $password
+            ];
+            $response = $this->_getNewToken($loginData, true);
+
+            // check status
+            if (!Arr::get($response, 'ok')) {
+                $this->setData(['errors' => 'Email hoặc mật khẩu sai. Vui lòng thử lại.']);
+                return $this->renderErrorJson();
+            }
+
+            // save session email login
+            Session::put(self::BOT_USER_EMAIL, $email);
+
+            // check 2fa
+            $require2Fa = Arr::get($response, 'd.require2Fa');
+            if ($require2Fa) {
+                Session::put(self::TWOFA_TOKEN, Arr::get($response, 'd.t'));
+                $this->setData(['require2fa' => route('bot.loginWith2FA')]);
+                return $this->renderJson();
+            }
+
+            // save token
+            Session::put(self::ACCESS_TOKEN, Arr::get($response, 'd.access_token'));
+            Session::put(self::REFRESH_TOKEN, Arr::get($response, 'd.refresh_token'));
+
+            $this->setData(['url' => route('bot.index')]);
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->renderErrorJson();
         }
-
-        // get token from AresBO
-        $loginData = [
-            'captcha' => Common::getConfig('aresbo.api_url.captcha_token'),
-            'email' => $email,
-            'password' => $password
-        ];
-        $response = $this->_getNewToken($loginData, true);
-
-        // check status
-        if (!Arr::get($response, 'ok')) {
-            $errors = new MessageBag(['Email hoặc mật khẩu sai. Vui lòng thử lại.']);
-            return $this->_to('bot.index')->withErrors($errors)->withInput($this->getParams());
-        }
-
-        // save session email login
-        Session::put(self::BOT_USER_EMAIL, $email);
-
-        // check 2fa
-        $require2Fa = Arr::get($response, 'd.require2Fa');
-        if ($require2Fa) {
-            Session::put(self::TWOFA_REQUIRED, $require2Fa);
-            Session::put(self::TWOFA_TOKEN, Arr::get($response, 'd.t'));
-            return $this->_to('bot.index');
-        }
-
-        // save token
-        Session::put(self::ACCESS_TOKEN, Arr::get($response, 'd.access_token'));
-        Session::put(self::REFRESH_TOKEN, Arr::get($response, 'd.refresh_token'));
-
-        // change bot queue after login
-
-        return $this->_to('bot.index');
+        return $this->renderJson();
     }
 
-    public function getToken2Fa()
+    public function loginWith2FA()
     {
-        // get token from AresBO
-        $loginData = [
-            'client_id' => 'aresbo-web',
-            'code' => $this->getParam('code'),
-            'td_code' => '',
-            'td_p_code' => '',
-            'token' => Session::get(self::TWOFA_TOKEN)
-        ];
-        $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_token2fa_url'), $loginData);
+        try {
+            // get token from AresBO
+            $loginData = [
+                'client_id' => 'aresbo-web',
+                'code' => $this->getParam('code'),
+                'td_code' => '',
+                'td_p_code' => '',
+                'token' => Session::get(self::TWOFA_TOKEN)
+            ];
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_token2fa_url'), $loginData);
 
-        // clear 2fa required
-        Session::forget(self::TWOFA_REQUIRED);
-        Session::forget(self::TWOFA_TOKEN);
+            // clear 2fa required
+            Session::forget(self::TWOFA_TOKEN);
 
-        // check status
-        if (!Arr::get($response, 'ok')) {
+            // check status
+            if (!Arr::get($response, 'ok')) {
+                return $this->_to('bot.index')->withErrors(new MessageBag(['Đăng nhập thất bại, vui lòng thử lại.']));
+            }
+
+            // save token
+            Session::put(self::ACCESS_TOKEN, Arr::get($response, 'd.access_token'));
+            Session::put(self::REFRESH_TOKEN, Arr::get($response, 'd.refresh_token'));
+
             return $this->_to('bot.index');
+        } catch (\Exception $exception) {
+            Log::error($exception);
         }
-
-        // save token
-        Session::put(self::ACCESS_TOKEN, Arr::get($response, 'd.access_token'));
-        Session::put(self::REFRESH_TOKEN, Arr::get($response, 'd.refresh_token'));
-
-        return $this->_to('bot.index');
+        return $this->_to('bot.index')->withErrors(new MessageBag(['Đăng nhập thất bại, vui lòng thử lại.']));
     }
 
     public function clearToken()
@@ -342,14 +345,19 @@ class BotController extends BackendController
                 $q->orWhere('deleted_at', '');
                 $q->orWhereNull('deleted_at');
             })->get();
+        if (blank($methods)) {
+            return $this->renderErrorJson();
+        }
 
         // get price & candles
         list($orderCandles, $resultCandles) = $this->_getListPrices();
 
         // get label
         $resultCandles = array_reverse($resultCandles);
-        foreach ($resultCandles as $resultCandle) {
-            $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
+        foreach ($resultCandles as $index => $resultCandle) {
+            if ($index == 0 || ($index + 1) % 10 == 0 || $index == count($resultCandles)) {
+                $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
+            }
         }
 
         // get data
@@ -359,7 +367,7 @@ class BotController extends BackendController
                 'data' => $this->_getProfitData($method, $resultCandles),
                 'fill' => false,
                 'borderColor' => $method->getColorText(),
-                'tension' => '1',
+                'tension' => Common::getConfig('aresbo.chart_tension'),
             ];
         }
         $responseData['datasets'] = $datasets;

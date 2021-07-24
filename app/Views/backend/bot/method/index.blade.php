@@ -26,7 +26,7 @@
                     </thead>
                     <tbody class="method-item">
                     @if(blank($methods))
-                        <tr><td colspan="8">Chưa có phương pháp nào</td></tr>
+                        <tr class="empty"><td colspan="8">Chưa có phương pháp nào</td></tr>
                     @else
                         @foreach($methods as $method)
                         <tr id="method_{{ $method->id }}">

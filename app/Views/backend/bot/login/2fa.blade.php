@@ -1,28 +1,24 @@
-<div class="container mt-2 border border-1 rounded-3" style="border-color: #303539">
+<div class="aresbo-login-with2fa container mt-2 border border-1 rounded-3 hide" style="border-color: #303539">
     <div class="row pt-2 text-center col-12">
         <h3>Xác minh bảo mật</h3>
     </div>
-    <div class="row mt-2 mb-2">
-        <form method="post" action="{{ route('bot.token2fa') }}" class="form-horizontal" enctype="multipart/form-data">
+    <div class="row mt-2 mb-2 mx-auto col-md-4 d-flex align-items-center">
+        <form method="post" action="{{ route('bot.loginWith2FA') }}" class="form-horizontal" enctype="multipart/form-data">
             @csrf
-            <div class="mt-2">
+            <div class="mt-4">
                 <div class="row">
-                    <div class="col-md-3 col-sm-0">&nbsp;</div>
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-12">
                         <label for="code" class="form-label" aria-hidden="true">Mã Google Authentication</label>
                     </div>
-                    <div class="col-md-4 col-sm-6">
+                    <div class="col-12">
                         <input type="text" name="code" class="form-control" id="code">
                     </div>
-                    <div class="col-md-2 col-sm-0">&nbsp;</div>
                 </div>
             </div>
-            <div class="mt-2">
-                <div class="row text-center">
+            <div class="mt-4">
+                <div class="row">
                     <div class="col-12">
-                        <button class="btn btn-lg btn-danger btn-block col-md-2 col-sm-12" type="submit" onclick="showLoading()">
-                            <span class="ls-icon ls-icon-login" aria-hidden="true">Gửi</span>
-                        </button>
+                        <button class="btn btn-lg btn-danger btn-block col-12" type="submit" onclick="showLoading()"><span class="fas fa-sign-in-alt">&nbsp;</span>Gửi</button>
                     </div>
                 </div>
             </div>

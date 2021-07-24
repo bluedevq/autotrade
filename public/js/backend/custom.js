@@ -11,28 +11,74 @@ $(document).ready(function () {
 });
 
 let BotController = {
-    betUrl: null,
-    researchUrl: null,
-    canBet: false,
-    hasOrder: false,
-    profit: 0,
-    volume: 0,
-    newOrderStatus: 'Đang đợi',
-    winStatus: 'Thắng',
-    loseStatus: 'Thua',
-    showHidePassword: function(button) {
-        let passwordInput = $(button).parent('.input-group').find('input#password');console.log($(passwordInput).attr('type'));
-        if($(passwordInput).attr('type') == 'text'){
+    options: {
+        canBet: false,
+        hasOrder: false,
+    },
+    config: {
+        url: {
+            login: null,
+            bet: null,
+            research: null,
+        },
+        orderStatus: {
+            new: 'Đang đợi',
+            win: 'Thắng',
+            lose: 'Thua',
+        },
+        profit: 0,
+        volume: 0,
+    },
+    showHidePassword: function (button) {
+        let passwordInput = $(button).parent('.input-group').find('input#password');
+        console.log($(passwordInput).attr('type'));
+        if ($(passwordInput).attr('type') == 'text') {
             $(passwordInput).attr('type', 'password');
             $(button).find('.show-hide-password').addClass('fa-eye').removeClass('fa-eye-slash');
-        }else if($(passwordInput).attr('type') == 'password'){
+        } else if ($(passwordInput).attr('type') == 'password') {
             $(passwordInput).attr('type', 'text');
             $(button).find('.show-hide-password').addClass('fa-eye-slash').removeClass('fa-eye');
         }
     },
+    login: function () {
+        sendRequest({
+            url: BotController.config.url.login,
+            type: 'POST',
+            data: {
+                email: $('.aresbo-login #email').val(),
+                password: $('.aresbo-login #password').val(),
+            },
+            beforeSend: function () {
+                showLoading();
+            },
+            complete: function () {
+            }
+        }, function (response) {
+            // errors
+            if (!response.status) {
+                $('.toast-message .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors);
+                $('.toast-message').toast('show');
+                hideLoading();
+                return false;
+            }
+            // login with 2fa
+            if (response.data.require2fa) {
+                hideLoading();
+                $('.aresbo-login').hide();
+                $('.aresbo-login-with2fa').show();
+                return true;
+            }
+            // login success without 2fa
+            if (response.data.url) {
+                window.location.href = response.data.url;
+                return true;
+            }
+            hideLoading();
+        });
+    },
     bet: function () {
         sendRequest({
-            url: BotController.betUrl,
+            url: BotController.config.url.bet,
             type: 'POST',
             data: {},
             beforeSend: function () {
@@ -72,22 +118,22 @@ let BotController = {
                 let timeOrder = $(childrens[i]).find('.time-order').text(),
                     lastTimeOrder = listClosedOrders[i].time,
                     lastOrderStatus = $(childrens[i]).find('.bet-order-result').text(),
-                    result = (listClosedOrders[i].result === 'WIN') ? '<span class="fw-bold text-success">' + BotController.winStatus + '</span>' : '<span class="fw-bold text-danger">' + BotController.loseStatus + '</span>';
+                    result = (listClosedOrders[i].result === 'WIN') ? '<span class="fw-bold text-success">' + BotController.config.orderStatus.win + '</span>' : '<span class="fw-bold text-danger">' + BotController.config.orderStatus.lose + '</span>';
 
                 lastTimeOrder = new Date(lastTimeOrder);
                 lastTimeOrder = BotController.pad(lastTimeOrder.getHours()) + ':' + BotController.pad(lastTimeOrder.getMinutes());
-                if (timeOrder == lastTimeOrder && lastOrderStatus == BotController.newOrderStatus) {
+                if (timeOrder == lastTimeOrder && lastOrderStatus == BotController.config.orderStatus.new) {
                     // update status
                     $(childrens[i]).length > 0 ? $(childrens[i]).find('.bet-order-result').empty().html(result) : null;
                     // update profit
-                    BotController.profit += listClosedOrders[i].win_amount;
+                    BotController.config.profit += listClosedOrders[i].win_amount;
                 }
             }
-            if (BotController.profit > 0) {
-                $('.profit').empty().html('<span class="text-success">' + BotController.profit + '</span>');
+            if (BotController.config.profit > 0) {
+                $('.profit').empty().html('<span class="text-success">' + BotController.config.profit + '</span>');
             }
-            if (BotController.profit < 0) {
-                $('.profit').empty().html('<span class="text-danger">' + BotController.profit + '</span>');
+            if (BotController.config.profit < 0) {
+                $('.profit').empty().html('<span class="text-danger">' + BotController.config.profit + '</span>');
             }
         }
     },
@@ -100,15 +146,15 @@ let BotController = {
                     '<td>' + listOpenOrders[i].method + '</td>\n' +
                     '<td>' + BotController.getBetTypeText(listOpenOrders[i].type) + '</td>\n' +
                     '<td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + listOpenOrders[i].amount + '</span></td>\n' +
-                    '<td class="fw-bold bet-order-result">' + BotController.newOrderStatus + '</td>\n' +
+                    '<td class="fw-bold bet-order-result">' + BotController.config.orderStatus.new + '</td>\n' +
                     '</tr>';
 
             $('.bet-result').prepend(newOrder);
 
             // update volume
-            BotController.volume += listOpenOrders[i].amount;
+            BotController.config.volume += listOpenOrders[i].amount;
         }
-        $('.volume').empty().text(BotController.volume);
+        $('.volume').empty().text(BotController.config.volume);
     },
     pad: function (t) {
         let st = "" + t;
@@ -129,14 +175,14 @@ let BotController = {
         if (0 < s && s < 30) {
             let balance = $('.account-balance:not(".hide") .current-amount').text();
             if (balance <= 0) {
-                BotController.hasOrder = true;
+                BotController.options.hasOrder = true;
             }
-            if (BotController.hasOrder === false && BotController.canBet === 'true') {
+            if (BotController.options.hasOrder === false && BotController.options.canBet === 'true') {
                 BotController.bet();
-                BotController.hasOrder = true;
+                BotController.options.hasOrder = true;
             }
         } else {
-            BotController.hasOrder = false;
+            BotController.options.hasOrder = false;
         }
 
         // show title
@@ -162,8 +208,11 @@ let BotController = {
         }
     },
     research: function () {
+        if ($('.method-item tr:not(".empty")').length == 0) {
+            return false;
+        }
         sendRequest({
-            url: BotController.researchUrl,
+            url: BotController.config.url.research,
             type: 'GET',
             data: {},
         }, function (response) {
