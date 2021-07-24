@@ -7,9 +7,7 @@ body {
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-a {
-    color: #fff !important;
-}
+
 
 .sp {
     display: revert;

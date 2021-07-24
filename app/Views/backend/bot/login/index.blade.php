@@ -1,4 +1,4 @@
-<div class="aresbo-login container mt-2 border border-1 rounded-3" style="border-color: #303539">
+<div class="aresbo-login container">
     <div class="row pt-2 text-center col-12">
         <h3>Đăng nhập vào tài khoản ARESBO</h3>
     </div>

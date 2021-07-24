@@ -12,7 +12,7 @@
             @include('backend.bot.login.index')
             @include('backend.bot.login.2fa')
         @else
-            <div class="container mt-2 border border-1 rounded-3" style="border-color: #303539">
+            <div class="container mt-2">
                 <div class="row mt-2">
                     <div class="col-md-2 col-12">
                         <a href="{{ route('bot.clear_token') }}" class="btn btn-secondary"><span class="fas fa-sign-out-alt" aria-hidden="true">&nbsp;</span>Thoát</a>
