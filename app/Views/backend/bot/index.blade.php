@@ -38,10 +38,11 @@
         @endif
         <script type="application/javascript">
             $(document).ready(function () {
-                BotController.options.canBet = '{{ $isRunning ? 'true' : 'false' }}';
+                BotController.options.isRunning = '{{ $isRunning ? 'true' : 'false' }}';
                 BotController.config.url.login = '{{ route('bot.login') }}';
                 BotController.config.url.bet = '{{ route('bot.bet') }}';
                 BotController.config.url.research = '{{ route('bot_method.research') }}';
+                BotController.config.startAt = '{{ time() * 1000 }}';
             });
         </script>
     </div>

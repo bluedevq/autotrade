@@ -6,13 +6,13 @@
                 <h3>Chọn tài khoản</h3>
                 <div class="row">
                     <div class="col-md-6 col-12">
-                        <select onchange="BotController.changeAccountBalance(this)" class="form-select form-select-lg {{ $isRunning ? 'disabled' : '' }}" name="account_type" {{ $isRunning ? 'disabled' : '' }}>
+                        <select onchange="BotController.changeAccountBalance(this)" class="form-select {{ $isRunning ? 'disabled' : '' }}" name="account_type" {{ $isRunning ? 'disabled' : '' }}>
                             <option value="{{ $demoType }}" {{ $isRunning && $accountType ==  $demoType ? 'selected="selected' : ''}}>DEMO</option>
                             <option value="{{ $liveType }}" {{ $isRunning && $accountType ==  $liveType ? 'selected="selected' : ''}}>LIVE</option>
                         </select>
                     </div>
                     <div class="col-md-6 col-12 mt-sp-2">
-                        <button class="btn btn-lg btn-{{ $isRunning ? 'danger' : 'success' }} btn-block col-12" type="submit">
+                        <button class="btn btn-{{ $isRunning ? 'danger' : 'success' }} btn-block col-12" type="submit">
                             <span class="fas fa-{{ $isRunning ? 'stop' : 'play' }}-circle" aria-hidden="true">&nbsp;</span>{{ $isRunning ? 'Dừng' : 'Chạy' }} Auto
                         </button>
                     </div>

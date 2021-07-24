@@ -12,7 +12,7 @@ $(document).ready(function () {
 
 let BotController = {
     options: {
-        canBet: false,
+        isRunning: false,
         hasOrder: false,
     },
     config: {
@@ -26,6 +26,11 @@ let BotController = {
             win: 'Thắng',
             lose: 'Thua',
         },
+        clockTitle: {
+            bet: 'Có thể đặt lệnh',
+            wait: 'Đang chờ kết quả',
+        },
+        startAt: null,
         profit: 0,
         volume: 0,
     },
@@ -75,6 +80,43 @@ let BotController = {
             }
             hideLoading();
         });
+    },
+    showTime: function () {
+        let date = new Date(),
+            s = date.getSeconds();
+
+        // update time 's bot running
+        if (BotController.options.isRunning === 'true') {
+            let diffTime = dateDiff(new Date(), new Date(parseInt(BotController.config.startAt))) / 1000;
+
+            $('.total-time').empty().text(BotController.pad(Math.floor(diffTime/60/60)) + ':' + BotController.pad(Math.floor(diffTime/60)) + ':' + BotController.pad(parseInt(diffTime % 60)));
+        }
+
+        // bet
+        if (0 < s && s < 30) {
+            let balance = $('.account-balance:not(".hide") .current-amount').text();
+            if (balance <= 0) {
+                BotController.options.hasOrder = true;
+            }
+            if (BotController.options.hasOrder === false && BotController.options.isRunning === 'true') {
+                BotController.bet();
+                BotController.options.hasOrder = true;
+            }
+        } else {
+            BotController.options.hasOrder = false;
+        }
+
+        // show title
+        document.getElementById('clock-title').innerText = (s < 30) ? BotController.config.clockTitle.bet : BotController.config.clockTitle.wait;
+        document.getElementById('clock-title').textContent = (s < 30) ? BotController.config.clockTitle.bet : BotController.config.clockTitle.wait;
+
+        // show time
+        s = (s > 30) ? (60 - s) : (30 - s);
+        s = (s == 0) ? "30" : s;
+        s = (s < 10) ? "0" + s : s;
+        document.getElementById('clock-countdown').innerText = s;
+        document.getElementById('clock-countdown').textContent = s;
+        setTimeout(BotController.showTime, 1000);
     },
     bet: function () {
         sendRequest({
@@ -167,36 +209,6 @@ let BotController = {
     getBetTypeText: function (betType) {
         return (betType == 'UP' ? '<span class="fw-bold">Mua</span>' : '<span class="fw-bold">Bán</span>')
     },
-    showTime: function () {
-        let date = new Date(),
-            s = date.getSeconds();
-
-        // bet
-        if (0 < s && s < 30) {
-            let balance = $('.account-balance:not(".hide") .current-amount').text();
-            if (balance <= 0) {
-                BotController.options.hasOrder = true;
-            }
-            if (BotController.options.hasOrder === false && BotController.options.canBet === 'true') {
-                BotController.bet();
-                BotController.options.hasOrder = true;
-            }
-        } else {
-            BotController.options.hasOrder = false;
-        }
-
-        // show title
-        document.getElementById('clock-title').innerText = (s < 30) ? 'Có thể đặt lệnh' : 'Đang chờ kết quả';
-        document.getElementById('clock-title').textContent = (s < 30) ? 'Có thể đặt lệnh' : 'Đang chờ kết quả';
-
-        // show time
-        s = (s > 30) ? (60 - s) : (30 - s);
-        s = (s == 0) ? "30" : s;
-        s = (s < 10) ? "0" + s : s;
-        document.getElementById('clock-countdown').innerText = s;
-        document.getElementById('clock-countdown').textContent = s;
-        setTimeout(BotController.showTime, 1000);
-    },
     changeAccountBalance: function (select) {
         let accountType = $(select).val();
         if (accountType == 1) {
@@ -271,12 +283,16 @@ let BotController = {
     showHideMethod: function () {
         if ($('.list-method').hasClass('not-active')) {
             $('.list-method').removeClass('not-active').slideDown(500);
+            $('.research-btn').show();
+            $('.add-method-btn').show();
         } else {
             $('.list-method').addClass('not-active').slideUp(500);
+            $('.research-btn').hide();
+            $('.add-method-btn').hide();
         }
     },
     createMethod: function () {
-        $('#form-method .modal-title').empty().text('Thêm mới phương pháp');
+        $('#form-method .modal-title').empty().text('Thêm phương pháp');
         BotController.resetForm();
         $('#form-method').modal('show');
     },

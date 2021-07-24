@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-danger">
             <div class="modal-header">
-                <h4 class="modal-title">Phân tích thị trường 50 lệnh gần nhất</h4>
+                <h4 class="modal-title">Phân tích 50 lệnh gần nhất</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -17,7 +17,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-danger">
             <div class="modal-header">
-                <h4 class="modal-title">Thêm mới phương pháp</h4>
+                <h4 class="modal-title">Thêm phương pháp</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="BotController.resetForm()"></button>
             </div>
             <div class="modal-body">

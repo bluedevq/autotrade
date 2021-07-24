@@ -29,7 +29,7 @@
             </div>
             <div class="row">
                 <div class="col-6 col-md-4">
-                    <label class="form-label" aria-hidden="true"><i class="fas fa-clock">&nbsp;&nbsp;</i>Hết hạn</label>
+                    <label class="form-label" aria-hidden="true"><i class="fas fa-calendar-times">&nbsp;&nbsp;</i>Hết hạn</label>
                 </div>
                 <div class="col-6 col-md-8">
                     <span class="fw-bold text-danger">Dùng thử</span>
@@ -65,6 +65,14 @@
                 </div>
                 <div class="col-6 col-md-8">
                     <i class="fas fa-dollar-sign">&nbsp;</i><span class="volume">0</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6 col-md-4">
+                    <label class="form-label" aria-hidden="true"><i class="fas fa-clock">&nbsp;</i>Thời gian đã chạy</label>
+                </div>
+                <div class="col-6 col-md-8">
+                    <span class="text-info total-time">00:00:00</span>
                 </div>
             </div>
         </div>

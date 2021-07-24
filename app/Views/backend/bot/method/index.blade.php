@@ -2,15 +2,13 @@
     <div class="col-md-3 col-12">
         <button class="btn btn-primary col-12" type="button" onclick="BotController.showHideMethod()"><span class="fas fa-list-alt">&nbsp;</span>Danh sách phương pháp</button>
     </div>
-    <div class="list-method not-active" style="display: none">
-        <div class="row mt-2">
-            <div class="col-md-3 col-12">
-                <a class="btn btn-danger col-12" href="javascript:void(0)" onclick="BotController.research()"><span class="fas fa-chart-line">&nbsp;</span>Phân tích thị trường</a>
-            </div>
-            <div class="col-md-3 col-12 mt-sp-2">
-                <a class="btn btn-success col-12" href="javascript:void(0)" onclick="BotController.createMethod()"><span class="fas fa-plus">&nbsp;</span>Thêm mới phương pháp</a>
-            </div>
-        </div>
+    <div class="col-md-2 col-6 mt-sp-2 research-btn hide">
+        <a class="btn btn-danger col-12" href="javascript:void(0)" onclick="BotController.research()"><span class="fas fa-chart-line">&nbsp;</span>Phân tích lệnh</a>
+    </div>
+    <div class="col-md-2 col-6 mt-sp-2 add-method-btn hide">
+        <a class="btn btn-success col-12" href="javascript:void(0)" onclick="BotController.createMethod()"><span class="fas fa-plus">&nbsp;</span>Thêm</a>
+    </div>
+    <div class="list-method hide not-active">
         <div class="row mt-2 list-methods-scroll">
             <div class="col-12">
                 <table class="table table-striped table-dark table-hover text-center col-12">
