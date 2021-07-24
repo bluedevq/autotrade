@@ -3,7 +3,7 @@
     <div class="wrapper">
         <div class="container">
             <div class="row text-center mx-auto col-md-4">
-                <img src="{{ public_url('images/backend/logo.png') }}" alt="">
+                <img class="img-fluid col-12" style="height:144px;object-fit:cover;" src="{{ public_url('images/backend/logo.png') }}" alt="">
             </div>
             <div class="row mx-auto col-md-4 d-flex align-items-center">
                 <form method="post" action="{{ route('backend.auth') }}" class="form-horizontal mt-5" enctype="multipart/form-data">
