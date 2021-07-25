@@ -95,9 +95,9 @@ let BotController = {
 
         // update time 's bot running
         if (BotController.options.isRunning === 'true') {
-            let diffTime = dateDiff(new Date(), new Date(parseInt(BotController.config.startAt))) / 1000;
-            let hours = BotController.pad(Math.floor(diffTime/60/60));
-            let minutes = BotController.pad(Math.floor(diffTime/60)) - hours * 60;
+            let diffTime = dateDiff(new Date(), new Date(parseInt(BotController.config.startAt))) / 1000,
+                hours = BotController.pad(Math.floor(diffTime/60/60)),
+                minutes = BotController.pad(Math.floor(diffTime/60)) - hours * 60;
 
             $('.total-time').empty().text(hours + ':' + minutes + ':' + BotController.pad(parseInt(diffTime % 60)));
         }
