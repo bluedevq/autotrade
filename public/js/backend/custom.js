@@ -276,27 +276,25 @@ let BotController = {
                             intersect: false,
                         },
                         scales: {
-                            x: {
+                            xAxes: [{
                                 display: true,
-                                title: {
-                                    display: true
-                                }
-                            },
-                            y: {
-                                display: true,
-                                title: {
+                                scaleLabel: {
                                     display: true,
-                                    text: 'Value'
-                                },
-                                suggestedMin: -10,
-                                suggestedMax: 200
-                            }
+                                    labelString: 'Giờ'
+                                }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: '$'
+                                }
+                            }]
                         },
                         plugins: {
                             title: {
                                 position: 'bottom',
-                                display: true,
-                                text: 'Sparta Chart'
+                                display: false
                             },
                             legend: {
                                 position: 'bottom',

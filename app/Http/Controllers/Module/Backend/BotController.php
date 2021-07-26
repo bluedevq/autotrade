@@ -369,9 +369,10 @@ class BotController extends BackendController
         // get label
         $resultCandles = array_reverse($resultCandles);
         foreach ($resultCandles as $index => $resultCandle) {
-            if ($index == 0 || ($index + 1) % 10 == 0 || $index == count($resultCandles)) {
-                $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
-            }
+            $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
+//            if ($index == 0 || ($index + 1) % 10 == 0 || $index == count($resultCandles)) {
+//                $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
+//            }
         }
 
         // get data
@@ -704,7 +705,7 @@ class BotController extends BackendController
         $orderPattern = $orderPatterns[0];
         $order = [
             'type' => $convertType ? Common::getConfig('aresbo.order_type_pattern.' . Str::lower(Str::substr($orderPattern, 0, 1))) : Str::lower(Str::substr($orderPattern, 0, 1)),
-            'amount' => Str::substr($orderPattern, 1, Str::length($orderPattern) - 1)
+            'amount' => Str::substr($orderPattern, 1)
         ];
 
         return Arr::get($order, $key, $order);
