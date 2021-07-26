@@ -2,12 +2,12 @@
 <html lang="ja">
 @include('layouts.backend.structures.head')
 <body class="{{ getBodyClass() }}">
-<div class="container">
-    @include('layouts.backend.structures.navigation')
+@include('layouts.backend.structures.navigation')
+<main class="container">
     @yield('content')
-    @include('layouts.backend.structures.footer')
-    @include('layouts.backend.elements.modal')
-</div>
+</main>
+@include('layouts.backend.structures.footer')
+@include('layouts.backend.elements.modal')
 @stack('scripts')
 </body>
 </html>

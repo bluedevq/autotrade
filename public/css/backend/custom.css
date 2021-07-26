@@ -1,13 +1,30 @@
 @charset "UTF-8";
 
+html {
+    box-sizing: border-box;
+    min-height: 100%;
+    position: relative;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
 body {
+    margin-bottom: 60px;
     background-color: #171b2c;
     color: #fff;
     --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-
+.bot-container {
+    padding: 0 .75rem;
+    border: 1px solid #dee2e6;
+    border-radius: .3rem;
+}
 
 .sp {
     display: revert;
@@ -45,8 +62,36 @@ body {
     overflow-y: auto;
 }
 
-.top-menu a {
+.top-menu a.nav-link {
     text-align: left;
+    color: #fff;
+}
+
+.list-prices {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.list-inline-item:not(:last-child) {
+    margin-right: 0;
+}
+
+.list-inline-item.new {
+    margin-right: 5px;
+}
+
+.candle-item {
+    padding: 0 8px;
+    border-radius: 50%;
+}
+
+.footer {
+    position: absolute;
+    text-align: center;
+    bottom: 0;
+    width: 100%;
+    line-height: 60px;
 }
 
 .modal {

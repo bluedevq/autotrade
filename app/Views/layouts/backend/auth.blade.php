@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="ja">
 @include('layouts.backend.structures.head')
-<body class="{{getBodyClass()}}">
-<div id="Wrap">
-    <div class="container">
-        @yield('content')
-    </div>
-</div>
-@include('layouts.backend.elements.modal')
+<body class="{{ getBodyClass() }}">
+<main class="container">
+    @yield('content')
+</main>
 @include('layouts.backend.structures.footer')
+@include('layouts.backend.elements.modal')
 @stack('scripts')
 </body>
 </html>

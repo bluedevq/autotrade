@@ -28,6 +28,7 @@ let BotController = {
             login: null,
             bet: null,
             research: null,
+            prices: null,
         },
         orderStatus: {
             new: 'Đang đợi',
@@ -38,9 +39,17 @@ let BotController = {
             bet: 'Có thể đặt lệnh',
             wait: 'Đang chờ kết quả',
         },
+        orderTypeText: {
+            up: 'T',
+            down: 'G',
+        },
         startAt: null,
         profit: 0,
         volume: 0,
+    },
+    notification: {
+        success: [],
+        errors: [],
     },
     showHidePassword: function (button) {
         let passwordInput = $(button).parent('.input-group').find('input#password');
@@ -69,8 +78,8 @@ let BotController = {
         }, function (response) {
             // errors
             if (!response.status) {
-                $('.toast-message .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors);
-                $('.toast-message').toast('show');
+                $('.toast-message-error .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors);
+                $('.toast-message-error').toast('show');
                 hideLoading();
                 return false;
             }
@@ -97,9 +106,14 @@ let BotController = {
         if (BotController.options.isRunning === 'true') {
             let diffTime = dateDiff(new Date(), new Date(parseInt(BotController.config.startAt))) / 1000,
                 hours = BotController.pad(Math.floor(diffTime/60/60)),
-                minutes = BotController.pad(Math.floor(diffTime/60)) - hours * 60;
+                minutes = BotController.pad(Math.floor(diffTime/60) - hours * 60);
 
             $('.total-time').empty().text(hours + ':' + minutes + ':' + BotController.pad(parseInt(diffTime % 60)));
+        }
+
+        if (s == 0) {
+            // update prices
+            BotController.updatePrices();
         }
 
         // bet
@@ -182,10 +196,10 @@ let BotController = {
                 }
             }
             if (BotController.config.profit > 0) {
-                $('.profit').empty().html('<span class="text-success">' + BotController.config.profit + '</span>');
+                $('.profit').empty().html('<span class="text-success">' + parseFloat(BotController.config.profit).toFixed(2) + '</span>');
             }
             if (BotController.config.profit < 0) {
-                $('.profit').empty().html('<span class="text-danger">' + BotController.config.profit + '</span>');
+                $('.profit').empty().html('<span class="text-danger">' + parseFloat(BotController.config.profit).toFixed(2) + '</span>');
             }
         }
     },
@@ -207,6 +221,25 @@ let BotController = {
             BotController.config.volume += listOpenOrders[i].amount;
         }
         $('.volume').empty().text(BotController.config.volume);
+    },
+    updatePrices: function() {
+        sendRequest({
+            url: BotController.config.url.prices,
+            type: 'GET',
+            data: {},
+            beforeSend: function () {
+            },
+            complete: function () {
+            }
+        }, function (response) {
+            if (!response.status) {
+                return false;
+            }
+            let candles = response.data;
+            let date = new Date(candles[0].close_order);
+            date = BotController.pad(date.getDate()) + '/' + BotController.pad(date.getMonth()) + '/' + BotController.pad(date.getFullYear()) + ' ' + BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes());
+            $('.list-prices').append('<li class="list-inline-item new"><span class="candle-item btn-' + (candles[0].order_result == BotController.config.orderTypeText.up ? 'success' : 'danger') + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '">&nbsp;</span></li>');
+        });
     },
     pad: function (t) {
         let st = "" + t;

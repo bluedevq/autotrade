@@ -25,5 +25,14 @@
                 <h3 id="clock-countdown" class="text-center clock text-info" onload="showTime()"></h3>
             </div>
         </div>
+        <div class="col-12 mx-auto p-1 mt-sp-2">
+            <ul class="list-inline list-prices">
+                @if(!blank($resultCandles))
+                @foreach($resultCandles as $resultCandle)
+                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ date('d/m/Y H:i', \Illuminate\Support\Arr::get($resultCandle, 'close_order') / 1000) }}"><span class="candle-item btn-{{ \Illuminate\Support\Arr::get($resultCandle, 'order_result') == 'T' ? 'success' : 'danger' }}">&nbsp;</span></li>
+                @endforeach
+                @endif
+            </ul>
+        </div>
     </div>
 </div>

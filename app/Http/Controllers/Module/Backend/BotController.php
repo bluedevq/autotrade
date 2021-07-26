@@ -40,15 +40,20 @@ class BotController extends BackendController
     public function index()
     {
         if (Session::has(self::REFRESH_TOKEN)) {
+            // get user info
             $userInfo = $this->_getUserInfo();
             if (blank($userInfo)) {
                 Session::forget(self::REFRESH_TOKEN);
                 return $this->_to('bot.index');
             }
+
+            // get bot queue
             $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
                 ->where('bot_user_id', $userInfo->id)
                 ->first();
-            $methods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $userInfo->id)
+
+            // get list methods
+            $listMethods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $userInfo->id)
                 ->where(function ($q) {
                     $q->orWhere('deleted_at', '');
                     $q->orWhereNull('deleted_at');
@@ -56,10 +61,15 @@ class BotController extends BackendController
                 ->orderBy($this->getParam('sort_field', 'id'), $this->getParam('sort_type', 'asc'))
                 ->get();
 
+            // get price & candles
+            list($orderCandles, $resultCandles) = $this->_getListPrices();
+            $resultCandles = array_reverse($resultCandles);
+
             $this->setViewData([
                 'userInfo' => $userInfo,
                 'botQueue' => $botQueue,
-                'methods' => $methods,
+                'methods' => $listMethods,
+                'resultCandles' => $resultCandles,
             ]);
         }
 
@@ -113,6 +123,14 @@ class BotController extends BackendController
             Log::error($exception);
             return $this->renderErrorJson();
         }
+        return $this->renderJson();
+    }
+
+    public function getListPrices()
+    {
+        // get price & candles
+        list($orderCandles, $resultCandles) = $this->_getListPrices();
+        $this->setData($resultCandles);
         return $this->renderJson();
     }
 

@@ -20,4 +20,6 @@ return [
     'frontend_alias' => env('FRONTEND_ALIAS', '/'),
     'api_domain' => env('API_DOMAIN', ''),
     'api_alias' => env('API_ALIAS', 'api'),
+    // config
+    'static_version' => time(),
 ];

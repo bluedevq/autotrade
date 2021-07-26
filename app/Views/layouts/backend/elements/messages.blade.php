@@ -1,7 +1,7 @@
-@if(Session()->has('success'))
+@if(session()->has('success'))
     <div class="mt-2">
         @php
-            $successMsg = Session()->get('success')->get('success');
+            $successMsg = Session()->get('success');
         @endphp
         <ul class="list-group">
             @foreach($successMsg as $msg)
