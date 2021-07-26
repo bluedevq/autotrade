@@ -126,14 +126,6 @@ class BotController extends BackendController
         return $this->renderJson();
     }
 
-    public function getListPrices()
-    {
-        // get price & candles
-        list($orderCandles, $resultCandles) = $this->_getListPrices();
-        $this->setData($resultCandles);
-        return $this->renderJson();
-    }
-
     public function loginWith2FA()
     {
         try {
@@ -187,6 +179,21 @@ class BotController extends BackendController
 
     public function bet()
     {
+        // get new refresh token
+        $newRefreshToken = $this->_getNewToken();
+        // check status
+        if (!Arr::get($newRefreshToken, 'ok')) {
+            $this->setData(['url' => route('bot.clear_token')]);
+            return $this->renderErrorJson();
+        }
+        // save token
+        Session::put(self::ACCESS_TOKEN, Arr::get($newRefreshToken, 'd.access_token'));
+        Session::put(self::REFRESH_TOKEN, Arr::get($newRefreshToken, 'd.refresh_token'));
+
+        // get price & candles
+        list($orderCandles, $resultCandles) = $this->_getListPrices();
+        $this->setData(['candles' => $resultCandles]);
+
         // check time to bet
         if (date('s') > 30) {
             return $this->renderErrorJson();
@@ -200,7 +207,7 @@ class BotController extends BackendController
         $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
             ->where('bot_user_id', $user->id)
             ->first();
-        if (blank($botQueue) || $botQueue->status = Common::getConfig('aresbo.bot_status.stop')) {
+        if (blank($botQueue) || $botQueue->status == Common::getConfig('aresbo.bot_status.stop')) {
             return $this->renderErrorJson();
         }
 
@@ -209,17 +216,6 @@ class BotController extends BackendController
             'betAccountType' => $botQueue->account_type,
             'size' => Session::get(self::TOTAL_OPEN_ORDER)
         ], false);
-
-        // get new refresh token
-        $newRefreshToken = $this->_getNewToken();
-        // check status
-        if (!Arr::get($newRefreshToken, 'ok')) {
-            $this->setData(['url' => route('bot.clear_token')]);
-            return $this->renderErrorJson();
-        }
-        // save token
-        Session::put(self::ACCESS_TOKEN, Arr::get($newRefreshToken, 'd.access_token'));
-        Session::put(self::REFRESH_TOKEN, Arr::get($newRefreshToken, 'd.refresh_token'));
 
         // research method to get bet order data
         $orderData = $this->_getOrderData($botQueue);
@@ -267,7 +263,7 @@ class BotController extends BackendController
     public function editMethod($id)
     {
         $entity = $this->_prepareFormMethod($id);
-        $this->setData($entity);
+        $this->setData(['entity' => $entity]);
         return $this->renderJson();
     }
 

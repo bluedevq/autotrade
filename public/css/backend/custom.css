@@ -20,6 +20,11 @@ body {
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+a {
+    color: #fff !important;
+    text-decoration: none;
+}
+
 .bot-container {
     padding: 0 .75rem;
     border: 1px solid #dee2e6;
@@ -71,6 +76,7 @@ body {
     max-width: 100%;
     overflow-x: auto;
     white-space: nowrap;
+    margin-bottom: 0;
 }
 
 .list-inline-item:not(:last-child) {
@@ -79,6 +85,10 @@ body {
 
 .list-inline-item.new {
     margin-right: 5px;
+}
+
+.list-inline-item:hover {
+    cursor: pointer;
 }
 
 .candle-item {
@@ -133,5 +143,40 @@ body {
 
     .top-menu a {
         text-align: center;
+    }
+
+    .bet-result-scroll::-webkit-scrollbar
+    {
+        width: .8rem;
+        background-color: #171b2c;
+        border-radius: .3rem;
+    }
+
+    .bet-result-scroll::-webkit-scrollbar-thumb {
+        border-radius: .3rem;
+        background-color: #dee2e6;
+    }
+
+    .bet-result-scroll::-webkit-scrollbar-track {
+        border-radius: .3rem;
+        background-color: #171b2c;
+    }
+
+    .list-prices::-webkit-scrollbar
+    {
+        height: .5rem;
+        background-color: #171b2c;
+        border-radius: .3rem;
+    }
+
+    .list-prices::-webkit-scrollbar-thumb {
+        border-radius: .3rem;
+        background-color: #dee2e6;
+        width: 0.5rem;
+    }
+
+    .list-prices::-webkit-scrollbar-track {
+        border-radius: .3rem;
+        background-color: #171b2c;
     }
 }

@@ -28,11 +28,6 @@
             @include('backend.bot.method.index')
             @include('backend.bot.history')
             @include('backend.bot.method.modal')
-            <script type="application/javascript">
-                $(document).ready(function () {
-                    BotController.showTime();
-                });
-            </script>
         </div>
     @endif
 @stop
@@ -43,8 +38,15 @@
             BotController.config.url.login = '{{ route('bot.login') }}';
             BotController.config.url.bet = '{{ route('bot.bet') }}';
             BotController.config.url.research = '{{ route('bot_method.research') }}';
-            BotController.config.url.prices = '{{ route('bot.prices') }}';
             BotController.config.startAt = '{{ time() * 1000 }}';
+
+            // show clock
+            @if(isset($userInfo) && !blank($userInfo))
+            BotController.showTime();
+            @endif
+
+            // scroll prices
+            $('.list-prices').scrollLeft($('.list-prices').width())
         });
     </script>
 @endpush

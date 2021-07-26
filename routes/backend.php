@@ -34,11 +34,6 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot.index',
             'uses' => 'BotController@index'
         ]);
-        // get list prices
-        Route::get('/prices', [
-            'as' => 'bot.prices',
-            'uses' => 'BotController@getListPrices'
-        ]);
         // get token to login aresbo
         Route::post('/login', [
             'as' => 'bot.login',

@@ -146,7 +146,7 @@ trait ApiResponse
      */
     public function setData($data)
     {
-        $this->_data = $data;
+        $this->_data = array_merge($this->_data, $data);
         return $this;
     }
 

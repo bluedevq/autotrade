@@ -28,7 +28,6 @@ let BotController = {
             login: null,
             bet: null,
             research: null,
-            prices: null,
         },
         orderStatus: {
             new: 'Đang đợi',
@@ -105,15 +104,10 @@ let BotController = {
         // update time 's bot running
         if (BotController.options.isRunning === 'true') {
             let diffTime = dateDiff(new Date(), new Date(parseInt(BotController.config.startAt))) / 1000,
-                hours = BotController.pad(Math.floor(diffTime/60/60)),
-                minutes = BotController.pad(Math.floor(diffTime/60) - hours * 60);
+                hours = BotController.pad(Math.floor(diffTime / 60 / 60)),
+                minutes = BotController.pad(Math.floor(diffTime / 60) - hours * 60);
 
             $('.total-time').empty().text(hours + ':' + minutes + ':' + BotController.pad(parseInt(diffTime % 60)));
-        }
-
-        if (s == 0) {
-            // update prices
-            BotController.updatePrices();
         }
 
         // bet
@@ -122,7 +116,7 @@ let BotController = {
             if (balance <= 0) {
                 BotController.options.hasOrder = true;
             }
-            if (BotController.options.hasOrder === false && BotController.options.isRunning === 'true') {
+            if (BotController.options.hasOrder === false) {
                 BotController.bet();
                 BotController.options.hasOrder = true;
             }
@@ -153,6 +147,9 @@ let BotController = {
             }
         }, function (response) {
             let betOrder = response.data;
+
+            // update list prices
+            BotController.updatePrices(betOrder.candles);
 
             if (!response.status) {
                 if (betOrder.url) {
@@ -222,24 +219,14 @@ let BotController = {
         }
         $('.volume').empty().text(BotController.config.volume);
     },
-    updatePrices: function() {
-        sendRequest({
-            url: BotController.config.url.prices,
-            type: 'GET',
-            data: {},
-            beforeSend: function () {
-            },
-            complete: function () {
-            }
-        }, function (response) {
-            if (!response.status) {
-                return false;
-            }
-            let candles = response.data;
-            let date = new Date(candles[0].close_order);
-            date = BotController.pad(date.getDate()) + '/' + BotController.pad(date.getMonth()) + '/' + BotController.pad(date.getFullYear()) + ' ' + BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes());
-            $('.list-prices').append('<li class="list-inline-item new"><span class="candle-item btn-' + (candles[0].order_result == BotController.config.orderTypeText.up ? 'success' : 'danger') + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '">&nbsp;</span></li>');
-        });
+    updatePrices: function (candles) {
+        if (candles.length == 0 || typeof candles == 'undefined') {
+            return false;
+        }
+        let date = new Date(candles[0].open_order);
+        date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth()) + '-' + BotController.pad(date.getFullYear());
+        $('.list-prices').append('<li class="list-inline-item new" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item btn-' + (candles[0].order_result == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>');
+        $('.list-prices').scrollLeft($('.list-prices').width());
     },
     pad: function (t) {
         let st = "" + t;
@@ -349,7 +336,7 @@ let BotController = {
             if (!response.status) {
                 return false;
             }
-            let entity = response.data;
+            let entity = response.data.entity;
             $('#form-method .modal-title').empty().text('Sửa phương pháp');
             $('#form-method #id').val(entity.id);
             $('#form-method #name').val(entity.name);

@@ -15,6 +15,7 @@ class HomeController extends BackendController
 
     public function index()
     {
+        return $this->_to('bot.index');
         return $this->render();
     }
 }

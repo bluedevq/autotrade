@@ -13,13 +13,13 @@
             <div class="col-12">
                 <table class="table table-striped table-dark table-hover text-center col-12">
                     <thead>
-                    <th>{!! getSortLink('Tên PP', 'name') !!}</th>
-                    <th class="pc">{!! getSortLink('Loại PP', 'type') !!}</th>
-                    <th>{!! getSortLink('Tín hiệu', 'signal') !!}</th>
-                    <th>{!! getSortLink('Lệnh', 'order_pattern') !!}</th>
-                    <th class="pc">{!! getSortLink('Cắt lỗ', 'stop_loss') !!}</th>
-                    <th class="pc">{!! getSortLink('Chốt lời', 'stop_win') !!}</th>
-                    <th>{!! getSortLink('Trạng thái', 'status') !!}</th>
+                    <th>Tên PP</th>
+                    <th class="pc">Loại PP</th>
+                    <th>Tín hiệu</th>
+                    <th>Lệnh</th>
+                    <th class="pc">Cắt lỗ</th>
+                    <th class="pc">Chốt lời</th>
+                    <th>Trạng thái</th>
                     <th><span class="pc">Thao tác</span></th>
                     </thead>
                     <tbody class="method-item">
