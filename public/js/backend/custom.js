@@ -272,24 +272,20 @@ let BotController = {
                     },
                     options: {
                         responsive: true,
-                        interaction: {
-                            intersect: false,
-                        },
                         scales: {
-                            xAxes: [{
-                                display: true,
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: 'Giờ'
-                                }
-                            }],
-                            yAxes: [{
-                                display: true,
-                                scaleLabel: {
-                                    display: true,
-                                    labelString: '$'
-                                }
-                            }]
+                            x: {
+                                title: {
+                                    display: false,
+                                },
+                                ticks:{
+                                    stepSize: 10,
+                                },
+                            },
+                            y: {
+                                title: {
+                                    display: false,
+                                },
+                            }
                         },
                         plugins: {
                             title: {
@@ -299,7 +295,7 @@ let BotController = {
                             legend: {
                                 position: 'bottom',
                             },
-                        }
+                        },
                     },
                 });
 
