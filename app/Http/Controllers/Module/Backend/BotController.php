@@ -125,6 +125,7 @@ class BotController extends BackendController
             $this->setData(['url' => route('bot.index')]);
         } catch (\Exception $exception) {
             Log::error($exception);
+            $this->setData(['errors' => 'Lỗi hệ thống. Vui lòng thử lại.']);
             return $this->renderErrorJson();
         }
         return $this->renderJson();
