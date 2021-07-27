@@ -232,4 +232,8 @@ a {
         border-radius: .3rem;
         background-color: #171b2c;
     }
+
+    .method-action .list-inline-item.updated {
+        margin-right: 5px;
+    }
 }

@@ -377,7 +377,7 @@ let BotController = {
                     '<td class="pc">' + entity.stop.win + '</td>' +
                     '<td>' + entity.status + '</td>' +
                     '<td><div class="row"><ul class="list-inline method-action">' +
-                    '<li class="list-inline-item"><a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a></li>' +
+                    '<li class="list-inline-item updated"><a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a></li>' +
                     '<li class="list-inline-item"><a class="btn btn-danger" onclick="BotController.deleteMethodConfirm(\'' + entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a></li>' +
                     '</ul></div></td>';
             if (entity.create) {
