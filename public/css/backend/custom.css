@@ -47,6 +47,22 @@ a {
     background-color: #171b2c;
 }
 
+.rank .text-warning {
+    color: #ffff00 !important;
+}
+
+.expired-date .text-danger {
+    color: #ff3333 !important;
+}
+
+.profit .text-success {
+    color: #33cc66 !important;
+}
+
+.profit .text-danger {
+    color: #ff3333 !important;
+}
+
 .form-select:disabled {
     background-color: #bbb;
     cursor: not-allowed;
@@ -113,6 +129,32 @@ a {
 
 .list-prices .candle-item.candle-danger {
     color: #ff3333;
+}
+
+.bet-order-result .text-success {
+    color: #33cc66 !important;
+}
+
+.bet-order-result .text-danger {
+    color: #ff3333 !important;
+}
+
+#research-method {
+    color: #dee2e6;
+}
+
+#research-method .modal-content {
+    border: 1px solid #dee2e6;
+}
+
+#research-method .modal-content {
+    background-color: transparent;
+}
+
+#research-method .modal-header,
+#research-method .modal-body,
+#research-method .modal-footer {
+    background-color: #171b2c;
 }
 
 .footer {

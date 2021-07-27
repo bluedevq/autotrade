@@ -11,7 +11,7 @@ trait BotUserMethod
             'type' => 'required|integer|in:1,2',
             'order_pattern' => 'required',
             'stop_loss' => 'nullable|integer',
-            'stop_win' => 'nullable|integer',
+            'take_profit' => 'nullable|integer',
             'status' => 'required|integer|in:0,1',
         ];
 

@@ -22,7 +22,7 @@
                 <div class="col-6 col-md-4">
                     <label class="form-label" aria-hidden="true"><i class="fas fa-medal">&nbsp;&nbsp;</i>Cấp bậc</label>
                 </div>
-                <div class="col-6 col-md-8">
+                <div class="col-6 col-md-8 rank">
                     @php $rank = isset($userInfo) ? $userInfo->rank : 0 @endphp
                     <span class="fw-bold text-warning">{{ $rank }}</span>
                 </div>
@@ -31,7 +31,7 @@
                 <div class="col-6 col-md-4">
                     <label class="form-label" aria-hidden="true"><i class="fas fa-calendar-times">&nbsp;&nbsp;</i>Hết hạn</label>
                 </div>
-                <div class="col-6 col-md-8">
+                <div class="col-6 col-md-8 expired-date">
                     <span class="fw-bold text-danger">Dùng thử</span>
                 </div>
             </div>

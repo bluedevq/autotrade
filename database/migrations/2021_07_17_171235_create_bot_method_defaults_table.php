@@ -15,12 +15,12 @@ class CreateBotMethodDefaultsTable extends Migration
     {
         Schema::create('bot_method_defaults', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
+            $table->string('name', 255);
             $table->smallInteger('type');
             $table->text('signal');
             $table->text('order_pattern');
             $table->float('stop_loss', 13)->nullable();
-            $table->float('stop_win', 13)->nullable();
+            $table->float('take_profit', 13)->nullable();
             $table->smallInteger('status');
             $table->string('color', 6);
             $table->timestamps();

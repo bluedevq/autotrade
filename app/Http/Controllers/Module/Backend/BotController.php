@@ -316,7 +316,7 @@ class BotController extends BackendController
                 'pattern' => $entity->getOrderPatternText(),
                 'stop' => [
                     'loss' => $entity->getStopLossText(),
-                    'win' => $entity->getStopWinText(),
+                    'win' => $entity->getTakeProfitText(),
                 ],
                 'status' => $entity->getMethodStatusText(),
                 'url' => [

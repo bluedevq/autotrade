@@ -33,7 +33,7 @@
                             <td>{!! $method->getSignalText() !!}</td>
                             <td>{!! $method->getOrderPatternText() !!}</td>
                             <td class="pc">{{ $method->getStopLossText() }}</td>
-                            <td class="pc">{{ $method->getStopWinText() }}</td>
+                            <td class="pc">{{ $method->getTakeProfitText() }}</td>
                             <td>{{ $method->getMethodStatusText() }}</td>
                             <td>
                                 <div class="row">

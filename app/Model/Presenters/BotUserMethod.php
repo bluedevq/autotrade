@@ -45,9 +45,9 @@ trait BotUserMethod
         return $this->stop_loss ? $this->stop_loss : '∞';
     }
 
-    public function getStopWinText()
+    public function getTakeProfitText()
     {
-        return $this->stop_win ? $this->stop_win : '∞';
+        return $this->take_profit ? $this->take_profit : '∞';
     }
 
     public function getMethodStatusText()

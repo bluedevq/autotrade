@@ -1,6 +1,6 @@
 <div class="modal" id="research-method">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-danger">
+        <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Phân tích 50 lệnh gần nhất</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -8,7 +8,6 @@
             <div class="modal-body">
                 <canvas id="chart-method" width="400" height="400"></canvas>
             </div>
-            <div class="modal-footer"></div>
         </div>
     </div>
 </div>
@@ -79,10 +78,10 @@
                     <div class="row mt-2">
                         <div class="col-md-2 col-0 pc">&nbsp;</div>
                         <div class="col-md-3">
-                            <label for="stop_win" class="form-label fw-bold" aria-hidden="true">Chốt lời</label>
+                            <label for="take_profit" class="form-label fw-bold" aria-hidden="true">Chốt lời</label>
                         </div>
                         <div class="col-md-4">
-                            <input type="text" name="stop_win" class="form-control" id="stop_win" value="">
+                            <input type="text" name="take_profit" class="form-control" id="take_profit" value="">
                         </div>
                     </div>
                     <div class="row mt-2">

@@ -209,7 +209,7 @@ let BotController = {
                     '<td>' + listOpenOrders[i].method + '</td>\n' +
                     '<td>' + BotController.getBetTypeText(listOpenOrders[i].type) + '</td>\n' +
                     '<td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + listOpenOrders[i].amount + '</span></td>\n' +
-                    '<td class="fw-bold bet-order-result">' + BotController.config.orderStatus.new + '</td>\n' +
+                    '<td class="bet-order-result">' + BotController.config.orderStatus.new + '</td>\n' +
                     '</tr>';
 
             $('.bet-result').prepend(newOrder);
@@ -217,7 +217,7 @@ let BotController = {
             // update volume
             BotController.config.volume += listOpenOrders[i].amount;
         }
-        $('.volume').empty().text(BotController.config.volume);
+        $('.volume').empty().text(parseFloat(BotController.config.volume).toFixed(2));
     },
     updatePrices: function (prices) {
         if (typeof prices == 'undefined') {
@@ -229,7 +229,8 @@ let BotController = {
         let date = new Date(prices[0].open_order);
         date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth()) + '-' + BotController.pad(date.getFullYear());
         $('.list-prices').append('<li class="list-inline-item new" data-time="' + prices[0].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (prices[0].order_result == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>');
-        $('.list-prices').scrollLeft($('.list-prices').width());
+        $('.list-prices .list-inline-item').get(0).remove();
+        $('.list-prices').scrollLeft(document.getElementsByClassName('list-prices')[0].scrollWidth);
     },
     pad: function (t) {
         let st = "" + t;
@@ -275,6 +276,7 @@ let BotController = {
                     },
                     options: {
                         responsive: true,
+                        animation:'',
                         scales: {
                             x: {
                                 title: {
@@ -341,7 +343,7 @@ let BotController = {
             $('#form-method #signal').val(entity.signal);
             $('#form-method #order_pattern').val(entity.order_pattern);
             $('#form-method #stop_loss').val(entity.stop_loss);
-            $('#form-method #stop_win').val(entity.stop_win);
+            $('#form-method #take_profit').val(entity.take_profit);
             document.getElementById('status').selectedIndex = entity.status;
             $('#form-method').modal('show');
         });
@@ -358,7 +360,7 @@ let BotController = {
                 signal: $('#form-method #signal').val(),
                 order_pattern: $('#form-method #order_pattern').val(),
                 stop_loss: $('#form-method #stop_loss').val(),
-                stop_win: $('#form-method #stop_win').val(),
+                take_profit: $('#form-method #take_profit').val(),
                 status: $('#form-method #status').val(),
             },
         }, function (response) {
@@ -374,12 +376,9 @@ let BotController = {
                     '<td class="pc">' + entity.stop.loss + '</td>' +
                     '<td class="pc">' + entity.stop.win + '</td>' +
                     '<td>' + entity.status + '</td>' +
-                    '<td><div class="pc">' +
-                    '<a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a>' +
-                    '&nbsp;<a class="btn btn-danger" onclick="BotController.deleteMethodConfirm(\'' + entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a>' +
-                    '</div><div class="sp" style="min-width: 70px;"><ul class="list-inline">' +
-                    '<li class="list-inline-item"><a class="text-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit"></span></a></li>' +
-                    '<li class="list-inline-item"><a class="text-danger" onclick="BotController.deleteMethodConfirm(\'' + entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash"></span></a></li>' +
+                    '<td><div class="row"><ul class="list-inline method-action">' +
+                    '<li class="list-inline-item"><a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a></li>' +
+                    '<li class="list-inline-item"><a class="btn btn-danger" onclick="BotController.deleteMethodConfirm(\'' + entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a></li>' +
                     '</ul></div></td>';
             if (entity.create) {
                 $('.method-item').append('<tr id="method_' + entity.id + '">' + methodItemHtml + '</tr>');
