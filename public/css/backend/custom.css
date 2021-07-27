@@ -67,6 +67,18 @@ a {
     overflow-y: auto;
 }
 
+.method-action .list-inline-item:not(:last-child) {
+    margin-right: 0;
+}
+
+.method-action .list-inline-item:last-child {
+    margin-top: .25rem;
+}
+
+.method-action .list-inline-item a {
+    min-width: 76px;
+}
+
 .top-menu a.nav-link {
     text-align: left;
     color: #fff;
@@ -79,21 +91,28 @@ a {
     margin-bottom: 0;
 }
 
-.list-inline-item:not(:last-child) {
+.list-prices .list-inline-item:not(:last-child) {
+    margin-right: -5px;
+}
+
+.list-prices .list-inline-item.new {
     margin-right: 0;
 }
 
-.list-inline-item.new {
-    margin-right: 5px;
-}
-
-.list-inline-item:hover {
+.list-prices .list-inline-item:hover {
     cursor: pointer;
 }
 
-.candle-item {
-    padding: 0 8px;
-    border-radius: 50%;
+.list-prices .candle-item {
+    font-size: 1.3rem;
+}
+
+.list-prices .candle-item.candle-success {
+    color: #33cc66;
+}
+
+.list-prices .candle-item.candle-danger {
+    color: #ff3333;
 }
 
 .footer {
@@ -145,37 +164,29 @@ a {
         text-align: center;
     }
 
-    .bet-result-scroll::-webkit-scrollbar
-    {
-        width: .8rem;
-        background-color: #171b2c;
-        border-radius: .3rem;
-    }
-
-    .bet-result-scroll::-webkit-scrollbar-thumb {
-        border-radius: .3rem;
-        background-color: #dee2e6;
-    }
-
-    .bet-result-scroll::-webkit-scrollbar-track {
-        border-radius: .3rem;
-        background-color: #171b2c;
-    }
-
-    .list-prices::-webkit-scrollbar
-    {
+    .list-prices::-webkit-scrollbar {
         height: .5rem;
         background-color: #171b2c;
         border-radius: .3rem;
     }
 
-    .list-prices::-webkit-scrollbar-thumb {
+    .list-methods-scroll::-webkit-scrollbar,
+    .bet-result-scroll::-webkit-scrollbar {
+        width: .5rem;
+        background-color: #171b2c;
         border-radius: .3rem;
-        background-color: #dee2e6;
-        width: 0.5rem;
     }
 
-    .list-prices::-webkit-scrollbar-track {
+    .list-prices::-webkit-scrollbar-thumb,
+    .list-methods-scroll::-webkit-scrollbar-thumb,
+    .bet-result-scroll::-webkit-scrollbar-thumb {
+        border-radius: .3rem;
+        background-color: #dee2e6;
+    }
+
+    .list-prices::-webkit-scrollbar-track,
+    .list-methods-scroll::-webkit-scrollbar-track,
+    .bet-result-scroll::-webkit-scrollbar-track {
         border-radius: .3rem;
         background-color: #171b2c;
     }

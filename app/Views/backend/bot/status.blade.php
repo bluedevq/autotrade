@@ -30,7 +30,7 @@
                 @if(!blank($resultCandles))
                 @foreach($resultCandles as $resultCandle)
                     @php $title = date('H:i d-m-Y', \Illuminate\Support\Arr::get($resultCandle, 'open_order') / 1000); @endphp
-                    <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $title }}"><span class="candle-item btn-{{ \Illuminate\Support\Arr::get($resultCandle, 'order_result') == 'T' ? 'success' : 'danger' }}">&nbsp;</span></li>
+                    <li class="list-inline-item" data-time="{{ \Illuminate\Support\Arr::get($resultCandle, 'open_order') }}" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $title }}"><span class="candle-item fas fa-circle candle-{{ \Illuminate\Support\Arr::get($resultCandle, 'order_result') == 'T' ? 'success' : 'danger' }}">&nbsp;</span></li>
                 @endforeach
                 @endif
             </ul>

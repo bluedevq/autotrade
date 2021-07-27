@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Module\Backend;
 
 use App\Helper\Common;
 use App\Http\Supports\ApiResponse;
+use App\Model\Entities\BotMethodDefault;
 use App\Model\Entities\BotQueue;
 use App\Model\Entities\BotUser;
 use App\Model\Entities\BotUserMethod;
@@ -30,11 +31,11 @@ class BotController extends BackendController
     const BOT_USER_EMAIL = 'bot_user_email';
     const TOTAL_OPEN_ORDER = 'total_open_order';
 
-    public function __construct(BotUser $botUser, BotQueue $botQueue, BotUserMethod $botUserMethod)
+    public function __construct(BotUser $botUser, BotQueue $botQueue, BotUserMethod $botUserMethod, BotMethodDefault $botMethodDefault)
     {
         parent::__construct();
         $this->setModel($botUser);
-        $this->registModel($botQueue, $botUserMethod);
+        $this->registModel($botQueue, $botUserMethod, $botMethodDefault);
     }
 
     public function index()
@@ -60,6 +61,9 @@ class BotController extends BackendController
                 })
                 ->orderBy($this->getParam('sort_field', 'id'), $this->getParam('sort_type', 'asc'))
                 ->get();
+            if (blank($listMethods)) {
+                $listMethods = $this->_getDefaultMethod($userInfo->id);
+            }
 
             // get price & candles
             list($orderCandles, $resultCandles) = $this->_getListPrices();
@@ -192,7 +196,10 @@ class BotController extends BackendController
 
         // get price & candles
         list($orderCandles, $resultCandles) = $this->_getListPrices();
-        $this->setData(['candles' => $resultCandles]);
+        if (blank($resultCandles)) {
+            return $this->renderErrorJson();
+        }
+        $this->setData(['prices' => $resultCandles]);
 
         // check time to bet
         if (date('s') > 30) {
@@ -239,8 +246,6 @@ class BotController extends BackendController
         ]);
         Session::put(self::TOTAL_OPEN_ORDER, count($openOrders));
 
-        // save bet new order
-
         // mapping result
         $result = $this->_mapOpenOrders([
             'list_open_orders' => $openOrders,
@@ -270,12 +275,21 @@ class BotController extends BackendController
     public function validateMethod()
     {
         // validate data
-        $validator = Validator::make($this->getParams(), $this->fetchModel(BotUserMethod::class)->rules());
+        $params = $this->getParams();
+        $params['signal'] = explode(Common::getConfig('aresbo.order_signal_delimiter'), $params['signal']);
+        $params['order_pattern'] = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $params['order_pattern']);
+        $this->fetchModel(BotUserMethod::class)->setParams($params);
+        $rules = $this->fetchModel(BotUserMethod::class)->rules();
+        $messages = $this->fetchModel(BotUserMethod::class)->messages();
+        $validator = Validator::make($params, $rules, $messages);
         if ($validator->fails()) {
+            $this->setData(['errors' => $validator->errors()->first()]);
             return $this->renderErrorJson();
         }
+        // @todo change
         $userInfo = $this->_getUserInfo();
         if (blank($userInfo)) {
+            $this->setData(['errors' => 'Lỗi người dùng. Vui lòng thử lại.']);
             return $this->renderErrorJson();
         }
 
@@ -309,12 +323,13 @@ class BotController extends BackendController
                     'edit' => route('bot_method.edit', $entity->id)
                 ],
             ]);
+            $this->setData(['success' => 'Lưu thành công.']);
 
             return $this->renderJson();
-//            new MessageBag(['success' => 'Lưu thành công']);
         } catch (\Exception $exception) {
             DB::rollBack();
             Log::error($exception);
+            $this->setData(['errors' => 'Lỗi hệ thống. Vui lòng thử lại.']);
         }
 
         return $this->renderErrorJson();
@@ -415,16 +430,6 @@ class BotController extends BackendController
         $win = $orderType == Str::lower(Arr::get($candles, (count($signals) + 1) . '.order_result'));
 
         return $win ? $amount * 0.95 : $amount * -1;
-    }
-
-    protected function _randomColor()
-    {
-        return $this->_randomColorPart() . $this->_randomColorPart() . $this->_randomColorPart();
-    }
-
-    protected function _randomColorPart()
-    {
-        return str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
     }
 
     protected function _processAuto($stop = false)
@@ -719,5 +724,50 @@ class BotController extends BackendController
         }
 
         return $entity;
+    }
+
+    protected function _getDefaultMethod($botUserId)
+    {
+        $userMethods = [];
+
+        // get default method from database
+        $methodDefaults = $this->fetchModel(BotMethodDefault::class)
+            ->where('status', Common::getConfig('aresbo.method.active'))
+            ->where(function ($q) {
+                $q->orWhere('deleted_at', '');
+                $q->orWhereNull('deleted_at');
+            })->get();
+        if (blank($methodDefaults)) {
+            return $userMethods;
+        }
+
+        // save method for user
+        $model = $this->fetchModel(BotUserMethod::class);
+        DB::beginTransaction();
+        try {
+            foreach ($methodDefaults as $index => $method) {
+                $methodData = $method->getAttributes();
+                unset($methodData['id'], $methodData['created_at'], $methodData['updated_at']);
+                $entity = clone $model->setRawAttributes($methodData);
+                $entity->bot_user_id = $botUserId;
+                $entity->save();
+                $userMethods[] = $entity;
+            }
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+        }
+
+        return $userMethods;
+    }
+
+    protected function _randomColor()
+    {
+        return $this->_randomColorPart() . $this->_randomColorPart() . $this->_randomColorPart();
+    }
+
+    protected function _randomColorPart()
+    {
+        return str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
     }
 }

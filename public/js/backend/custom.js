@@ -149,7 +149,7 @@ let BotController = {
             let betOrder = response.data;
 
             // update list prices
-            BotController.updatePrices(betOrder.candles);
+            BotController.updatePrices(betOrder.prices);
 
             if (!response.status) {
                 if (betOrder.url) {
@@ -219,13 +219,16 @@ let BotController = {
         }
         $('.volume').empty().text(BotController.config.volume);
     },
-    updatePrices: function (candles) {
-        if (candles.length == 0 || typeof candles == 'undefined') {
+    updatePrices: function (prices) {
+        if (typeof prices == 'undefined') {
             return false;
         }
-        let date = new Date(candles[0].open_order);
+        if ($('.list-prices li[data-time="' + prices[0].open_order + '"]').length != 0) {
+            return false;
+        }
+        let date = new Date(prices[0].open_order);
         date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth()) + '-' + BotController.pad(date.getFullYear());
-        $('.list-prices').append('<li class="list-inline-item new" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item btn-' + (candles[0].order_result == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>');
+        $('.list-prices').append('<li class="list-inline-item new" data-time="' + prices[0].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (prices[0].order_result == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>');
         $('.list-prices').scrollLeft($('.list-prices').width());
     },
     pad: function (t) {
@@ -277,7 +280,7 @@ let BotController = {
                                 title: {
                                     display: false,
                                 },
-                                ticks:{
+                                ticks: {
                                     stepSize: 10,
                                 },
                             },
@@ -360,6 +363,7 @@ let BotController = {
             },
         }, function (response) {
             if (!response.status) {
+                $('.validate-method').empty().html('<li class="list-group-item alert-danger text-danger"><i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors + '</li>');
                 return false;
             }
             let entity = response.data,
@@ -384,11 +388,14 @@ let BotController = {
             }
             $('#form-method').modal('hide');
             BotController.resetForm();
+            $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + response.data.success);
+            $('.toast-message-success').toast('show');
         });
     },
     resetForm: function () {
         $('#form-method form').get(0).reset();
         $('#form-method #id').val('');
+        $('.validate-method').empty();
     },
     deleteMethodConfirm: function (title, id) {
         $('#delete-method .method-title').empty().text(title);

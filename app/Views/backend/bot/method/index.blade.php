@@ -1,11 +1,11 @@
 <div class="row mt-2">
-    <div class="col-md-3 col-12">
-        <button class="btn btn-primary col-12" type="button" onclick="BotController.showHideMethod()"><span class="fas fa-list-alt">&nbsp;</span>Danh sách phương pháp</button>
+    <div class="col-md-4 col-lg-3 col-12">
+        <button class="btn btn-primary col-12" type="button" onclick="BotController.showHideMethod()"><span class="fas fa-list-alt">&nbsp;</span>Phương pháp</button>
     </div>
-    <div class="col-md-2 col-6 mt-sp-2 research-btn hide">
+    <div class="col-md-4 col-lg-3 col-6 mt-sp-2 research-btn hide">
         <a class="btn btn-danger col-12" href="javascript:void(0)" onclick="BotController.research()"><span class="fas fa-chart-line">&nbsp;</span>Phân tích lệnh</a>
     </div>
-    <div class="col-md-2 col-6 mt-sp-2 add-method-btn hide">
+    <div class="col-md-4 col-lg-3 col-6 mt-sp-2 add-method-btn hide">
         <a class="btn btn-success col-12" href="javascript:void(0)" onclick="BotController.createMethod()"><span class="fas fa-plus">&nbsp;</span>Thêm</a>
     </div>
     <div class="list-method hide not-active">
@@ -36,14 +36,10 @@
                             <td class="pc">{{ $method->getStopWinText() }}</td>
                             <td>{{ $method->getMethodStatusText() }}</td>
                             <td>
-                                <div class="pc">
-                                    <a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="{{ route('bot_method.edit', $method->id) }}" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a>
-                                    <a class="btn btn-danger" onclick="BotController.deleteMethodConfirm('{{ $method->getNameText() }}', '{{ $method->id }}')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a>
-                                </div>
-                                <div class="sp" style="min-width: 70px;">
-                                    <ul class="list-inline">
-                                        <li class="list-inline-item"><a class="text-info" onclick="BotController.editMethod(this)" data-href="{{ route('bot_method.edit', $method->id) }}" href="javascript:void(0)"><span class="fas fa-edit"></span></a></li>
-                                        <li class="list-inline-item"><a class="text-danger" onclick="BotController.deleteMethodConfirm('{{ $method->getNameText() }}', '{{ $method->id }}')" href="javascript:void(0)"><span class="fas fa-trash"></span></a></li>
+                                <div class="row">
+                                    <ul class="list-inline method-action">
+                                        <li class="list-inline-item"><a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="{{ route('bot_method.edit', $method->id) }}" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a></li>
+                                        <li class="list-inline-item"><a class="btn btn-danger" onclick="BotController.deleteMethodConfirm('{{ $method->getNameText() }}', '{{ $method->id }}')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a></li>
                                     </ul>
                                 </div>
                             </td>

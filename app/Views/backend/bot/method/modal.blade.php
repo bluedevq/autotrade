@@ -23,6 +23,9 @@
             <div class="modal-body">
                 <form data-action="{{ route('bot_method.valid') }}" method="POST" class="form-horizontal" enctype="multipart/form-data">
                     @csrf
+                    <div class="mt-2">
+                        <ul class="list-group validate-method"></ul>
+                    </div>
                     <div class="row mt-2">
                         <div class="col-md-2 col-0 pc">&nbsp;</div>
                         <div class="col-md-3">

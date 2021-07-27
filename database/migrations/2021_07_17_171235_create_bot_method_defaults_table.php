@@ -21,6 +21,8 @@ class CreateBotMethodDefaultsTable extends Migration
             $table->text('order_pattern');
             $table->float('stop_loss', 13)->nullable();
             $table->float('stop_win', 13)->nullable();
+            $table->smallInteger('status');
+            $table->string('color', 6);
             $table->timestamps();
             $table->softDeletes();
         });
