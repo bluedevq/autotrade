@@ -9,7 +9,6 @@ trait BotUserMethod
         $rules = [
             'name' => 'required|max:255',
             'type' => 'required|integer|in:1,2',
-            'order_pattern' => 'required',
             'stop_loss' => 'nullable|integer',
             'take_profit' => 'nullable|integer',
             'status' => 'required|integer|in:0,1',
@@ -20,7 +19,7 @@ trait BotUserMethod
             $rules['signal.' . $index] = 'required|in:t,T,g,G';
         }
         foreach ($params['order_pattern'] as $index => $item) {
-            $rules['order_pattern.' . $index] = ['regex:/^[tTgG]\d+\.\d+$|^[tTgG]\d+$/'];
+            $rules['order_pattern.' . $index] = ['required', 'regex:/^[tTgG]\d+\.\d+$|^[tTgG]\d+$/'];
         }
 
         return $rules;
@@ -39,9 +38,11 @@ trait BotUserMethod
 
         $params = $this->getParams();
         foreach ($params['signal'] as $index => $item) {
+            $messages['signal.' . $index . '.required'] = 'Vui lòng nhập đúng định dạng tín hiệu nến.';
             $messages['signal.' . $index . '.in'] = 'Vui lòng nhập đúng định dạng tín hiệu nến.';
         }
         foreach ($params['order_pattern'] as $index => $item) {
+            $messages['order_pattern.' . $index . '.required'] = 'Vui lòng nhập đúng định dạng lệnh đặt.';
             $messages['order_pattern.' . $index . '.regex'] = 'Vui lòng nhập đúng định dạng lệnh đặt.';
         }
 
