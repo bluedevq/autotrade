@@ -1,5 +1,7 @@
 <?php
 return [
+    // title bot
+    'bot_title' => env('APP_NAME'),
     // mail config
     'mail' => [
         'from' => 'no-reply@xoano.net',
@@ -39,9 +41,6 @@ return [
     'forgot_password_expired' => 60, // minutes
     // aresbo config
     'aresbo' => [
-        // title bot
-        'bot_title' => env('APP_NAME'),
-
         // api
         'api_url' => [
             'captcha_token' => '03AGdBq27jgvS3PSiB_IiRCWqGcC-sANBQu9ha6axMhMw1ZszFeLELEJZpzt5z1-53gmy-rfLN-iwMVtg4tEJ_GHmMRwKAg5CcisjEzlWfxAFtAHZML0KEmhrRZK0F_F9VzhNbEGW2mQ7OipxMuubvg6a3mwQZ0hXfotyZnDSxWoZZW28sWvJZNCQVudvnFweFuMxbw6Xrb-kybfotNECD_sK2PGZBephuR2n_sby5HkI9UgS4QLI2zffAgedbNw0eEXO_JEPfKr8q-ZBuLnzrwBH8sciTGvJmL0t-E0AbJWgBSi62QSsEY0sl9plpyDmpNX6psGwk6GDN1MKRWno_BaX2xb7aP2keqA7Z6bLF1kihioOcUgCdrVzySPfuKyb440aly1ComIaJFaHc9tz9PGKhDhx52idYD-MmpvyVa19n-IJbVfO-nP3zUUgghqoRsFosoliW2WFv',
@@ -54,8 +53,9 @@ return [
             'open_order' => 'https://aresbo.com/api/wallet/binaryoption/transaction/open',
             'close_order' => 'https://aresbo.com/api/wallet/binaryoption/transaction/close',
             'get_prices' => 'https://aresbo.com/api/wallet/binaryoption/prices',
+            'move_usdtbo' => 'https://aresbo.com/api/wallet/binaryoption/move-usdtbo', // POST {amount: '2', confirmed: true}
+            'move_bousdt' => 'https://aresbo.com/api/wallet/binaryoption/move-bousdt', // POST {amount: '2', confirmed: true}
         ],
-
         // config
         'bot_status' => [
             'stop' => 0,
@@ -92,5 +92,9 @@ return [
             'down' => 'G',
         ],
         'chart_tension' => '0.4',
+        'move_money_type' => [
+            'wallet_to_trade' => 1,
+            'trade_to_wallet' => 2,
+        ],
     ],
 ];

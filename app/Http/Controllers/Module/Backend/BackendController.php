@@ -36,7 +36,7 @@ class BackendController extends BaseController
 
     public function render($view = null, $params = array(), $mergeData = array())
     {
-        $this->setTitle(Common::getConfig('aresbo.bot_title'));
+        $this->setTitle(Common::getConfig('bot_title'));
         return parent::render($view, $params, $mergeData);
     }
 

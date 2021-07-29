@@ -10,11 +10,13 @@
                 <li class="nav-item">
                     <a class="nav-link {{ $currentRoute == 'bot.index' ? 'active' : '' }}" href="{{ route('bot.index') }}"><span class="fas fa-robot">&nbsp;</span>AresBo Bot</a>
                 </li>
-
+                <li class="nav-item">
+                    <a class="nav-link {{ $currentRoute == 'bot.move.money' ? 'active' : '' }}" href="{{ route('bot.move.money') }}"><span class="fas fa-retweet">&nbsp;</span>Chuyển tiền</a>
+                </li>
             </ul>
             <ul class="nav nav-pills">
                 <li class="nav-item">
-                    <a class="nav-link" href="javascript:void(0)"><span>Xin chào&nbsp;</span>{{ backendGuard()->user()->name }}</a>
+                    <a class="nav-link" href="javascript:void(0)"><span>Xin chào&nbsp;</span><span class="text-info">{{ backendGuard()->user()->name }}</span></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0);" onclick="document.getElementById('form-logout').submit();"><span class="fas fa-sign-out-alt">&nbsp;</span>Đăng xuất</a>

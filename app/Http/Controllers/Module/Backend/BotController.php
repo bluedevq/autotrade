@@ -407,6 +407,46 @@ class BotController extends BackendController
         return $this->renderJson();
     }
 
+    public function moveMoney()
+    {
+        $this->setViewData(['balance' => $this->_getBalance()]);
+        return $this->render();
+    }
+
+    public function moveMoneyValid()
+    {
+        try {
+            $param = $this->getParams();
+            $amount = Arr::get($param, 'amount');
+            $type = Arr::get($param, 'type');
+            $url = $type == Common::getConfig('aresbo.move_money_type.wallet_to_trade') ? Common::getConfig('aresbo.api_url.move_usdtbo') : Common::getConfig('aresbo.api_url.move_bousdt');
+            if ($amount <= 0) {
+                $this->setData(['errors' => 'Giá trị không hợp lệ.']);
+                return $this->renderErrorJson();
+            }
+            $data = [
+                'amount' => $amount,
+                'confirmed' => true
+            ];
+            $response = $this->requestApi($url, $data, 'POST', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
+            if (!Arr::get($response, 'ok')) {
+                $message = Arr::get($response, 'd.err_code') == 'err_invalid_balance' ? 'Số dư của bạn không đủ.' : '';
+                $this->setData(['errors' => $message]);
+                return $this->renderErrorJson();
+            }
+            $this->setData([
+                'amount' => $amount,
+                'success' => $type == Common::getConfig('aresbo.move_money_type.wallet_to_trade') ? 'Bạn đã chuyển thành công ' . $amount . ' USDT đến Tài khoản Thực' : 'Bạn đã chuyển thành công ' . $amount . ' USDT đến Ví USDT'
+            ]);
+
+            return $this->renderJson();
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            $this->setData(['errors' => 'Đã xảy ra lỗi. Vui lòng thử lại.']);
+        }
+        return $this->renderErrorJson();
+    }
+
     protected function _getProfitData($method, $candles)
     {
         $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
@@ -487,8 +527,7 @@ class BotController extends BackendController
             $profile = Arr::get($response, 'd');
 
             // get balance
-            $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_balance'), [], 'GET', $headers, true);
-            $profile += Arr::get($response, 'd');
+            $profile += $this->_getBalance();
 
             // get rank
             $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_overview'), [], 'GET', $headers, true);
@@ -506,9 +545,9 @@ class BotController extends BackendController
                 'rank' => Arr::get($profile, 'rank'),
                 'access_token' => Session::get(self::ACCESS_TOKEN),
                 'refresh_token' => Session::get(self::REFRESH_TOKEN),
-                'demo_balance' => Arr::get($profile, 'demoBalance'),
-                'available_balance' => Arr::get($profile, 'availableBalance'),
-                'usdt_available_balance' => Arr::get($profile, 'usdtAvailableBalance'),
+                'demo_balance' => Arr::get($profile, 'demo_balance'),
+                'available_balance' => Arr::get($profile, 'available_balance'),
+                'usdt_available_balance' => Arr::get($profile, 'usdt_available_balance'),
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
@@ -760,6 +799,29 @@ class BotController extends BackendController
         }
 
         return $userMethods;
+    }
+
+    protected function _getBalance()
+    {
+        // get balance
+        try {
+            $refreshToken = Session::get(self::REFRESH_TOKEN);
+            $headers = ['Authorization' => 'Bearer ' . $refreshToken];
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_balance'), [], 'GET', $headers, true);
+            $demoBalance = Arr::get($response, 'd.demoBalance');
+            $availableBalance = Arr::get($response, 'd.availableBalance');
+            $usdtAvailableBalance = Arr::get($response, 'd.usdtAvailableBalance');
+            $balance = [
+                'demo_balance' => $demoBalance > 0 ? number_format($demoBalance, 2) : 0,
+                'available_balance' => $availableBalance > 0 ? number_format($availableBalance, 2) : 0,
+                'usdt_available_balance' => $usdtAvailableBalance > 0 ? number_format($usdtAvailableBalance, 2) : 0,
+            ];
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            $balance = [];
+        }
+
+        return $balance;
     }
 
     protected function _randomColor()

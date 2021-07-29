@@ -136,5 +136,15 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot_method.research',
             'uses' => 'BotController@research'
         ]);
+        // move usdt
+        Route::get('/move-money', [
+            'as' => 'bot.move.money',
+            'uses' => 'BotController@moveMoney'
+        ]);
+
+        Route::post('/move-money-valid', [
+            'as' => 'bot.move.money.valid',
+            'uses' => 'BotController@moveMoneyValid'
+        ]);
     });
 });

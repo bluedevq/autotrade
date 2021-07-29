@@ -42,6 +42,10 @@ let BotController = {
             up: 'T',
             down: 'G',
         },
+        moveMoneyType: {
+            walletToTrade: 1,
+            tradeToWallet: 2
+        },
         startAt: null,
         profit: 0,
         volume: 0,
@@ -276,7 +280,7 @@ let BotController = {
                     },
                     options: {
                         responsive: true,
-                        animation:'',
+                        animation: '',
                         scales: {
                             x: {
                                 title: {
@@ -425,4 +429,46 @@ let BotController = {
             BotController.verifyCount(start - 1, url);
         }, 1000);
     },
+    moveAllMoney: function () {
+        let amount = $('.left-header .amount').text();
+        $('#number').val(amount)
+    },
+    changeAmount: function () {
+        let leftHeader = $('.left-header').html(),
+            rightHeader = $('.right-header').html();
+
+        $('.left-header').html(rightHeader);
+        $('.right-header').html(leftHeader);
+        if ($('#move_type').val() == BotController.config.moveMoneyType.walletToTrade) {
+            $('#move_type').val(BotController.config.moveMoneyType.tradeToWallet);
+        } else {
+            $('#move_type').val(BotController.config.moveMoneyType.walletToTrade);
+        }
+    },
+    moveMoney: function () {
+        sendRequest({
+            url: $('.move-money form').data('action'),
+            type: 'POST',
+            data: {
+                amount: $('#number').val(),
+                type: $('#move_type').val(),
+            },
+        }, function (response) {
+            if (!response.status) {
+                $('.toast-message-error .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors);
+                $('.toast-message-error').toast('show');
+                return false;
+            }
+            let leftAmount = $('.left-header .amount').text();
+            let rightAmount = $('.right-header .amount').text();
+
+            leftAmount = leftAmount - response.data.amount == 0 ? 0 : parseFloat(leftAmount - response.data.amount).toFixed(2);
+            rightAmount = parseFloat(rightAmount + response.data.amount).toFixed(2);
+            $('.left-header .amount').text(leftAmount);
+            $('.right-header .amount').text(rightAmount);
+
+            $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + response.data.success);
+            $('.toast-message-success').toast('show');
+        });
+    }
 };

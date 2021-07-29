@@ -43,12 +43,24 @@ a {
     margin-top: .5rem;
 }
 
+.font-14 {
+    font-size: .875rem;
+}
+
+.font-26 {
+    font-size: 1.625rem;
+}
+
+.font-weight-700 {
+    font-weight: 700;
+}
+
 .bg-ares {
     background-color: #171b2c;
 }
 
 .img-logo {
-    object-fit:cover;
+    object-fit: cover;
 }
 
 .custom-label label {
@@ -129,6 +141,15 @@ a {
     color: #fff;
 }
 
+.top-menu .nav-item:hover {
+    border-radius: .3rem;
+    background-color: #bbbbbb;
+}
+
+.top-menu .nav-item:hover a.nav-link {
+    color: #0f0f0f !important;
+}
+
 .list-prices {
     max-width: 100%;
     overflow-x: auto;
@@ -184,6 +205,48 @@ a {
 #research-method .modal-body,
 #research-method .modal-footer {
     background-color: #171b2c;
+}
+
+.move-money-wrap {
+    padding: 0.75rem;
+}
+
+.move-money {
+    border: 1px solid #dee2e6;
+}
+
+.move-money-header {
+    background-color: #171b2c;
+
+}
+
+.move-money-header .left-header {
+    border-right: 1px solid #555555;
+    padding: 1.5rem;
+}
+
+.move-money-header .right-header {
+    padding: 1.5rem;
+}
+
+.move-money-body {
+    background-color: #1d233b;
+    padding: 0 2rem 2rem 2rem;
+}
+
+.changeAmount,
+.all-amount {
+    cursor: pointer;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
 }
 
 .footer {
