@@ -9,6 +9,7 @@ use App\Model\Entities\BotQueue;
 use App\Model\Entities\BotUser;
 use App\Model\Entities\BotUserMethod;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -409,7 +410,11 @@ class BotController extends BackendController
 
     public function moveMoney()
     {
-        $this->setViewData(['balance' => $this->_getBalance()]);
+        $balance = $this->_getBalance();
+        if ($balance instanceof RedirectResponse) {
+            return $balance;
+        }
+        $this->setViewData(['balance' => $balance]);
         return $this->render();
     }
 
@@ -443,6 +448,9 @@ class BotController extends BackendController
         } catch (\Exception $exception) {
             Log::error($exception);
             $this->setData(['errors' => 'Đã xảy ra lỗi. Vui lòng thử lại.']);
+            if ($exception->getCode() == 401) {
+                $this->setData(['url' => route('bot.clear_token')]);
+            }
         }
         return $this->renderErrorJson();
     }
@@ -818,7 +826,7 @@ class BotController extends BackendController
             ];
         } catch (\Exception $exception) {
             Log::error($exception);
-            $balance = [];
+            return $this->_to('bot.clear_token');
         }
 
         return $balance;

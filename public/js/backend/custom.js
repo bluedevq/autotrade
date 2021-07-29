@@ -455,6 +455,10 @@ let BotController = {
             },
         }, function (response) {
             if (!response.status) {
+                if (response.data.url) {
+                    window.location.href = response.data.url;
+                    return false;
+                }
                 $('.toast-message-error .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors);
                 $('.toast-message-error').toast('show');
                 return false;
