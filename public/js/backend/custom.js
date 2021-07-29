@@ -55,10 +55,10 @@ let BotController = {
         console.log($(passwordInput).attr('type'));
         if ($(passwordInput).attr('type') == 'text') {
             $(passwordInput).attr('type', 'password');
-            $(button).find('.show-hide-password').addClass('fa-eye').removeClass('fa-eye-slash');
+            $(button).find('.show-hide-password').addClass('fa-eye-slash').removeClass('fa-eye');
         } else if ($(passwordInput).attr('type') == 'password') {
             $(passwordInput).attr('type', 'text');
-            $(button).find('.show-hide-password').addClass('fa-eye-slash').removeClass('fa-eye');
+            $(button).find('.show-hide-password').addClass('fa-eye').removeClass('fa-eye-slash');
         }
     },
     login: function () {
@@ -414,5 +414,15 @@ let BotController = {
             $('#delete-method').modal('hide');
             $('.method-item tr#method_' + id).remove();
         });
+    },
+    verifyCount: function (start, url) {
+        $('.verify-count').empty().text(start + 's');
+        if (start === 0) {
+            window.location.href = url;
+            return true;
+        }
+        setTimeout(function () {
+            BotController.verifyCount(start - 1, url);
+        }, 1000);
     },
 };

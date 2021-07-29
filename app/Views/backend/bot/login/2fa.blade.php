@@ -1,4 +1,4 @@
-<div class="aresbo-login-with2fa container mt-2 hide">
+<div class="aresbo-login-with2fa container mt-2 custom-label hide">
     <div class="row pt-2 text-center col-12">
         <h3>Xác minh bảo mật</h3>
     </div>

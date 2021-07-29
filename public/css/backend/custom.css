@@ -47,6 +47,34 @@ a {
     background-color: #171b2c;
 }
 
+.img-logo {
+    object-fit:cover;
+}
+
+.custom-label label {
+    color: #747680;
+}
+
+.text-danger-custom > * {
+    color: #ff3333 !important;
+}
+
+.text-success-custom > * {
+    color: #33cc66 !important;
+}
+
+.register a {
+    text-decoration: underline;
+}
+
+.verify-status {
+    font-size: 6rem;
+}
+
+.verify-count {
+    font-size: 1.3rem;
+}
+
 .rank .text-warning {
     color: #ffff00 !important;
 }

@@ -1,4 +1,4 @@
-<div class="aresbo-login container">
+<div class="aresbo-login container custom-label">
     <div class="row pt-2 text-center col-12">
         <h3>Đăng nhập vào tài khoản ARESBO</h3>
     </div>
@@ -22,7 +22,7 @@
                     </div>
                     <div class="col-12 input-group">
                         <input type="password" name="password" class="form-control" id="password" aria-label="password">
-                        <span class="input-group-text password-hover" onclick="BotController.showHidePassword(this)"><span class="fas fa-eye show-hide-password"></span></span>
+                        <span class="input-group-text password-hover" onclick="BotController.showHidePassword(this)"><span class="fas fa-eye-slash show-hide-password"></span></span>
                     </div>
                 </div>
             </div>

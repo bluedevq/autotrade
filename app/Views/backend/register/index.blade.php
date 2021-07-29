@@ -1,13 +1,13 @@
-@extends('layouts.backend.auth')
+@extends('layouts.backend.register')
 @section('content')
-    <div class="row text-center mx-auto col-md-4">
+    <div class="row text-center mx-auto col-md-6 mt-4">
         <img class="img-fluid img-logo col-12" src="{{ public_url('images/backend/logo.png') }}" alt="">
     </div>
     <div class="row mx-auto col-md-4 d-flex align-items-center">
-        <form method="post" action="{{ route('backend.auth') }}" class="form-horizontal mt-5" enctype="multipart/form-data">
+        <form method="post" action="{{ route('backend.register.valid') }}" class="form-horizontal mt-5 register" enctype="multipart/form-data">
             @csrf
             <div class="row text-center">
-                <h3>Đăng nhập vào hệ thống</h3>
+                <h3>Tạo tài khoản {{ env('APP_NAME') }}</h3>
             </div>
             <div class="mt-4">
                 <div class="row">
@@ -15,7 +15,7 @@
                         <label for="email" class="form-label" aria-hidden="true">Địa chỉ Email *</label>
                     </div>
                     <div class="col-12">
-                        <input type="email" name="email" class="form-control" id="email" value="{{ old('email') }}">
+                        <input type="text" name="email" class="form-control" id="email" aria-label="email" value="{{ old('email') }}" maxlength="255">
                     </div>
                 </div>
             </div>
@@ -25,30 +25,32 @@
                         <label for="password" class="form-label" aria-hidden="true">Mật khẩu *</label>
                     </div>
                     <div class="col-12 input-group">
-                        <input type="password" name="password" class="form-control" id="password" aria-label="password">
+                        <input type="password" name="password" class="form-control" id="password" aria-label="password" maxlength="20">
                         <span class="input-group-text password-hover" onclick="BotController.showHidePassword(this)"><span class="fas fa-eye-slash show-hide-password"></span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-2">
+                <div class="row">
+                    <div class="col-12">
+                        <label for="name" class="form-label" aria-hidden="true">Tên *</label>
+                    </div>
+                    <div class="col-12 input-group">
+                        <input type="text" name="name" class="form-control" id="name" aria-label="name" value="{{ old('name') }}" maxlength="255">
                     </div>
                 </div>
             </div>
             <div class="mt-4">
                 <div class="row">
                     <div class="col-12">
-                        <button class="btn btn-lg btn-danger btn-block col-12" type="submit" onclick="showLoading()"><span class="fas fa-sign-in-alt">&nbsp;</span>Đăng nhập</button>
-                        <input type="hidden" name="return_url" value="{{ request()->get('return_url') }}">
+                        <button class="btn btn-lg btn-danger btn-block col-12" type="submit" onclick="showLoading()">Đăng ký</button>
                     </div>
                 </div>
             </div>
-            <div class="mt-4 register">
+            <div class="mt-4">
                 <div class="row">
-                    <div class="col-12 text-start">
-                        <a href="{{ route('backend.register') }}">Đăng ký mới</a>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-2 register">
-                <div class="row">
-                    <div class="col-12 text-start">
-                        <a href="{{ route('backend.register') }}">Quên mật khẩu?</a>
+                    <div class="col-12 text-start text-danger-custom">
+                        <a href="{{ route('backend.login') }}">Đăng nhập vào hệ thống</a>
                     </div>
                 </div>
             </div>

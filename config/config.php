@@ -1,8 +1,44 @@
 <?php
 return [
+    // mail config
+    'mail' => [
+        'from' => 'no-reply@xoano.net',
+        'sender' => env('APP_NAME'),
+        'subject' => [
+            'verify' => 'Xác nhận tài khoản',
+            'verify_success' => 'Chào mừng bạn đến với ' . env('APP_NAME'),
+        ],
+    ],
+    // user status
+    'user_status' => [
+        'stop' => 0,
+        'active' => 1,
+        'verify' => 2,
+        'forgot_password' => 3,
+    ],
+    // hash config
+    'hash' => [
+        'delimiter' => '@',
+        'default' => [
+            'password' => 'bluedevq_default'
+        ],
+        'verify' => [
+            'password' => 'bluedevq_verify'
+        ],
+        'forgot_password' => [
+            'password' => 'bluedevq_forgot_password'
+        ],
+    ],
+    // token param name
+    'token_param_name' => '_t',
+    // verify expired date time
+    'verify_expired' => 60, // minutes
+    // forgot password expired date time
+    'forgot_password_expired' => 60, // minutes
+    // aresbo config
     'aresbo' => [
         // title bot
-        'bot_title' => 'Xóa Nợ',
+        'bot_title' => env('APP_NAME'),
 
         // api
         'api_url' => [

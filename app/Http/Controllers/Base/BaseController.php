@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Base;
 
 use App\Helper\Common;
+use App\Http\Mail\Mailer;
 use App\Http\Supports\ApiResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -22,14 +23,17 @@ class BaseController extends Controller
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     use ApiResponse;
 
-    protected $_title = '';
-
     protected $_area = '';
+
+    protected $_mailer = '';
+
+    protected $_title = '';
 
     protected $_viewData = array();
 
     public function __construct()
     {
+        $this->setMailer(new Mailer());
     }
 
     public function setArea($area)
@@ -40,6 +44,16 @@ class BaseController extends Controller
     public function getArea()
     {
         return $this->_area;
+    }
+
+    public function setMailer($mailer)
+    {
+        $this->_mailer = $mailer;
+    }
+
+    public function getMailer()
+    {
+        return $this->_mailer;
     }
 
     public function setTitle($title)

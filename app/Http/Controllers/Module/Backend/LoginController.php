@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Module\Backend;
 
-use App\Helper\Common;
 use App\Model\Entities\User;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\MessageBag;
 
@@ -30,9 +28,8 @@ class LoginController extends BackendController
 
     public function auth()
     {
-        $data = request()->all();
-        $email = Arr::get($data, 'email');
-        $password = Arr::get($data, 'password');
+        $email = request()->get('email');
+        $password = request()->get('password');
         // validate email
         if (blank($email)) {
             return $this->_backWithError(new MessageBag(['login_email' => ['Vui lòng nhập email.']]));
@@ -53,8 +50,8 @@ class LoginController extends BackendController
             return $this->_backWithError(new MessageBag(['login_password' => ['Tài khoản không tồn tại.']]));
         }
         $userData = [
-            'email' => Arr::get($data, 'email'),
-            'password' => Arr::get($data, 'password')
+            'email' => $email,
+            'password' => $password
         ];
         if (backendGuard()->attempt($userData)) {
             Session::flash('success', ['Đăng nhập thành công.']);

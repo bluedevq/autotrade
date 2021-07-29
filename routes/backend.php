@@ -16,6 +16,34 @@ Route::middleware(['auth.backend'])->post('logout', [
     'uses' => 'LoginController@logout'
 ]);
 
+// register new account
+Route::prefix('register')->group(function () {
+    Route::get('/', [
+        'as' => 'backend.register',
+        'uses' => 'RegisterController@index'
+    ]);
+    Route::post('valid', [
+        'as' => 'backend.register.valid',
+        'uses' => 'RegisterController@valid'
+    ]);
+    Route::get('success', [
+        'as' => 'backend.register.success',
+        'uses' => 'RegisterController@success'
+    ]);
+});
+
+// verify account
+Route::get('verify', [
+    'as' => 'backend.verify',
+    'uses' => 'RegisterController@verify'
+]);
+
+// reset password
+Route::get('forgot-password', [
+    'as' => 'backend.forgot_password',
+    'uses' => 'RegisterController@forgotPassword'
+]);
+
 // backend
 Route::middleware(['auth.backend'])->group(function () {
     // home
