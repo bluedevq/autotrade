@@ -14,7 +14,6 @@ return [
         'stop' => 0,
         'active' => 1,
         'verify' => 2,
-        'forgot_password' => 3,
     ],
     // hash config
     'hash' => [

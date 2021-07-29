@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Module\Backend;
 
+use App\Helper\Common;
 use App\Model\Entities\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Session;
@@ -49,9 +50,12 @@ class LoginController extends BackendController
         if (blank($user)) {
             return $this->_backWithError(new MessageBag(['login_password' => ['Tài khoản không tồn tại.']]));
         }
+        if ($user->status != Common::getConfig('user_status.active')) {
+            return $this->_backWithError(new MessageBag(['login_password' => ['Tài khoản chưa được kích hoạt.']]));
+        }
         $userData = [
             'email' => $email,
-            'password' => $password
+            'password' => $password,
         ];
         if (backendGuard()->attempt($userData)) {
             Session::flash('success', ['Đăng nhập thành công.']);
