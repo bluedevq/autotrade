@@ -467,9 +467,9 @@ let BotController = {
             let rightAmount = $('.right-header .amount').text();
 
             leftAmount = leftAmount - response.data.amount == 0 ? 0 : parseFloat(leftAmount - response.data.amount).toFixed(2);
-            rightAmount = parseFloat(rightAmount + response.data.amount).toFixed(2);
+            rightAmount = parseFloat(rightAmount) + parseFloat(response.data.amount);
             $('.left-header .amount').text(leftAmount);
-            $('.right-header .amount').text(rightAmount);
+            $('.right-header .amount').text(parseFloat(rightAmount).toFixed(2));
 
             $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + response.data.success);
             $('.toast-message-success').toast('show');
