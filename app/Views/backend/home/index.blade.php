@@ -8,7 +8,7 @@
             <br>
             {{ env('APP_NAME') }} là một trong những sản phẩm độc quyền của chúng tôi.
             <br>
-            Kính mời các bạn trải nghiệm thử <a href="{{ route('bot.index') }}">tại đây</a>
+            Kính mời các bạn trải nghiệm <a class="btn btn-danger" href="{{ route('bot.index') }}">tại đây</a>
         </p>
     </div>
 @stop
