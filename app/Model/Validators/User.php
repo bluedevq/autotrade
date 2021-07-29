@@ -2,11 +2,13 @@
 
 namespace App\Model\Validators;
 
+use Illuminate\Support\Str;
+
 trait User
 {
-    public function rules()
+    protected function _getRuleDefaults()
     {
-        $rules = [
+        return [
             'email' => 'required|email|max:255',
             'password' => 'required|min:8|max:20',
             'name' => 'required|max:255',
@@ -14,13 +16,11 @@ trait User
             'sex' => 'nullable|integer|in:0,1',
             'address' => 'nullable'
         ];
-
-        return $rules;
     }
 
-    public function messages()
+    protected function _getMessageDefaults()
     {
-        $messages = [
+        return [
             'email.required' => 'Vui lòng nhập email.',
             'email.email' => 'Vui lòng nhập đúng định dạng email.',
             'email.max' => 'Vui lòng nhập email không quá 255 ký tự.',
@@ -30,7 +30,35 @@ trait User
             'name.required' => 'Vui lòng nhập tên của bạn.',
             'name.max' => 'Vui lòng nhập tên không quá 255 ký tự.',
         ];
+    }
 
-        return $messages;
+    public function rules()
+    {
+        return $this->_getRuleDefaults();
+    }
+
+    public function getRule($field)
+    {
+        $rules = $this->_getRuleDefaults();
+
+        return isset($rules[$field]) ? [$field => $rules[$field]] : [];
+    }
+
+    public function messages()
+    {
+        return $this->_getMessageDefaults();
+    }
+
+    public function getMessage($field)
+    {
+        $result = [];
+        $messages = $this->_getMessageDefaults();
+        foreach ($messages as $key => $message) {
+            if (strpos($key, $field) !== false) {
+                $result[$key] = $message;
+            }
+        }
+
+        return $result;
     }
 }

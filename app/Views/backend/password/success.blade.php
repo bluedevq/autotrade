@@ -3,15 +3,15 @@
     @include('layouts.backend.elements.logo')
     <div class="row mx-auto col-md-4 d-flex align-items-center mt-4">
         <div class="row">
-            <h2>Đăng ký thành công</h2>
+            <h2>Yêu cầu mật khẩu mới thành công!</h2>
         </div>
         <div class="mt-4">
             <div class="row">
                 <div class="col-12">
                     <p class="mt-4">
-                        Chúng tôi đã gửi một liên kết xác nhận tới <a href="mailto:{{ $email }}" class="text-info">{{ $email }}</a>.
+                        Một liên kết xác nhận đã được gửi đến hòm thư điện tử <a href="mailto:{{ $email }}" class="text-info">{{ $email }}</a> của bạn.
                         <br>
-                        Vui lòng truy cập vào mail để xác nhận.
+                        Vui lòng chờ trong ít phút để nhận liên kết để đặt lại mật khẩu.
                     </p>
                 </div>
             </div>

@@ -72,12 +72,12 @@ class RegisterController extends BackendController
             // send confirm token via email
             $data = [
                 'name' => Arr::get($params, 'name'),
-                'confirm_url' => route('backend.verify', [
+                'confirm_url' => route('backend.register.verify', [
                     'email' => $entity->email,
                     Common::getConfig('token_param_name') => $entity->verify_token,
                 ])
             ];
-            $this->_sendMail(Common::getConfig('mail.subject.verify'), Arr::get($params, 'email'), 'backend.mail.register_verify', $data);
+            $this->_sendMail(Common::getConfig('mail.subject.register_verify'), Arr::get($params, 'email'), 'backend.mail.register_verify', $data);
             Session::put(self::REGISTER_EMAIL, $this->getParam('email'));
 
             DB::commit();
@@ -92,7 +92,7 @@ class RegisterController extends BackendController
 
     public function success()
     {
-        $this->setViewData(['registEmail' => Session::get(self::REGISTER_EMAIL)]);
+        $this->setViewData(['email' => Session::get(self::REGISTER_EMAIL)]);
         return $this->render();
     }
 
@@ -149,7 +149,7 @@ class RegisterController extends BackendController
                 'url' => route('backend.login'),
                 'app_name' => env('APP_NAME'),
             ];
-            $this->_sendMail(Common::getConfig('mail.subject.verify_success'), $user->email, 'backend.mail.register_success', $dataMail);
+            $this->_sendMail(Common::getConfig('mail.subject.register_verify_success'), $user->email, 'backend.mail.register_success', $dataMail);
             DB::commit();
         } catch (\Exception $exception) {
             DB::rollBack();
@@ -163,30 +163,5 @@ class RegisterController extends BackendController
 
         $this->setViewData(['verify' => 'success']);
         return $this->render();
-    }
-
-    public function forgotPassword()
-    {
-        $this->render();
-    }
-
-    protected function _sendMail($subject, $to, $view, $data = [])
-    {
-        $from = Common::getConfig('mail.from');
-        $sender = Common::getConfig('mail.sender');
-        $content = '';
-        $contentHtml = view($view, compact('data'));
-        return $this->getMailer()->sendmail($from, $sender, $to, $subject, $content, [], $contentHtml);
-    }
-
-    protected function _generateToken($data, $type)
-    {
-        if ($type == Common::getConfig('user_status.verify')) {
-            return hash('sha256', Common::getConfig('hash.verify.password') . Common::getConfig('hash.delimiter') . json_encode($data));
-        }
-        if ($type == Common::getConfig('user_status.forgot_password')) {
-            return hash('sha256', Common::getConfig('hash.forgot_password.password') . Common::getConfig('hash.delimiter') . json_encode($data));
-        }
-        return hash('sha256', Common::getConfig('hash.default.password') . Common::getConfig('hash.delimiter') . json_encode($data));
     }
 }

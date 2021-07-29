@@ -34,13 +34,33 @@ class BackendController extends BaseController
         return $this->render();
     }
 
-    protected function _prepareForm($id = null)
-    {
-    }
-
     public function render($view = null, $params = array(), $mergeData = array())
     {
         $this->setTitle(Common::getConfig('aresbo.bot_title'));
         return parent::render($view, $params, $mergeData);
+    }
+
+    protected function _prepareForm($id = null)
+    {
+    }
+
+    protected function _sendMail($subject, $to, $view, $data = [])
+    {
+        $from = Common::getConfig('mail.from');
+        $sender = Common::getConfig('mail.sender');
+        $content = '';
+        $contentHtml = view($view, compact('data'));
+        return $this->getMailer()->sendmail($from, $sender, $to, $subject, $content, [], $contentHtml);
+    }
+
+    protected function _generateToken($data, $type)
+    {
+        if ($type == Common::getConfig('user_status.verify')) {
+            return hash('sha256', Common::getConfig('hash.verify.password') . Common::getConfig('hash.delimiter') . json_encode($data));
+        }
+        if ($type == Common::getConfig('user_status.forgot_password')) {
+            return hash('sha256', Common::getConfig('hash.forgot_password.password') . Common::getConfig('hash.delimiter') . json_encode($data));
+        }
+        return hash('sha256', Common::getConfig('hash.default.password') . Common::getConfig('hash.delimiter') . json_encode($data));
     }
 }

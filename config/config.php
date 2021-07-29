@@ -5,8 +5,10 @@ return [
         'from' => 'no-reply@xoano.net',
         'sender' => env('APP_NAME'),
         'subject' => [
-            'verify' => 'Xác nhận tài khoản',
-            'verify_success' => 'Chào mừng bạn đến với ' . env('APP_NAME'),
+            'register_verify' => 'Xác nhận tài khoản',
+            'register_verify_success' => 'Chào mừng bạn đến với ' . env('APP_NAME'),
+            'reset_password_verify' => 'Xác nhận lấy lại mật khẩu',
+            'reset_password_success' => 'Đổi mật khẩu thành công',
         ],
     ],
     // user status
@@ -14,6 +16,7 @@ return [
         'stop' => 0,
         'active' => 1,
         'verify' => 2,
+        'forgot_password' => 2,
     ],
     // hash config
     'hash' => [

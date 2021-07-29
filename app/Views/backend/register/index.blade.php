@@ -1,8 +1,6 @@
 @extends('layouts.backend.register')
 @section('content')
-    <div class="row text-center mx-auto col-md-6 mt-4">
-        <img class="img-fluid img-logo col-12" src="{{ public_url('images/backend/logo.png') }}" alt="">
-    </div>
+    @include('layouts.backend.elements.logo')
     <div class="row mx-auto col-md-4 d-flex align-items-center">
         <form method="post" action="{{ route('backend.register.valid') }}" class="form-horizontal mt-5 register" enctype="multipart/form-data">
             @csrf

@@ -30,19 +30,40 @@ Route::prefix('register')->group(function () {
         'as' => 'backend.register.success',
         'uses' => 'RegisterController@success'
     ]);
+    Route::get('verify', [
+        'as' => 'backend.register.verify',
+        'uses' => 'RegisterController@verify'
+    ]);
 });
 
-// verify account
-Route::get('verify', [
-    'as' => 'backend.verify',
-    'uses' => 'RegisterController@verify'
-]);
 
-// reset password
-Route::get('forgot-password', [
-    'as' => 'backend.forgot_password',
-    'uses' => 'RegisterController@forgotPassword'
-]);
+// forgot password
+Route::prefix('password')->group(function () {
+    Route::get('forgot', [
+        'as' => 'backend.password.forgot',
+        'uses' => 'PasswordController@index'
+    ]);
+    Route::post('forgot-valid', [
+        'as' => 'backend.password.forgot.valid',
+        'uses' => 'PasswordController@valid'
+    ]);
+    Route::get('forgot-success', [
+        'as' => 'backend.password.forgot.success',
+        'uses' => 'PasswordController@success'
+    ]);
+    Route::get('forgot-verify', [
+        'as' => 'backend.password.forgot.verify',
+        'uses' => 'PasswordController@verify'
+    ]);
+    Route::post('new-valid', [
+        'as' => 'backend.password.new.valid',
+        'uses' => 'PasswordController@validNew'
+    ]);
+    Route::get('new-success', [
+        'as' => 'backend.forgot.password.new.success',
+        'uses' => 'PasswordController@newSuccess'
+    ]);
+});
 
 // backend
 Route::middleware(['auth.backend'])->group(function () {

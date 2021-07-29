@@ -125,7 +125,7 @@ class BaseController extends Controller
     {
         $currentRoute = Route::currentRouteAction();
         $currentRoute = explode('@', $currentRoute);
-        return Str::lower(last($currentRoute));
+        return Str::snake(last($currentRoute));
     }
 
     public function getParams()
