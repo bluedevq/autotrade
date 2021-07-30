@@ -44,10 +44,10 @@
                 <div class="col-6 col-md-8">
                     @php $liveAccount = isset($botQueue) && $botQueue && $botQueue->account_type == \App\Helper\Common::getConfig('aresbo.account_live') ? true: false; @endphp
                     <div class="account-balance demo-balance {{ $liveAccount ? 'hide' : ''}}">
-                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ $userInfo->demo_balance }}</span>
+                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ $userInfo->demo_balance > 0 ? number_format($userInfo->demo_balance, 2) : 0 }}</span>
                     </div>
                     <div class="account-balance live-balance {{ $liveAccount ? '' : 'hide'}}">
-                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ $userInfo->available_balance }}</span>
+                        <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ $userInfo->available_balance > 0 ? number_format($userInfo->available_balance, 2) : 0 }}</span>
                     </div>
                 </div>
             </div>
