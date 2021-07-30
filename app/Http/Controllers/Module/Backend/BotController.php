@@ -455,6 +455,56 @@ class BotController extends BackendController
         return $this->renderErrorJson();
     }
 
+    protected function _getNewToken($params = [], $isLogin = false)
+    {
+        $params['client_id'] = 'aresbo-web';
+        $params['grant_type'] = $isLogin ? 'password' : 'refresh_token';
+        if (!$isLogin) {
+            $params['refresh_token'] = Session::get(self::REFRESH_TOKEN);
+        }
+
+        return $this->requestApi(Common::getConfig('aresbo.api_url.get_token_url'), $params);
+    }
+
+    protected function _getListPrices()
+    {
+        $orderCandles = $resultCandles = [];
+        try {
+            // get price & candles
+            $prices = $this->requestApi(Common::getConfig('aresbo.api_url.get_prices'), [], 'GET', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
+            if (!Arr::get($prices, 'ok')) {
+                return [$orderCandles, $resultCandles];
+            }
+            $listCandles = array_reverse(Arr::get($prices, 'd'));
+            $candlesKey = [
+                'open_order',
+                'open_price',
+                'high_price',
+                'low_price',
+                'close_price',
+                'base_volume',
+                'close_order',
+                'xxx',
+                'order_type', // 1: order, 0: result
+                'session',
+            ];
+            foreach ($listCandles as $item) {
+                $candleTmp = array_combine($candlesKey, $item);
+                $orderResult = Arr::get($candleTmp, 'close_price') - Arr::get($candleTmp, 'open_price');
+                $candleTmp['order_result'] = $orderResult > 0 ? Common::getConfig('aresbo.order_type_text.up') : Common::getConfig('aresbo.order_type_text.down');
+                if (Arr::get($candleTmp, 'order_type') == 1) {
+                    $orderCandles[] = $candleTmp;
+                    continue;
+                }
+                $resultCandles[] = $candleTmp;
+            }
+        } catch (\Exception $exception) {
+            Log::error($exception);
+        }
+
+        return [$orderCandles, $resultCandles];
+    }
+
     protected function _getProfitData($method, $candles)
     {
         $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
@@ -479,44 +529,6 @@ class BotController extends BackendController
         $win = $orderType == Str::lower(Arr::get($candles, (count($signals) + 1) . '.order_result'));
 
         return $win ? $amount * 0.95 : $amount * -1;
-    }
-
-    protected function _processAuto($stop = false)
-    {
-        $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
-        if (blank($user)) {
-            return $this->_to('bot.clear_token');
-        }
-        $botQueueData = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
-            ->where('bot_user_id', $user->id)
-            ->first();
-        $now = Carbon::now();
-        $botQueue = [
-            'user_id' => backendGuard()->user()->id,
-            'bot_user_id' => $user->id,
-            'account_type' => $this->getParam('account_type', Common::getConfig('aresbo.account_demo')),
-            'status' => $stop ? 0 : 1,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ];
-
-        if ($botQueueData) {
-            $botQueue['id'] = $botQueueData->id;
-            unset($botQueue['created_at']);
-        }
-
-        DB::beginTransaction();
-        try {
-            $botQueueData ? $this->fetchModel(BotQueue::class)->where('id', $botQueueData->id)->update($botQueue) : $this->fetchModel(BotQueue::class)->insert($botQueue);
-            DB::commit();
-        } catch (\Exception $exception) {
-            DB::rollBack();
-            Log::error($exception);
-            $errors = new MessageBag([($stop ? 'Dừng' : 'Chạy') . ' auto thất bại, vui lòng thử lại.']);
-            return $this->_to('bot.index')->withErrors($errors);
-        }
-
-        return $this->_to('bot.index');
     }
 
     protected function _getUserInfo()
@@ -578,6 +590,44 @@ class BotController extends BackendController
         }
     }
 
+    protected function _processAuto($stop = false)
+    {
+        $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        if (blank($user)) {
+            return $this->_to('bot.clear_token');
+        }
+        $botQueueData = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
+            ->where('bot_user_id', $user->id)
+            ->first();
+        $now = Carbon::now();
+        $botQueue = [
+            'user_id' => backendGuard()->user()->id,
+            'bot_user_id' => $user->id,
+            'account_type' => $this->getParam('account_type', Common::getConfig('aresbo.account_demo')),
+            'status' => $stop ? 0 : 1,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
+
+        if ($botQueueData) {
+            $botQueue['id'] = $botQueueData->id;
+            unset($botQueue['created_at']);
+        }
+
+        DB::beginTransaction();
+        try {
+            $botQueueData ? $this->fetchModel(BotQueue::class)->where('id', $botQueueData->id)->update($botQueue) : $this->fetchModel(BotQueue::class)->insert($botQueue);
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $errors = new MessageBag([($stop ? 'Dừng' : 'Chạy') . ' auto thất bại, vui lòng thử lại.']);
+            return $this->_to('bot.index')->withErrors($errors);
+        }
+
+        return $this->_to('bot.index');
+    }
+
     protected function _getListOrders($params = [], $open = true)
     {
         $params['page'] = 1;
@@ -609,34 +659,6 @@ class BotController extends BackendController
         return $result;
     }
 
-    protected function _getNewToken($params = [], $isLogin = false)
-    {
-        $params['client_id'] = 'aresbo-web';
-        $params['grant_type'] = $isLogin ? 'password' : 'refresh_token';
-        if (!$isLogin) {
-            $params['refresh_token'] = Session::get(self::REFRESH_TOKEN);
-        }
-
-        return $this->requestApi(Common::getConfig('aresbo.api_url.get_token_url'), $params);
-    }
-
-    protected function _betProcess($orderData = [])
-    {
-        // bet new order
-        foreach ($orderData as $betData) {
-            $response = $this->requestApi(Common::getConfig('aresbo.api_url.bet'), $betData, 'POST', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
-            // check status
-            if (!Arr::get($response, 'ok')) {
-                $errorCode = Arr::get($response, 'd.err_code');
-                if ($errorCode == 'insufficient_bet_balance') {
-                    return $this->renderErrorJson();
-                }
-                return $this->renderErrorJson(200, ['data' => ['url' => route('bot.clear_token')]]);
-            }
-        }
-        return true;
-    }
-
     protected function _getOrderData($botQueue)
     {
         // get method order from database
@@ -666,43 +688,21 @@ class BotController extends BackendController
         return $result;
     }
 
-    protected function _getListPrices()
+    protected function _betProcess($orderData = [])
     {
-        $orderCandles = $resultCandles = [];
-        try {
-            // get price & candles
-            $prices = $this->requestApi(Common::getConfig('aresbo.api_url.get_prices'), [], 'GET', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
-            if (!Arr::get($prices, 'ok')) {
-                return [$orderCandles, $resultCandles];
-            }
-            $listCandles = array_reverse(Arr::get($prices, 'd'));
-            $candlesKey = [
-                'open_order',
-                'open_price',
-                'high_price',
-                'low_price',
-                'close_price',
-                'base_volume',
-                'close_order',
-                'xxx',
-                'order_type', // 1: order, 0: result
-                'session',
-            ];
-            foreach ($listCandles as $item) {
-                $candleTmp = array_combine($candlesKey, $item);
-                $orderResult = Arr::get($candleTmp, 'close_price') - Arr::get($candleTmp, 'open_price');
-                $candleTmp['order_result'] = $orderResult > 0 ? Common::getConfig('aresbo.order_type_text.up') : Common::getConfig('aresbo.order_type_text.down');
-                if (Arr::get($candleTmp, 'order_type') == 1) {
-                    $orderCandles[] = $candleTmp;
-                    continue;
+        // bet new order
+        foreach ($orderData as $betData) {
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.bet'), $betData, 'POST', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
+            // check status
+            if (!Arr::get($response, 'ok')) {
+                $errorCode = Arr::get($response, 'd.err_code');
+                if ($errorCode == 'insufficient_bet_balance') {
+                    return $this->renderErrorJson();
                 }
-                $resultCandles[] = $candleTmp;
+                return $this->renderErrorJson(200, ['data' => ['url' => route('bot.clear_token')]]);
             }
-        } catch (\Exception $exception) {
-            Log::error($exception);
         }
-
-        return [$orderCandles, $resultCandles];
+        return true;
     }
 
     protected function _mapOpenOrders($params = [])
