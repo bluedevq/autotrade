@@ -6,7 +6,6 @@
         $liveType = \App\Helper\Common::getConfig('aresbo.account_live');
         $isRunning = isset($botQueue) && $botQueue->status ? true : false;
     @endphp
-    @include('layouts.backend.elements.messages')
     @if(!isset($userInfo) || blank($userInfo))
         @include('backend.bot.login.index')
         @include('backend.bot.login.2fa')

@@ -1,5 +1,9 @@
 <div class="aresbo-login-with2fa container mt-2 custom-label hide">
-    <div class="row pt-2 text-center col-12">
+    <div class="row mx-auto col-md-4 text-center col-12">
+        <img height="50" src="{{ public_url('images/backend/logo.svg') }}" alt="Aresbo" style="height: 50px;">
+    </div>
+    <div class="row mt-4 mx-auto col-md-4 text-center col-12">
+        <hr>
         <h3>Xác minh bảo mật</h3>
     </div>
     <div class="row mt-2 mb-2 mx-auto col-md-4 d-flex align-items-center">

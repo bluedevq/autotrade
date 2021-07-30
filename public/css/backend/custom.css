@@ -61,6 +61,7 @@ a {
 
 .img-logo {
     object-fit: cover;
+    height: 7.5rem;
 }
 
 .custom-label label {

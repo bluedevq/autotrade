@@ -1,5 +1,9 @@
 <div class="aresbo-login container custom-label">
-    <div class="row pt-2 text-center col-12">
+    <div class="row mx-auto col-md-4 text-center col-12">
+        <img height="50" src="{{ public_url('images/backend/logo.svg') }}" alt="Aresbo" style="height: 50px;">
+    </div>
+    <div class="row mt-4 mx-auto col-md-4 text-center col-12">
+        <hr>
         <h3>Đăng nhập vào tài khoản ARESBO</h3>
     </div>
     <div class="row mt-2 mb-2 mx-auto col-md-4 d-flex align-items-center">
