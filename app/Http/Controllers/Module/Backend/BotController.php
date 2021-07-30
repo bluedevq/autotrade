@@ -410,7 +410,7 @@ class BotController extends BackendController
 
     public function moveMoney()
     {
-        $balance = $this->_getBalance();
+        $balance = $this->_getBalance(true);
         if ($balance instanceof RedirectResponse) {
             return $balance;
         }
@@ -809,7 +809,7 @@ class BotController extends BackendController
         return $userMethods;
     }
 
-    protected function _getBalance()
+    protected function _getBalance($format = false)
     {
         // get balance
         try {
@@ -820,10 +820,17 @@ class BotController extends BackendController
             $availableBalance = Arr::get($response, 'd.availableBalance');
             $usdtAvailableBalance = Arr::get($response, 'd.usdtAvailableBalance');
             $balance = [
-                'demo_balance' => $demoBalance > 0 ? number_format($demoBalance, 2) : 0,
-                'available_balance' => $availableBalance > 0 ? number_format($availableBalance, 2) : 0,
-                'usdt_available_balance' => $usdtAvailableBalance > 0 ? number_format($usdtAvailableBalance, 2) : 0,
+                'demo_balance' => $demoBalance,
+                'available_balance' => $availableBalance,
+                'usdt_available_balance' => $usdtAvailableBalance,
             ];
+            if ($format) {
+                $balance = [
+                    'demo_balance' => $demoBalance > 0 ? number_format($demoBalance, 2) : 0,
+                    'available_balance' => $availableBalance > 0 ? number_format($availableBalance, 2) : 0,
+                    'usdt_available_balance' => $usdtAvailableBalance > 0 ? number_format($usdtAvailableBalance, 2) : 0,
+                ];
+            }
         } catch (\Exception $exception) {
             Log::error($exception);
             return $this->_to('bot.clear_token');
