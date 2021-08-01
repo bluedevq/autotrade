@@ -232,21 +232,22 @@ let BotController = {
         if (typeof prices == 'undefined') {
             return false;
         }
-        if ($('.list-prices li[data-time="' + prices[0].open_order + '"]').length != 0) {
-            return false;
+
+        // clear list prices and update new list prices
+        let listPrices = prices.reverse();
+        for (let i = 0; i < listPrices.length; i++) {
+            let date = new Date(listPrices[i].open_order),
+                orderType = listPrices[i].order_result;
+            date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth()) + '-' + BotController.pad(date.getFullYear());
+            // append new price to list
+            $('.list-prices').append('<li class="list-inline-item new" data-time="' + listPrices[i].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>');
         }
-        let date = new Date(prices[0].open_order),
-            orderType = prices[0].order_result;
-        date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth()) + '-' + BotController.pad(date.getFullYear());
-        // append new price to list
-        $('.list-prices').append('<li class="list-inline-item new" data-time="' + prices[0].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>');
-        // remove first price from list
-        $('.list-prices .list-inline-item').get(0).remove();
+
         // auto scroll to right
         $('.list-prices').scrollLeft(document.getElementsByClassName('list-prices')[0].scrollWidth);
 
         // update last order
-        BotController.updateLastOrders(orderType == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[0].close_order);
+        BotController.updateLastOrders(prices[0].order_result == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[0].close_order);
     },
     pad: function (t) {
         let st = "" + t;
