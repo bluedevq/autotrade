@@ -12,7 +12,7 @@
                         </select>
                     </div>
                     <div class="col-md-6 col-12 mt-sp-2">
-                        <button class="btn btn-{{ $isRunning ? 'danger' : 'success' }} btn-block col-12" type="submit">
+                        <button class="btn btn-{{ $isRunning ? 'danger' : 'success' }} btn-block col-12" type="submit" {{ $userExpired && $userExpired->greaterThanOrEqualTo(\Carbon\Carbon::now()) ? '' : 'disabled' }}>
                             <span class="fas fa-{{ $isRunning ? 'stop' : 'play' }}-circle" aria-hidden="true">&nbsp;</span>{{ $isRunning ? 'Dừng' : 'Chạy' }} Auto
                         </button>
                     </div>

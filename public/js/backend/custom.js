@@ -114,6 +114,9 @@ let BotController = {
             $('.total-time').empty().text(hours + ':' + minutes + ':' + BotController.pad(parseInt(diffTime % 60)));
         }
 
+        // remove method background running
+        $('.method-item tr span').removeClass('bg-light');
+
         // bet
         if (0 < s && s < 30) {
             let balance = $('.account-balance:not(".hide") .current-amount').text();
@@ -162,12 +165,6 @@ let BotController = {
                 return false;
             }
 
-            // update last result
-            let listClosedOrders = betOrder.closed_orders;
-            if (typeof listClosedOrders != 'undefined') {
-                BotController.updateLastOrders(listClosedOrders);
-            }
-
             // update new orders
             let listOpenOrders = betOrder.open_orders;
             if (typeof listOpenOrders != 'undefined') {
@@ -178,22 +175,24 @@ let BotController = {
             $('.current-amount').empty().text(betOrder.current_amount);
         });
     },
-    updateLastOrders: function (listClosedOrders) {
-        let childrens = $('.bet-result tr');
+    updateLastOrders: function ($winType, lastTimeOrder) {
+        let childrens = $('.bet-result tr.open-order');
         if (typeof childrens !== 'undefined' && childrens.length > 0) {
-            for (let i = 0; i < listClosedOrders.length; i++) {
-                let timeOrder = $(childrens[i]).find('.time-order').text(),
-                    lastTimeOrder = listClosedOrders[i].time,
-                    lastOrderStatus = $(childrens[i]).find('.bet-order-result').text(),
-                    result = (listClosedOrders[i].result === 'WIN') ? '<span class="fw-bold text-success">' + BotController.config.orderStatus.win + '</span>' : '<span class="fw-bold text-danger">' + BotController.config.orderStatus.lose + '</span>';
+            for (let i = 0; i < childrens.length; i++) {
+                let timeOrder = $(childrens[i]).find('.time-order').data('time'),
+                    lastOrderStatus = $(childrens[i]).find('.order-result').text(),
+                    lastOrderAmount = $(childrens[i]).find('.order-amount').data('amount'),
+                    lastOrderType = $(childrens[i]).find('.order-type').data('type'),
+                    win = $winType === lastOrderType,
+                    result = win ? '<span class="fw-bold text-success">' + BotController.config.orderStatus.win + '</span>' : '<span class="fw-bold text-danger">' + BotController.config.orderStatus.lose + '</span>';
 
-                lastTimeOrder = new Date(lastTimeOrder);
-                lastTimeOrder = BotController.pad(lastTimeOrder.getHours()) + ':' + BotController.pad(lastTimeOrder.getMinutes());
-                if (timeOrder == lastTimeOrder && lastOrderStatus == BotController.config.orderStatus.new) {
+                if (timeOrder <= lastTimeOrder && lastOrderStatus == BotController.config.orderStatus.new) {
                     // update status
-                    $(childrens[i]).length > 0 ? $(childrens[i]).find('.bet-order-result').empty().html(result) : null;
+                    $(childrens[i]).find('.order-result').empty().html(result);
                     // update profit
-                    BotController.config.profit += listClosedOrders[i].win_amount;
+                    BotController.config.profit += win ? (lastOrderAmount * 0.95) : (-1 * lastOrderAmount);
+
+                    $(childrens[i]).removeClass('open-order');
                 }
             }
             if (BotController.config.profit > 0) {
@@ -208,20 +207,26 @@ let BotController = {
         $('.no-item').remove();
         for (let i = 0; i < listOpenOrders.length; i++) {
             let dateTime = new Date(listOpenOrders[i].time),
-                newOrder = "<tr>\n" +
-                    '<td class="time-order">' + BotController.pad(dateTime.getHours()) + ':' + BotController.pad(dateTime.getMinutes()) + '</td>\n' +
+                newOrder = '<tr class="open-order">\n' +
+                    '<td class="time-order" data-time="' + listOpenOrders[i].time + '">' + BotController.pad(dateTime.getHours()) + ':' + BotController.pad(dateTime.getMinutes()) + ':' + BotController.pad(dateTime.getSeconds()) + '</td>\n' +
                     '<td>' + listOpenOrders[i].method + '</td>\n' +
-                    '<td>' + BotController.getBetTypeText(listOpenOrders[i].type) + '</td>\n' +
-                    '<td class="text-info"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + listOpenOrders[i].amount + '</span></td>\n' +
-                    '<td class="bet-order-result">' + BotController.config.orderStatus.new + '</td>\n' +
+                    '<td class="order-type" data-type="' + listOpenOrders[i].type + '">' + BotController.getBetTypeText(listOpenOrders[i].type) + '</td>\n' +
+                    '<td class="text-info order-amount" data-amount="' + listOpenOrders[i].amount + '"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + listOpenOrders[i].amount + '</span></td>\n' +
+                    '<td class="order-result">' + BotController.config.orderStatus.new + '</td>\n' +
                     '</tr>';
 
             $('.bet-result').prepend(newOrder);
 
             // update volume
             BotController.config.volume += listOpenOrders[i].amount;
+
+            // update method
+            $('.method-item tr#method_' + listOpenOrders[i]['method_id'] + ' .method-pattern .step-' + listOpenOrders[i]['step']).addClass('bg-light');
         }
+        // show volume
         $('.volume').empty().text(parseFloat(BotController.config.volume).toFixed(2));
+        // update commission
+        $('.commission').empty().text(parseFloat((BotController.config.volume / 100)).toFixed(2));
     },
     updatePrices: function (prices) {
         if (typeof prices == 'undefined') {
@@ -230,11 +235,18 @@ let BotController = {
         if ($('.list-prices li[data-time="' + prices[0].open_order + '"]').length != 0) {
             return false;
         }
-        let date = new Date(prices[0].open_order);
+        let date = new Date(prices[0].open_order),
+            orderType = prices[0].order_result;
         date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth()) + '-' + BotController.pad(date.getFullYear());
-        $('.list-prices').append('<li class="list-inline-item new" data-time="' + prices[0].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (prices[0].order_result == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>');
+        // append new price to list
+        $('.list-prices').append('<li class="list-inline-item new" data-time="' + prices[0].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>');
+        // remove first price from list
         $('.list-prices .list-inline-item').get(0).remove();
+        // auto scroll to right
         $('.list-prices').scrollLeft(document.getElementsByClassName('list-prices')[0].scrollWidth);
+
+        // update last order
+        BotController.updateLastOrders(orderType == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[0].close_order);
     },
     pad: function (t) {
         let st = "" + t;
@@ -375,8 +387,8 @@ let BotController = {
             let entity = response.data,
                 methodItemHtml = '<td>' + entity.name + '</td>' +
                     '<td class="pc">' + entity.type + '</td>' +
-                    '<td>' + entity.signal + '</td>' +
-                    '<td>' + entity.pattern + '</td>' +
+                    '<td class="method-signal">' + entity.signal + '</td>' +
+                    '<td class="method-pattern">' + entity.pattern + '</td>' +
                     '<td class="pc">' + entity.stop.loss + '</td>' +
                     '<td class="pc">' + entity.stop.win + '</td>' +
                     '<td>' + entity.status + '</td>' +

@@ -121,7 +121,7 @@ a {
 }
 
 .list-methods-scroll {
-    max-height: 390px;
+    max-height: 330px;
     overflow-y: auto;
 }
 
@@ -135,6 +135,11 @@ a {
 
 .method-action .list-inline-item a {
     min-width: 76px;
+}
+
+.method-item .method-pattern .bg-light {
+    padding: 2px;
+    border-radius: .2rem;
 }
 
 .top-menu a.nav-link {
@@ -182,11 +187,11 @@ a {
     color: #ff3333;
 }
 
-.bet-order-result .text-success {
+.order-result .text-success {
     color: #33cc66 !important;
 }
 
-.bet-order-result .text-danger {
+.order-result .text-danger {
     color: #ff3333 !important;
 }
 

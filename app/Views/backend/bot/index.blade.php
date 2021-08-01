@@ -5,8 +5,9 @@
         $demoType = \App\Helper\Common::getConfig('aresbo.account_demo');
         $liveType = \App\Helper\Common::getConfig('aresbo.account_live');
         $isRunning = isset($botQueue) && $botQueue->status ? true : false;
+        $userExpired = \Carbon\Carbon::parse(backendGuard()->user()->expired_date);
     @endphp
-    @if(!isset($userInfo) || blank($userInfo))
+    @if(!isset($botUserInfo) || blank($botUserInfo))
         @include('backend.bot.login.index')
         @include('backend.bot.login.2fa')
     @else
@@ -40,7 +41,7 @@
             BotController.config.startAt = '{{ time() * 1000 }}';
 
             // show clock
-            @if(isset($userInfo) && !blank($userInfo))
+            @if(isset($botUserInfo) && !blank($botUserInfo))
             BotController.showTime();
             @endif
 

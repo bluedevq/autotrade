@@ -30,8 +30,8 @@
                         <tr id="method_{{ $method->id }}">
                             <td>{{ $method->getNameText() }}</td>
                             <td class="pc">{{ $method->getTypeText() }}</td>
-                            <td>{!! $method->getSignalText() !!}</td>
-                            <td>{!! $method->getOrderPatternText() !!}</td>
+                            <td class="method-signal">{!! $method->getSignalText() !!}</td>
+                            <td class="method-pattern">{!! $method->getOrderPatternText() !!}</td>
                             <td class="pc">{{ $method->getStopLossText() }}</td>
                             <td class="pc">{{ $method->getTakeProfitText() }}</td>
                             <td>{{ $method->getMethodStatusText() }}</td>

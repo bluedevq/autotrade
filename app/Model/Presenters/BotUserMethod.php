@@ -31,10 +31,10 @@ trait BotUserMethod
     {
         $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $this->order_pattern);
         $text = [];
-        foreach ($orderPatterns as $orderPattern) {
+        foreach ($orderPatterns as $index => $orderPattern) {
             $order = Str::substr($orderPattern, 0, 1);
             $amount = Str::substr($orderPattern, 1, Str::length($orderPattern) - 1);
-            $textTmp = Str::lower($order) == 't' ? ('<span class="fw-bold text-success"> ' . Str::upper($order) . $amount . '</span>') : ('<span class="fw-bold text-danger"> ' . Str::upper($order) . $amount . '</span>');
+            $textTmp = Str::lower($order) == 't' ? ('<span class="fw-bold text-success step-' . $index . '"> ' . Str::upper($order) . $amount . '</span>') : ('<span class="fw-bold text-danger step-' . $index . '"> ' . Str::upper($order) . $amount . '</span>');
             $text[] = $textTmp;
         }
         return implode(Common::getConfig('aresbo.order_pattern_delimiter'), $text);
