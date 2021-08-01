@@ -213,12 +213,12 @@ class BotController extends BackendController
             $this->setData(['prices' => $resultPrices]);
 
             // check bot queue has running
-            $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
-            if (blank($user)) {
+            $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+            if (blank($botUser)) {
                 return $this->_to('bot.clear_token');
             }
             $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
-                ->where('bot_user_id', $user->id)
+                ->where('bot_user_id', $botUser->id)
                 ->first();
             if (blank($botQueue) || $botQueue->status == Common::getConfig('aresbo.bot_status.stop')) {
                 return $this->renderErrorJson();

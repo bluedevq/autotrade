@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Module\Backend;
 
 use App\Helper\Common;
 use App\Model\Entities\User;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\MessageBag;
@@ -33,11 +34,11 @@ class LoginController extends BackendController
         $password = request()->get('password');
         // validate email
         if (blank($email)) {
-            return $this->_backWithError(new MessageBag(['login_email' => ['Vui lòng nhập email.']]));
+            return $this->_backWithError(new MessageBag(['email' => ['Vui lòng nhập email.']]));
         }
         // validate password
         if (blank($password)) {
-            return $this->_backWithError(new MessageBag(['login_password' => ['Vui lòng nhập mật khẩu.']]));
+            return $this->_backWithError(new MessageBag(['password' => ['Vui lòng nhập mật khẩu.']]));
         }
         // validate exist
         $user = $this->getModel()
@@ -48,10 +49,13 @@ class LoginController extends BackendController
             })
             ->first();
         if (blank($user)) {
-            return $this->_backWithError(new MessageBag(['login_password' => ['Tài khoản không tồn tại.']]));
+            return $this->_backWithError(new MessageBag(['email' => ['Tài khoản không tồn tại.']]));
         }
         if ($user->status != Common::getConfig('user_status.active')) {
-            return $this->_backWithError(new MessageBag(['login_password' => ['Tài khoản chưa được kích hoạt.']]));
+            return $this->_backWithError(new MessageBag(['email' => ['Tài khoản chưa được kích hoạt.']]));
+        }
+        if (Carbon::parse($user->expired_date)->lessThan(Carbon::now())) {
+            return $this->_backWithError(new MessageBag(['email' => ['Tài khoản của bạn đã hết hạn. Vui lòng liên hệ admin để được hỗ trợ.']]));
         }
         $userData = [
             'email' => $email,

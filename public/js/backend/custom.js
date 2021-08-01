@@ -233,21 +233,24 @@ let BotController = {
             return false;
         }
 
-        // clear list prices and update new list prices
-        let listPrices = prices.reverse();
-        for (let i = 0; i < listPrices.length; i++) {
-            let date = new Date(listPrices[i].open_order),
-                orderType = listPrices[i].order_result;
+        prices = prices.reverse();
+        let listPrices = '';
+        for (let i = 0; i < prices.length; i++) {
+            let date = new Date(prices[i].open_order),
+                orderType = prices[i].order_result;
+
             date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth()) + '-' + BotController.pad(date.getFullYear());
-            // append new price to list
-            $('.list-prices').append('<li class="list-inline-item new" data-time="' + listPrices[i].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>');
+            listPrices += '<li class="list-inline-item new" data-time="' + prices[i].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>';
         }
+
+        // clear list prices and update new list prices
+        $('.list-prices').empty().append(listPrices);
 
         // auto scroll to right
         $('.list-prices').scrollLeft(document.getElementsByClassName('list-prices')[0].scrollWidth);
 
         // update last order
-        BotController.updateLastOrders(prices[0].order_result == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[0].close_order);
+        BotController.updateLastOrders(prices[prices.length - 1].order_result == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[prices.length - 1].close_order);
     },
     pad: function (t) {
         let st = "" + t;
