@@ -7,7 +7,7 @@
                     <label class="form-label" aria-hidden="true"><i class="fas fa-user">&nbsp;&nbsp;</i>Biệt danh</label>
                 </div>
                 <div class="col-6 col-md-8">
-                    <span class="fw-bold">{{ $botUserInfo->nick_name }}</span>
+                    <span class="">{{ $botUserInfo->nick_name }}</span>
                 </div>
             </div>
             <div class="row">
@@ -15,7 +15,7 @@
                     <label class="form-label" aria-hidden="true"><i class="fas fa-user-friends">&nbsp;</i>Người giới thiệu</label>
                 </div>
                 <div class="col-6 col-md-8">
-                    <span class="fw-bold">{{ $botUserInfo->reference_name }}</span>
+                    <span class="">{{ $botUserInfo->reference_name }}</span>
                 </div>
             </div>
             <div class="row">
@@ -24,7 +24,7 @@
                 </div>
                 <div class="col-6 col-md-8 rank">
                     @php $rank = isset($botUserInfo) ? $botUserInfo->rank : 0 @endphp
-                    <span class="fw-bold text-warning">{{ $rank }}</span>
+                    <span class="text-warning">{{ $rank }}</span>
                 </div>
             </div>
             <div class="row">
@@ -32,7 +32,7 @@
                     <label class="form-label" aria-hidden="true"><i class="fas fa-calendar-times">&nbsp;&nbsp;</i>Hết hạn</label>
                 </div>
                 <div class="col-6 col-md-8 expired-date">
-                    <span class="fw-bold text-danger">{{ $userExpired && $userExpired->greaterThanOrEqualTo(\Carbon\Carbon::now()) ? $userExpired->format('d-m-Y') : 'Đã hết hạn' }}</span>
+                    <span class="text-danger">{{ $userExpired && $userExpired->greaterThanOrEqualTo(\Carbon\Carbon::now()) ? $userExpired->format('d-m-Y') : 'Đã hết hạn' }}</span>
                 </div>
             </div>
         </div>

@@ -31,7 +31,6 @@ class BotController extends BackendController
     const REFRESH_TOKEN = 'refresh_token';
     const TWOFA_TOKEN = '2fa_token';
     const BOT_USER_EMAIL = 'bot_user_email';
-    const TOTAL_OPEN_ORDER = 'total_open_order';
 
     public function __construct(BotUser $botUser, BotQueue $botQueue, BotUserMethod $botUserMethod, BotMethodDefault $botMethodDefault, User $user)
     {
@@ -46,8 +45,7 @@ class BotController extends BackendController
             // get user info
             $botUserInfo = $this->_getUserInfo();
             if (blank($botUserInfo)) {
-                Session::forget(self::REFRESH_TOKEN);
-                return $this->_to('bot.index');
+                return $this->_to('bot.clear_token');
             }
 
             // get bot queue
@@ -193,7 +191,7 @@ class BotController extends BackendController
             }
 
             // get new refresh token after 30 minutes
-            if (date('i') == 30 || date('i') == 0) {
+            if (date('i') % 20 == 0) {
                 $newRefreshToken = $this->_getToken();
                 // check status
                 if (!Arr::get($newRefreshToken, 'ok')) {
