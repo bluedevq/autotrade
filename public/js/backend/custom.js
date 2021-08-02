@@ -175,18 +175,22 @@ let BotController = {
             $('.current-amount').empty().text(betOrder.current_amount);
         });
     },
-    updateLastOrders: function ($winType, lastTimeOrder) {
-        let childrens = $('.bet-result tr.open-order');
+    updateLastOrders: function ($winType, openOrder, closeOrder) {
+        let childrens = $('.bet-result tr.open-order'),
+            openTimeOrder = new Date(openOrder).getMinutes(),
+            closeTimeOrder = new Date(closeOrder).getMinutes();
+
         if (typeof childrens !== 'undefined' && childrens.length > 0) {
             for (let i = 0; i < childrens.length; i++) {
-                let timeOrder = $(childrens[i]).find('.time-order').data('time'),
-                    lastOrderStatus = $(childrens[i]).find('.order-result').text(),
-                    lastOrderAmount = $(childrens[i]).find('.order-amount').data('amount'),
-                    lastOrderType = $(childrens[i]).find('.order-type').data('type'),
+                let entity = $(childrens[i]),
+                    timeOrder = new Date(entity.find('.time-order').data('time')).getMinutes(),
+                    lastOrderStatus = entity.find('.order-result').text(),
+                    lastOrderAmount = entity.find('.order-amount').data('amount'),
+                    lastOrderType = entity.find('.order-type').data('type'),
                     win = $winType === lastOrderType,
                     result = win ? '<span class="fw-bold text-success">' + BotController.config.orderStatus.win + '</span>' : '<span class="fw-bold text-danger">' + BotController.config.orderStatus.lose + '</span>';
 
-                if (timeOrder <= lastTimeOrder && lastOrderStatus == BotController.config.orderStatus.new) {
+                if (timeOrder >= openTimeOrder && timeOrder <= closeTimeOrder && lastOrderStatus == BotController.config.orderStatus.new) {
                     // update status
                     $(childrens[i]).find('.order-result').empty().html(result);
                     // update profit
@@ -250,7 +254,7 @@ let BotController = {
         $('.list-prices').scrollLeft(document.getElementsByClassName('list-prices')[0].scrollWidth);
 
         // update last order
-        BotController.updateLastOrders(prices[prices.length - 1].order_result == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[prices.length - 1].close_order);
+        BotController.updateLastOrders(prices[prices.length - 1].order_result == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[prices.length - 1].open_order, prices[prices.length - 1].close_order);
     },
     pad: function (t) {
         let st = "" + t;
