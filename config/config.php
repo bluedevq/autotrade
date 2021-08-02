@@ -77,8 +77,8 @@ return [
         ],
         'method_type' => [
             'value' => [
-                'PAROLI' => 1,
-                'MARTINGALE' => 2,
+                'paroli' => 1,
+                'martingale' => 2,
             ],
             'text' => [
                 1 => 'PAROLI',

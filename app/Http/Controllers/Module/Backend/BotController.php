@@ -692,8 +692,16 @@ class BotController extends BackendController
             $signals = array_reverse($signals);
             // check method has used last order
 //            if (!blank($method->step)) {
-//                // Martingale: next step order
-//                if ($method->type == Common::getConfig('aresbo.method_type.value.PAROLI')) {
+//                // Martingale: next step order after lose
+//                if ($method->type == Common::getConfig('aresbo.method_type.value.martingale')) {
+//                    $orderTmp = $this->_getOrder($method, $accountType, $method->step + 1);
+//                    // save step method
+//                    $method->step = $method->step + 1;
+//                    $method->save();
+//                    blank($orderTmp) ? null : $result[] = $orderTmp;
+//                }
+//                // Paroli: next step order after win
+//                if ($method->type == Common::getConfig('aresbo.method_type.value.paroli')) {
 //                    $orderTmp = $this->_getOrder($method, $accountType, $method->step + 1);
 //                    // save step method
 //                    $method->step = $method->step + 1;
