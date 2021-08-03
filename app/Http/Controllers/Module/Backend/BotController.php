@@ -279,9 +279,10 @@ class BotController extends BackendController
             $this->setData(['errors' => $validator->errors()->first()]);
             return $this->renderErrorJson();
         }
-        // @todo change
-        $userInfo = $this->_getUserInfo();
-        if (blank($userInfo)) {
+
+        // check bot user
+        $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        if (blank($botUser)) {
             $this->setData(['errors' => 'Lỗi người dùng. Vui lòng thử lại.']);
             return $this->renderErrorJson();
         }
@@ -297,7 +298,7 @@ class BotController extends BackendController
             } else {
                 $entity->color = $this->_randomColor();
             }
-            $entity->bot_user_id = $userInfo->id;
+            $entity->bot_user_id = $botUser->id;
             $entity->save();
             DB::commit();
             $this->setData([

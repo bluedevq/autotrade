@@ -389,7 +389,7 @@ let BotController = {
             },
         }, function (response) {
             if (!response.status) {
-                $('.validate-method').empty().html('<li class="list-group-item alert-danger text-danger"><i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors + '</li>');
+                $('.validate-method').empty().html('<li class="list-group-item bg-danger-custom"><i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors + '</li>');
                 return false;
             }
             let entity = response.data,
