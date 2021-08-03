@@ -68,12 +68,25 @@ a {
     color: #747680;
 }
 
-.text-danger-custom > * {
+.bg-danger-custom {
+    background-color: #ff3333 !important;
+}
+
+.bg-success-custom {
+    background-color: #33cc66 !important;
+}
+
+.text-danger-custom {
     color: #ff3333 !important;
 }
 
-.text-success-custom > * {
+.text-success-custom {
     color: #33cc66 !important;
+}
+
+.border-radius-custom {
+    border: none;
+    border-radius: 0.3rem;
 }
 
 .register a {
@@ -140,6 +153,10 @@ a {
 .method-item .method-pattern .bg-light {
     padding: 2px;
     border-radius: .2rem;
+}
+
+.validate-method .list-group-item {
+    color: #ffffff;
 }
 
 .top-menu a.nav-link {
