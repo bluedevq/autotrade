@@ -81,8 +81,8 @@ return [
                 'martingale' => 2,
             ],
             'text' => [
-                1 => 'PAROLI',
-                2 => 'MARTINGALE',
+                1 => 'Đánh sau thắng',
+                2 => 'Đánh sau thua',
             ],
         ],
         'order_signal_delimiter' => '-',

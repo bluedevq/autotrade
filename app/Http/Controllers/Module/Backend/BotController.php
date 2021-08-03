@@ -402,7 +402,7 @@ class BotController extends BackendController
 
     public function moveMoney()
     {
-        $balance = $this->_getBalance(true);
+        $balance = $this->_getBalance();
         if ($balance instanceof RedirectResponse) {
             return $balance;
         }

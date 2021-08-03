@@ -485,13 +485,16 @@ let BotController = {
                 $('.toast-message-error').toast('show');
                 return false;
             }
-            let leftAmount = $('.left-header .amount').text();
-            let rightAmount = $('.right-header .amount').text();
+            let leftAmount = $('.left-header .amount').data('amount');
+            let rightAmount = $('.right-header .amount').data('amount');
 
             leftAmount = leftAmount - response.data.amount == 0 ? 0 : parseFloat(leftAmount - response.data.amount).toFixed(2);
             rightAmount = parseFloat(rightAmount) + parseFloat(response.data.amount);
-            $('.left-header .amount').text(leftAmount);
-            $('.right-header .amount').text(parseFloat(rightAmount).toFixed(2));
+            $('.left-header .amount').attr('data-amount', leftAmount);
+            $('.left-header .amount').text(new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(leftAmount));
+
+            $('.right-header .amount').attr('data-amount', rightAmount);
+            $('.right-header .amount').text(new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(rightAmount));
 
             $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + response.data.success);
             $('.toast-message-success').toast('show');
