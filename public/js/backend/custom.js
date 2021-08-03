@@ -114,9 +114,6 @@ let BotController = {
             $('.total-time').empty().text(hours + ':' + minutes + ':' + BotController.pad(parseInt(diffTime % 60)));
         }
 
-        // remove method background running
-        $('.method-item tr span').removeClass('bg-light');
-
         // bet
         if (0 < s && s < 30) {
             let balance = $('.account-balance:not(".hide") .current-amount').text();
@@ -208,7 +205,12 @@ let BotController = {
         }
     },
     updateNewOrders: function (listOpenOrders) {
+        // remove method background running
+        $('.method-item tr span').removeClass('bg-light');
+
+        // remove no-item
         $('.no-item').remove();
+
         for (let i = 0; i < listOpenOrders.length; i++) {
             let dateTime = new Date(listOpenOrders[i].time),
                 newOrder = '<tr class="open-order">\n' +
