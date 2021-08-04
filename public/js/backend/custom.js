@@ -162,6 +162,9 @@ let BotController = {
                 return false;
             }
 
+            // remove method background running
+            $('.method-item tr span').removeClass('bg-light');
+
             // update new orders
             let listOpenOrders = betOrder.open_orders;
             if (typeof listOpenOrders != 'undefined') {
@@ -205,9 +208,6 @@ let BotController = {
         }
     },
     updateNewOrders: function (listOpenOrders) {
-        // remove method background running
-        $('.method-item tr span').removeClass('bg-light');
-
         // remove no-item
         $('.no-item').remove();
 

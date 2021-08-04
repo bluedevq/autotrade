@@ -689,37 +689,51 @@ class BotController extends BackendController
             // reverse signal
             $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
             $signals = array_reverse($signals);
-            // check method has used last order
-//            if (!blank($method->step)) {
-//                // Martingale: next step order after lose
-//                if ($method->type == Common::getConfig('aresbo.method_type.value.martingale')) {
-//                    $orderTmp = $this->_getOrder($method, $accountType, $method->step + 1);
-//                    // save step method
-//                    $method->step = $method->step + 1;
-//                    $method->save();
-//                    blank($orderTmp) ? null : $result[] = $orderTmp;
-//                }
-//                // Paroli: next step order after win
-//                if ($method->type == Common::getConfig('aresbo.method_type.value.paroli')) {
-//                    $orderTmp = $this->_getOrder($method, $accountType, $method->step + 1);
-//                    // save step method
-//                    $method->step = $method->step + 1;
-//                    $method->save();
-//                    blank($orderTmp) ? null : $result[] = $orderTmp;
-//                }
-//                continue;
-//            }
 
-            // check method mapping with signal
-            if ($this->_mapMethod($signals, $resultPrices)) {
-                // get order data from method
-                $orderTmp = $this->_getOrder($method, $accountType);
-                blank($orderTmp) ? null : $result[] = $orderTmp;
-
-                // save step method
-//                $method->step = 0;
-//                $method->save();
+            // check step has used
+            if (blank($method->step)) {
+                // check method mapping with signal
+                $method->step = null;
+                if ($this->_mapMethod($signals, $resultPrices)) {
+                    // get order data from method
+                    $result[] = $this->_getOrder($method, $accountType);
+                    $method->step = 0;
+                }
+            } else {
+                // check win or loss
+                $lastOrder = $this->_getBetPattern($method->order_pattern, 'type', false, $method->step);
+                $win = Str::lower($lastOrder) == Str::lower($resultPrices[0]['order_result']);
+                // Martingale: next step order after lose
+                if ($method->type == Common::getConfig('aresbo.method_type.value.martingale')) {
+                    if (!$win) {
+                        $result[] = $this->_getOrder($method, $accountType, $method->step + 1);
+                        $method->step = $method->step + 1;
+                    } else {
+                        $method->step = null;
+                        if ($this->_mapMethod($signals, $resultPrices)) {
+                            // get order data from method
+                            $result[] = $this->_getOrder($method, $accountType);
+                            $method->step = 0;
+                        }
+                    }
+                }
+                // Paroli: next step order after win
+                if ($method->type == Common::getConfig('aresbo.method_type.value.paroli')) {
+                    if ($win) {
+                        $result[] = $this->_getOrder($method, $accountType, $method->step + 1);
+                        $method->step = $method->step + 1;
+                    } else {
+                        $method->step = null;
+                        if ($this->_mapMethod($signals, $resultPrices)) {
+                            // get order data from method
+                            $result[] = $this->_getOrder($method, $accountType);
+                            $method->step = 0;
+                        }
+                    }
+                }
             }
+            // save step method
+            $method->save();
         }
 
         return $result;
@@ -730,6 +744,9 @@ class BotController extends BackendController
         $betResult = [];
         // bet new order
         foreach ($orderData as $betData) {
+            if (blank($betData)) {
+                continue;
+            }
             $response = $this->requestApi(Common::getConfig('aresbo.api_url.bet'), $betData, 'POST', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
             // check status
             if (!Arr::get($response, 'ok')) {
@@ -746,7 +763,6 @@ class BotController extends BackendController
     {
         $listOpenOrders = Arr::get($params, 'list_open_orders');
         $orderData = Arr::get($params, 'order_data');
-        $orderData = array_reverse($orderData);
 
         $currentAmount = Arr::get($params, 'current_amount');
         $accountType = Arr::get($params, 'account_type');
@@ -780,6 +796,10 @@ class BotController extends BackendController
 
     protected function _getOrder($method, $accountType, $step = 0)
     {
+        $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
+        if ($method->type == Common::getConfig('aresbo.method_type.value.martingale') && !isset($orderPatterns[$step])) {
+            return [];
+        }
         return [
             'betAccountType' => Common::getConfig('aresbo.bet_account_type.' . $accountType),
             'betAmount' => $this->_getBetPattern($method->order_pattern, 'amount', true, $step),
@@ -793,7 +813,7 @@ class BotController extends BackendController
     protected function _getBetPattern($orderPattern, $key = '', $convertType = true, $step = 0)
     {
         $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $orderPattern);
-        $orderPattern = $orderPatterns[$step];
+        $orderPattern = isset($orderPatterns[$step]) ? $orderPatterns[$step] : $orderPatterns[0];
         $order = [
             'type' => $convertType ? Common::getConfig('aresbo.order_type_pattern.' . Str::lower(Str::substr($orderPattern, 0, 1))) : Str::lower(Str::substr($orderPattern, 0, 1)),
             'amount' => Str::substr($orderPattern, 1)
