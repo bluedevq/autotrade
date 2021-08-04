@@ -703,9 +703,11 @@ class BotController extends BackendController
                 // check win or loss
                 $lastOrder = $this->_getBetPattern($method->order_pattern, 'type', false, $method->step);
                 $win = Str::lower($lastOrder) == Str::lower($resultPrices[0]['order_result']);
+                $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
                 // Martingale: next step order after lose
                 if ($method->type == Common::getConfig('aresbo.method_type.value.martingale')) {
-                    if (!$win) {
+                    if (!$win && isset($orderPatterns[$method->step + 1])) {
+                        // cần kiểm tra step
                         $result[] = $this->_getOrder($method, $accountType, $method->step + 1);
                         $method->step = $method->step + 1;
                     } else {
@@ -719,7 +721,8 @@ class BotController extends BackendController
                 }
                 // Paroli: next step order after win
                 if ($method->type == Common::getConfig('aresbo.method_type.value.paroli')) {
-                    if ($win) {
+                    if ($win && isset($orderPatterns[$method->step + 1])) {
+                        // cần kiểm tra step
                         $result[] = $this->_getOrder($method, $accountType, $method->step + 1);
                         $method->step = $method->step + 1;
                     } else {
