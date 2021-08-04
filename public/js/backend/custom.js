@@ -200,10 +200,10 @@ let BotController = {
                 }
             }
             if (BotController.config.profit > 0) {
-                $('.profit').empty().html('<span class="text-success">' + parseFloat(BotController.config.profit).toFixed(2) + '</span>');
+                $('.profit').empty().html('<span class="text-success">' + (new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(BotController.config.profit)) + '</span>');
             }
             if (BotController.config.profit < 0) {
-                $('.profit').empty().html('<span class="text-danger">' + parseFloat(BotController.config.profit).toFixed(2) + '</span>');
+                $('.profit').empty().html('<span class="text-danger">' + new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(BotController.config.profit) + '</span>');
             }
         }
     },
@@ -230,9 +230,9 @@ let BotController = {
             $('.method-item tr#method_' + listOpenOrders[i]['method_id'] + ' .method-pattern .step-' + listOpenOrders[i]['step']).addClass('bg-light');
         }
         // show volume
-        $('.volume').empty().text(parseFloat(BotController.config.volume).toFixed(2));
+        $('.volume').empty().text(new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(BotController.config.volume));
         // update commission
-        $('.commission').empty().text(parseFloat((BotController.config.volume / 100)).toFixed(2));
+        $('.commission').empty().text(new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(BotController.config.volume / 100));
     },
     updatePrices: function (prices) {
         if (typeof prices == 'undefined') {
@@ -488,7 +488,7 @@ let BotController = {
             let leftAmount = $('.left-header .amount').data('amount');
             let rightAmount = $('.right-header .amount').data('amount');
 
-            leftAmount = leftAmount - response.data.amount == 0 ? 0 : parseFloat(leftAmount - response.data.amount).toFixed(2);
+            leftAmount = leftAmount - response.data.amount == 0 ? 0 : (parseFloat(leftAmount) - parseFloat(response.data.amount));
             rightAmount = parseFloat(rightAmount) + parseFloat(response.data.amount);
             $('.left-header .amount').attr('data-amount', leftAmount);
             $('.left-header .amount').text(new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(leftAmount));
