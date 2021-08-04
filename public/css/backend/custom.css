@@ -155,6 +155,11 @@ a {
     border-radius: .2rem;
 }
 
+.method-item .method-signal,
+.method-item .method-pattern {
+    text-align: left;
+}
+
 .validate-method .list-group-item {
     color: #ffffff;
 }
