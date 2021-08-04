@@ -65,6 +65,19 @@ class BotController extends BackendController
                 $listMethods = $this->_getDefaultMethod($botUserInfo->id);
             }
 
+            // save method when go to first time
+            DB::beginTransaction();
+            try {
+                foreach ($listMethods as $method) {
+                    $method->step = null;
+                    $method->save();
+                }
+                DB::commit();
+            } catch (\Exception $exception) {
+                Log::error($exception);
+                DB::rollBack();
+            }
+
             // get price & candles
             list($orderCandles, $resultCandles) = $this->_getListPrices();
             $resultCandles = array_reverse($resultCandles);
