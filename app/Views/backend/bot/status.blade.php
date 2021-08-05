@@ -22,7 +22,7 @@
         <div class="col-md-6 col-12 mt-sp-2">
             <div class="mx-auto col-12 position-relative">
                 <h6 id="clock-title" class="text-center clock-title">{{ date('s') < 30 ? 'Có thể đặt lệnh' : 'Đang chờ kết quả' }}</h6>
-                <h3 id="clock-countdown" class="text-center clock text-info" onload="showTime()"></h3>
+                <h3 id="clock-countdown" class="text-center clock text-info"></h3>
             </div>
         </div>
         <div class="col-12 mx-auto mt-sp-2">

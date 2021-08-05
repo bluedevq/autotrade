@@ -39,6 +39,8 @@ return [
     'verify_expired' => 60, // minutes
     // forgot password expired date time
     'forgot_password_expired' => 60, // minutes
+    // free days after register
+    'free_days_after_register' => -1,
     // aresbo config
     'aresbo' => [
         // api
@@ -53,8 +55,9 @@ return [
             'open_order' => 'https://aresbo.com/api/wallet/binaryoption/transaction/open',
             'close_order' => 'https://aresbo.com/api/wallet/binaryoption/transaction/close',
             'get_prices' => 'https://aresbo.com/api/wallet/binaryoption/prices',
-            'move_usdtbo' => 'https://aresbo.com/api/wallet/binaryoption/move-usdtbo', // POST {amount: '2', confirmed: true}
-            'move_bousdt' => 'https://aresbo.com/api/wallet/binaryoption/move-bousdt', // POST {amount: '2', confirmed: true}
+            'move_usdtbo' => 'https://aresbo.com/api/wallet/binaryoption/move-usdtbo',
+            'move_bousdt' => 'https://aresbo.com/api/wallet/binaryoption/move-bousdt',
+            'reload_demo_balance' => 'https://aresbo.com/api/wallet/binaryoption/demo',
         ],
         // config
         'bot_status' => [

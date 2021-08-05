@@ -13,7 +13,7 @@
                         <label for="email" class="form-label" aria-hidden="true">Địa chỉ Email *</label>
                     </div>
                     <div class="col-12">
-                        <input type="email" name="email" class="form-control" id="email" value="{{ old('email') }}">
+                        <input type="text" name="email" class="form-control" id="email" value="{{ old('email') }}">
                     </div>
                 </div>
             </div>

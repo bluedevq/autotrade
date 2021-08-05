@@ -59,7 +59,7 @@ class RegisterController extends BackendController
             'email' => Arr::get($params, 'email'),
             'password' => Hash::make(Arr::get($params, 'password')),
             'name' => Arr::get($params, 'name'),
-            'expired_date' => Carbon::now()->addDays(7)->format('Y-m-d 23:59:59'),
+            'expired_date' => Carbon::now()->addDays(Common::getConfig('free_days_after_register'))->format('Y-m-d 23:59:59'),
             'status' => Common::getConfig('user_status.verify'),
         ];
         DB::beginTransaction();
@@ -140,6 +140,8 @@ class RegisterController extends BackendController
         // save user
         DB::beginTransaction();
         try {
+            $user->verify_token = null;
+            $user->verify_expired = null;
             $user->status = Common::getConfig('user_status.active');
             $user->save();
 

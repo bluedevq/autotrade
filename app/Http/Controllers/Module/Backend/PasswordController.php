@@ -159,6 +159,8 @@ class PasswordController extends BackendController
         // save user into db
         DB::beginTransaction();
         try {
+            $user->forgot_password_token = null;
+            $user->forgot_password_expired = null;
             $user->password = Hash::make($this->getParam('password'));
             $user->save();
 
