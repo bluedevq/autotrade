@@ -40,7 +40,7 @@ return [
     // forgot password expired date time
     'forgot_password_expired' => 60, // minutes
     // free days after register
-    'free_days_after_register' => -1,
+    'free_days_after_register' => 3,
     // aresbo config
     'aresbo' => [
         // api
