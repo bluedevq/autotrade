@@ -452,7 +452,7 @@ let BotController = {
         }, 1000);
     },
     moveAllMoney: function () {
-        let amount = $('.left-header .amount').text();
+        let amount = $('.left-header .amount').data('amount');
         $('#number').val(amount)
     },
     changeAmount: function () {
@@ -491,10 +491,10 @@ let BotController = {
             leftAmount = leftAmount - response.data.amount == 0 ? 0 : (parseFloat(leftAmount) - parseFloat(response.data.amount));
             rightAmount = parseFloat(rightAmount) + parseFloat(response.data.amount);
             $('.left-header .amount').attr('data-amount', leftAmount);
-            $('.left-header .amount').text(new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(leftAmount));
+            $('.left-header .amount').text(Number(leftAmount.toString().match(/^\d+(?:\.\d{0,2})?/)));
 
             $('.right-header .amount').attr('data-amount', rightAmount);
-            $('.right-header .amount').text(new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(rightAmount));
+            $('.right-header .amount').text(Number(rightAmount.toString().match(/^\d+(?:\.\d{0,2})?/)));
 
             $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + response.data.success);
             $('.toast-message-success').toast('show');
