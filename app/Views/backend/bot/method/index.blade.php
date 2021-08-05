@@ -11,7 +11,7 @@
     <div class="list-method hide not-active">
         <div class="row mt-2 list-methods-scroll">
             <div class="col-12">
-                <table class="table table-striped table-dark table-hover text-center col-12">
+                <table class="table table-striped table-dark table-hover col-12">
                     <thead>
                     <th>Tên PP</th>
                     <th class="pc">Loại PP</th>
