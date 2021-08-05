@@ -24,7 +24,7 @@ trait BotUserMethod
         foreach ($signals as $signal) {
             $text[] = Str::lower($signal) == 't' ? ('<span class="fw-bold text-success"> ' . Str::upper($signal) . '</span>') : ('<span class="fw-bold text-danger"> ' . Str::upper($signal) . '</span>');
         }
-        return implode(isMobile() ? '<br/>' : Common::getConfig('aresbo.order_signal_delimiter'), $text);
+        return implode(isMobile() ? '<br/>' : '&nbsp;', $text);
     }
 
     public function getOrderPatternText()
@@ -37,7 +37,7 @@ trait BotUserMethod
             $textTmp = Str::lower($order) == 't' ? ('<span class="fw-bold text-success step-' . $index . '"> ' . Str::upper($order) . $amount . '</span>') : ('<span class="fw-bold text-danger step-' . $index . '"> ' . Str::upper($order) . $amount . '</span>');
             $text[] = $textTmp;
         }
-        return implode(isMobile() ? '<br/>' : Common::getConfig('aresbo.order_pattern_delimiter'), $text);
+        return implode(isMobile() ? '<br/>' : '&nbsp;', $text);
     }
 
     public function getStopLossText()
