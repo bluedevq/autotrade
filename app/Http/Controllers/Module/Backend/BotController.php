@@ -65,10 +65,11 @@ class BotController extends BackendController
                 $listMethods = $this->_getDefaultMethod($botUserInfo->id);
             }
 
-            // save method when go to first time
+            // reset method when go to first time
             DB::beginTransaction();
             try {
                 foreach ($listMethods as $method) {
+                    $method->profit = null;
                     $method->step = null;
                     $method->save();
                 }
@@ -235,8 +236,16 @@ class BotController extends BackendController
                 return $this->renderErrorJson();
             }
 
+            // get method order from database
+            $methods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botQueue->bot_user_id)
+                ->where('status', Common::getConfig('aresbo.method.active'))
+                ->where(function ($q) {
+                    $q->orWhere('deleted_at', '');
+                    $q->orWhereNull('deleted_at');
+                })->get();
+
             // research method to get bet order data
-            $orderData = $this->_getOrderData($botQueue, $resultPrices);
+            $orderData = $this->_getOrderData($botQueue, $methods, $resultPrices);
             if (!is_array($orderData)) {
                 return $this->renderErrorJson();
             }
@@ -255,7 +264,8 @@ class BotController extends BackendController
                 'list_open_orders' => $betResult,
                 'order_data' => $orderData,
                 'current_amount' => $currentAmount,
-                'account_type' => $botQueue->account_type
+                'account_type' => $botQueue->account_type,
+                'methods' => $methods,
             ]);
             $this->setData($result);
             return $this->renderJson();
@@ -321,6 +331,8 @@ class BotController extends BackendController
                 'type' => $entity->getTypeText(),
                 'signal' => $entity->getSignalText(),
                 'pattern' => $entity->getOrderPatternText(),
+                'step' => $entity->step,
+                'profit' => $entity->getProfitText(),
                 'stop' => [
                     'loss' => $entity->getStopLossText(),
                     'win' => $entity->getTakeProfitText(),
@@ -684,16 +696,8 @@ class BotController extends BackendController
         return $result;
     }
 
-    protected function _getOrderData($botQueue, $resultPrices)
+    protected function _getOrderData($botQueue, $methods, $resultPrices)
     {
-        // get method order from database
-        $methods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botQueue->bot_user_id)
-            ->where('status', Common::getConfig('aresbo.method.active'))
-            ->where(function ($q) {
-                $q->orWhere('deleted_at', '');
-                $q->orWhereNull('deleted_at');
-            })->get();
-
         $accountType = $botQueue->account_type;
 
         // research and order
@@ -717,12 +721,18 @@ class BotController extends BackendController
                 $lastOrder = $this->_getBetPattern($method->order_pattern, 'type', false, $method->step);
                 $win = Str::lower($lastOrder) == Str::lower($resultPrices[0]['order_result']);
                 $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
+                $amount = $this->_getBetPattern($method->order_pattern, 'amount', false, $method->step);
+                $method->profit = $win ? ($method->profit + $amount * 0.95) : ($method->profit - $amount);
                 // Martingale: next step order after lose
                 if ($method->type == Common::getConfig('aresbo.method_type.value.martingale')) {
                     if (!$win && isset($orderPatterns[$method->step + 1])) {
-                        // cần kiểm tra step
-                        $result[] = $this->_getOrder($method, $accountType, $method->step + 1);
-                        $method->step = $method->step + 1;
+                        $orderTmp = $this->_getOrder($method, $accountType, $method->step + 1);
+                        if (blank($orderTmp)) {
+                            $method->step = null;
+                        } else {
+                            $result[] = $orderTmp;
+                            $method->step = $method->step + 1;
+                        }
                     } else {
                         $method->step = null;
                         if ($this->_mapMethod($signals, $resultPrices)) {
@@ -735,9 +745,13 @@ class BotController extends BackendController
                 // Paroli: next step order after win
                 if ($method->type == Common::getConfig('aresbo.method_type.value.paroli')) {
                     if ($win && isset($orderPatterns[$method->step + 1])) {
-                        // cần kiểm tra step
-                        $result[] = $this->_getOrder($method, $accountType, $method->step + 1);
-                        $method->step = $method->step + 1;
+                        $orderTmp = $this->_getOrder($method, $accountType, $method->step + 1);
+                        if (blank($orderTmp)) {
+                            $method->step = null;
+                        } else {
+                            $result[] = $orderTmp;
+                            $method->step = $method->step + 1;
+                        }
                     } else {
                         $method->step = null;
                         if ($this->_mapMethod($signals, $resultPrices)) {
@@ -779,20 +793,30 @@ class BotController extends BackendController
     {
         $listOpenOrders = Arr::get($params, 'list_open_orders');
         $orderData = Arr::get($params, 'order_data');
+        $methods = Arr::get($params, 'methods');
 
         $currentAmount = Arr::get($params, 'current_amount');
         $accountType = Arr::get($params, 'account_type');
         $result['current_amount'] = $accountType == Common::getConfig('aresbo.account_demo') ? Arr::get($currentAmount, 'demo_balance') : Arr::get($currentAmount, 'available_balance');
         $result['current_amount'] = number_format($result['current_amount'], 2);
 
+        // update open orders
         foreach ($listOpenOrders as $index => $openOrder) {
             $result['open_orders'][] = [
                 'time' => $openOrder['time'],
                 'amount' => $openOrder['amt'],
                 'type' => $openOrder['type'],
-                'method' => Arr::get($orderData, $index . '.method'),
+                'method_name' => Arr::get($orderData, $index . '.method_name'),
                 'method_id' => Arr::get($orderData, $index . '.method_id'),
                 'step' => Arr::get($orderData, $index . '.step'),
+            ];
+        }
+
+        // update list method
+        foreach ($methods as $method) {
+            $result['methods'][] = [
+                'id' => $method->id,
+                'profit' => $method->getProfitText()
             ];
         }
 
@@ -812,15 +836,26 @@ class BotController extends BackendController
 
     protected function _getOrder($method, $accountType, $step = 0)
     {
+        // check order pattern
         $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
         if ($method->type == Common::getConfig('aresbo.method_type.value.martingale') && !isset($orderPatterns[$step])) {
             return [];
         }
+
+        // bet amount
+        $amount = $this->_getBetPattern($method->order_pattern, 'amount', true, $step);
+
+        // check profit
+        if (($method->stop_loss && ($method->profit - $amount < $method->stop_loss)) ||
+            ($method->take_profit && ($method->profit + $amount * 0.95 > $method->take_profit))) {
+            return [];
+        }
+
         return [
             'betAccountType' => Common::getConfig('aresbo.bet_account_type.' . $accountType),
-            'betAmount' => $this->_getBetPattern($method->order_pattern, 'amount', true, $step),
+            'betAmount' => $amount,
             'betType' => $this->_getBetPattern($method->order_pattern, 'type', true, $step),
-            'method' => $method->name,
+            'method_name' => $method->name,
             'method_id' => $method->id,
             'step' => $step,
         ];

@@ -171,6 +171,9 @@ let BotController = {
                 BotController.updateNewOrders(listOpenOrders);
             }
 
+            // update method
+            BotController.updateMethods(betOrder.methods)
+
             // update amount
             $('.current-amount').empty().text(betOrder.current_amount);
         });
@@ -200,10 +203,16 @@ let BotController = {
                 }
             }
             if (BotController.config.profit > 0) {
-                $('.profit').empty().html('<span class="text-success">' + (new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(BotController.config.profit)) + '</span>');
+                $('.profit').empty().html('<span class="text-success">' + (new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(BotController.config.profit)) + '</span>');
             }
             if (BotController.config.profit < 0) {
-                $('.profit').empty().html('<span class="text-danger">' + new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(BotController.config.profit) + '</span>');
+                $('.profit').empty().html('<span class="text-danger">' + new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(BotController.config.profit) + '</span>');
             }
         }
     },
@@ -215,7 +224,7 @@ let BotController = {
             let dateTime = new Date(listOpenOrders[i].time),
                 newOrder = '<tr class="open-order">\n' +
                     '<td class="time-order" data-time="' + listOpenOrders[i].time + '">' + BotController.pad(dateTime.getHours()) + ':' + BotController.pad(dateTime.getMinutes()) + ':' + BotController.pad(dateTime.getSeconds()) + '</td>\n' +
-                    '<td>' + listOpenOrders[i].method + '</td>\n' +
+                    '<td>' + listOpenOrders[i].method_name + '</td>\n' +
                     '<td class="order-type" data-type="' + listOpenOrders[i].type + '">' + BotController.getBetTypeText(listOpenOrders[i].type) + '</td>\n' +
                     '<td class="text-info order-amount" data-amount="' + listOpenOrders[i].amount + '"><span class="fas fa-dollar-sign"></span><span class="fw-bold">' + listOpenOrders[i].amount + '</span></td>\n' +
                     '<td class="order-result">' + BotController.config.orderStatus.new + '</td>\n' +
@@ -226,13 +235,19 @@ let BotController = {
             // update volume
             BotController.config.volume += listOpenOrders[i].amount;
 
-            // update method
+            // update method pattern
             $('.method-item tr#method_' + listOpenOrders[i]['method_id'] + ' .method-pattern .step-' + listOpenOrders[i]['step']).addClass('bg-light');
         }
         // show volume
-        $('.volume').empty().text(new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(BotController.config.volume));
+        $('.volume').empty().text(new Intl.NumberFormat(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(BotController.config.volume));
         // update commission
-        $('.commission').empty().text(new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(BotController.config.volume / 100));
+        $('.commission').empty().text(new Intl.NumberFormat(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(BotController.config.volume / 100));
     },
     updatePrices: function (prices) {
         if (typeof prices == 'undefined') {
@@ -257,6 +272,12 @@ let BotController = {
 
         // update last order
         BotController.updateLastOrders(prices[prices.length - 1].order_result == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[prices.length - 1].open_order, prices[prices.length - 1].close_order);
+    },
+    updateMethods: function (methods) {
+        for (let i = 0; i < methods.length; i++) {
+            // update method profit
+            $('.method-item tr#method_' + methods[i]['id'] + ' .method-profit').empty().html(methods[i]['profit']);
+        }
     },
     pad: function (t) {
         let st = "" + t;
@@ -368,6 +389,8 @@ let BotController = {
             document.getElementById('type').selectedIndex = entity.type - 1;
             $('#form-method #signal').val(entity.signal);
             $('#form-method #order_pattern').val(entity.order_pattern);
+            $('#form-method #step').val(entity.step);
+            $('#form-method #profit').val(entity.profit);
             $('#form-method #stop_loss').val(entity.stop_loss);
             $('#form-method #take_profit').val(entity.take_profit);
             document.getElementById('status').selectedIndex = entity.status;
@@ -385,6 +408,8 @@ let BotController = {
                 type: $('#form-method #type').val(),
                 signal: $('#form-method #signal').val(),
                 order_pattern: $('#form-method #order_pattern').val(),
+                step: $('#form-method #step').val(),
+                profit: $('#form-method #profit').val(),
                 stop_loss: $('#form-method #stop_loss').val(),
                 take_profit: $('#form-method #take_profit').val(),
                 status: $('#form-method #status').val(),
@@ -399,6 +424,7 @@ let BotController = {
                     '<td class="pc">' + entity.type + '</td>' +
                     '<td class="method-signal">' + entity.signal + '</td>' +
                     '<td class="method-pattern">' + entity.pattern + '</td>' +
+                    '<td class="method-profit">' + entity.profit + '</td>' +
                     '<td class="pc">' + entity.stop.loss + '</td>' +
                     '<td class="pc">' + entity.stop.win + '</td>' +
                     '<td>' + entity.status + '</td>' +

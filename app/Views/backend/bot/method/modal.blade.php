@@ -102,6 +102,8 @@
                         <div class="col-md-5">&nbsp;</div>
                         <div class="col-md-4">
                             <input type="hidden" name="id" id="id" value="">
+                            <input type="hidden" name="step" id="step" value="">
+                            <input type="hidden" name="profit" id="profit" value="">
                             <button class="btn btn-lg btn-primary btn-block col-12" type="button" onclick="BotController.validateMethod()">
                                 <span class="fas fa-save" aria-hidden="true">&nbsp;</span>Lưu lại
                             </button>

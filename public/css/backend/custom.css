@@ -366,9 +366,4 @@ input[type=number] {
     .method-action .list-inline-item a {
         padding: 0.37rem 0.75rem;
     }
-
-    .method-item .method-signal,
-    .method-item .method-pattern {
-        text-align: center;
-    }
 }

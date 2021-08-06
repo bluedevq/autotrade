@@ -21,6 +21,7 @@ class CreateBotUserMethodsTable extends Migration
             $table->text('signal');
             $table->text('order_pattern');
             $table->integer('step')->nullable();
+            $table->float('profit', 13)->nullable();
             $table->float('stop_loss', 13)->nullable();
             $table->float('take_profit', 13)->nullable();
             $table->smallInteger('status');

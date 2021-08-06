@@ -15,8 +15,9 @@
                     <thead>
                     <th>Tên PP</th>
                     <th class="pc">Loại PP</th>
-                    <th>Tín hiệu</th>
-                    <th>Lệnh</th>
+                    <th class="text-start">Tín hiệu</th>
+                    <th class="text-start">Lệnh</th>
+                    <th>+/-</th>
                     <th class="pc">Cắt lỗ</th>
                     <th class="pc">Chốt lời</th>
                     <th>Trạng thái</th>
@@ -32,8 +33,9 @@
                             <td class="pc">{{ $method->getTypeText() }}</td>
                             <td class="method-signal">{!! $method->getSignalText() !!}</td>
                             <td class="method-pattern">{!! $method->getOrderPatternText() !!}</td>
-                            <td class="pc">{{ $method->getStopLossText() }}</td>
-                            <td class="pc">{{ $method->getTakeProfitText() }}</td>
+                            <td class="method-profit">{!! $method->getProfitText() !!}</td>
+                            <td class="pc">{!! $method->getStopLossText() !!}</td>
+                            <td class="pc">{!! $method->getTakeProfitText() !!}</td>
                             <td>{{ $method->getMethodStatusText() }}</td>
                             <td>
                                 <div class="row">

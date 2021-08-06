@@ -22,7 +22,7 @@ trait BotUserMethod
         $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $this->signal);
         $text = [];
         foreach ($signals as $signal) {
-            $text[] = Str::lower($signal) == 't' ? ('<span class="fw-bold text-success"> ' . Str::upper($signal) . '</span>') : ('<span class="fw-bold text-danger"> ' . Str::upper($signal) . '</span>');
+            $text[] = Str::lower($signal) == 't' ? ('<span class="text-success-custom">' . Str::upper($signal) . '</span>') : ('<span class="text-danger-custom">' . Str::upper($signal) . '</span>');
         }
         return implode(isMobile() ? '<br/>' : '&nbsp;', $text);
     }
@@ -34,10 +34,19 @@ trait BotUserMethod
         foreach ($orderPatterns as $index => $orderPattern) {
             $order = Str::substr($orderPattern, 0, 1);
             $amount = Str::substr($orderPattern, 1, Str::length($orderPattern) - 1);
-            $textTmp = Str::lower($order) == 't' ? ('<span class="fw-bold text-success step-' . $index . '"> ' . Str::upper($order) . $amount . '</span>') : ('<span class="fw-bold text-danger step-' . $index . '"> ' . Str::upper($order) . $amount . '</span>');
+            $bgLight = !blank($this->step) && $index === intval($this->step) ? ' bg-light ' : '';
+            $textTmp = Str::lower($order) == 't' ? ('<span class="text-success-custom step-' . $index . $bgLight . '">' . Str::upper($order) . $amount . '</span>') : ('<span class="text-danger-custom step-' . $index . $bgLight . '">' . Str::upper($order) . $amount . '</span>');
             $text[] = $textTmp;
         }
         return implode(isMobile() ? '<br/>' : '&nbsp;', $text);
+    }
+
+    public function getProfitText()
+    {
+        if (blank($this->profit)) {
+            return '';
+        }
+        return $this->profit > 0 ? ('<span class="text-success-custom">' . number_format($this->profit, 2) . '</span>') : ('<span class="text-danger-custom">' . number_format($this->profit, 2) . '</span>');
     }
 
     public function getStopLossText()
