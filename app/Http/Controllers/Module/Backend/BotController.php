@@ -233,6 +233,13 @@ class BotController extends BackendController
                 Session::put(self::REFRESH_TOKEN, Arr::get($newRefreshToken, 'd.refresh_token'));
             }
 
+            // get price
+            list($orderPrices, $resultPrices) = $this->_getListPrices();
+            if (blank($resultPrices)) {
+                return $this->renderErrorJson();
+            }
+            $this->setData(['prices' => $resultPrices]);
+
             // check bot queue has running
             $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
             if (blank($botUser)) {
@@ -252,13 +259,6 @@ class BotController extends BackendController
                     $q->orWhere('deleted_at', '');
                     $q->orWhereNull('deleted_at');
                 })->get();
-
-            // get price
-            list($orderPrices, $resultPrices) = $this->_getListPrices();
-            if (blank($resultPrices)) {
-                return $this->renderErrorJson();
-            }
-            $this->setData(['prices' => $resultPrices]);
 
             // research method to get bet order data
             $orderData = $this->_getOrderData($botQueue, $methods, $resultPrices);

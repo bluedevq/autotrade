@@ -62,6 +62,7 @@ let BotController = {
         success: [],
         errors: [],
     },
+    listPrices: [],
     showHidePassword: function (button) {
         let passwordInput = $(button).parent('.input-group').find('input#password');
         console.log($(passwordInput).attr('type'));
@@ -264,8 +265,12 @@ let BotController = {
         }
 
         prices = prices.reverse();
-        let listPrices = '';
+        let listPrices = '',
+            updateFirstTime = BotController.listPrices.length === 0;
         for (let i = 0; i < prices.length; i++) {
+            if (i === 0 || updateFirstTime) {
+                BotController.listPrices.push(prices[i]);
+            }
             let date = new Date(prices[i].open_order),
                 orderType = prices[i].order_result;
 
