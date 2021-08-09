@@ -89,9 +89,7 @@ let BotController = {
         }, function (response) {
             // errors
             if (!response.status) {
-                $('.toast-message-error .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors);
-                $('.toast-message-error').toast('show');
-                hideLoading();
+                BotController.showMessage(response.data.errors, 'error');
                 return false;
             }
             // login with 2fa
@@ -450,8 +448,7 @@ let BotController = {
             }
             $('#form-method').modal('hide');
             BotController.resetForm();
-            $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + response.data.success);
-            $('.toast-message-success').toast('show');
+            BotController.showMessage(response.data.success);
         });
     },
     resetForm: function () {
@@ -518,8 +515,7 @@ let BotController = {
                     window.location.href = response.data.url;
                     return false;
                 }
-                $('.toast-message-error .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors);
-                $('.toast-message-error').toast('show');
+                BotController.showMessage(response.data.errors, 'error');
                 return false;
             }
             let leftAmount = $('.left-header .amount').data('amount');
@@ -533,9 +529,49 @@ let BotController = {
             $('.right-header .amount').attr('data-amount', rightAmount);
             $('.right-header .amount').text(Number(rightAmount.toString().match(/^\d+(?:\.\d{0,2})?/)));
 
-            $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + response.data.success);
-            $('.toast-message-success').toast('show');
+            BotController.showMessage(response.data.success);
         });
+    },
+    showMessage: function (message, type) {
+        if (type === 'error') {
+            $('.toast-message-error .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + message);
+            $('.toast-message-error').toast('show');
+        } else {
+            $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + message);
+            $('.toast-message-success').toast('show');
+        }
+
+        hideLoading();
+    },
+    startAuto: function () {
+        let url = BotController.options.isRunning === 'true' ? BotController.config.url.stopAuto : BotController.config.url.startAuto;
+        sendRequest({
+            url: url,
+            type: 'POST',
+            data: {
+                account_type: $('.bot-account').val(),
+            },
+        }, function (response) {
+            if (!response.status) {
+                BotController.showMessage(response.data.errors, 'error');
+                return false;
+            }
+            BotController.options.isRunning === 'true' ? BotController.afterStopAuto() : BotController.afterStartAuto();
+        });
+    },
+    afterStartAuto: function () {
+        BotController.options.isRunning = 'true';
+        $('.bot-account').attr('disabled', 'disabled').addClass('disabled');
+        $('.bot-status-btn').addClass('btn-danger').removeClass('btn-success');
+        $('.bot-status-icon').addClass('fa-stop-circle').removeClass('fa-play-circle');
+        $('.bot-status-text').empty().text('Dừng');
+    },
+    afterStopAuto: function () {
+        BotController.options.isRunning = 'false';
+        $('.bot-account').removeAttr('disabled').removeClass('disabled');
+        $('.bot-status-btn').removeClass('btn-danger').addClass('btn-success');
+        $('.bot-status-icon').removeClass('fa-stop-circle').addClass('fa-play-circle');
+        $('.bot-status-text').empty().text('Chạy');
     },
     updateSettingProfit: function (botQueue) {
         let profit = botQueue.profit;
@@ -554,12 +590,7 @@ let BotController = {
         // check bot queue was stopped
         if (botQueue.status === 0) {
             showLoading();
-            BotController.options.isRunning = false;
-            $('.bot-status-btn').removeAttr('disabled').removeClass('btn-danger').addClass('btn-success');
-            $('.bot-account').removeAttr('disabled').removeClass('disabled');
-            $('.bot-status-icon').removeClass('fa-stop-circle').addClass('fa-play-circle');
-            $('.bot-status-text').empty().text('Chạy');
-            $('.start-auto').attr('action', BotController.config.url.startAuto);
+            BotController.afterStopAuto();
             setTimeout(function () {
                 hideLoading();
             }, 1000);
@@ -581,6 +612,7 @@ let BotController = {
             },
         }, function (response) {
             if (!response.status) {
+                $('.validate-profit').empty().html('<li class="list-group-item bg-danger-custom"><i class="fas fa-exclamation-triangle">&nbsp;</i>' + response.data.errors + '</li>');
                 return false;
             }
             $('.stop-loss').empty().text(response.data.stop_loss);
@@ -592,5 +624,6 @@ let BotController = {
     resetProfit: function () {
         $('#bot_stop_loss').val('');
         $('#bot_take_profit').val('');
+        $('.validate-profit').val('');
     },
 };

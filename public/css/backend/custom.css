@@ -139,7 +139,7 @@ a {
     flex-wrap: wrap;
     --bs-gutter-x: 1.5rem;
     --bs-gutter-y: 0;
-    background-color: #333366!important;
+    background-color: #333366 !important;
 }
 
 .setting-profit .bg-secondary div {
@@ -209,7 +209,8 @@ a {
     text-align: left;
 }
 
-.validate-method .list-group-item {
+.validate-method .list-group-item,
+.validate-profit .list-group-item {
     color: #ffffff;
 }
 

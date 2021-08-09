@@ -11,6 +11,7 @@ use App\Model\Base\BaseModel;
 class BotQueue extends BaseModel
 {
     use \App\Model\Presenters\BotQueue;
+    use \App\Model\Validators\BotQueue;
 
     protected $table = 'bot_queues';
 

@@ -80,7 +80,7 @@
                     <div class="row mt-2">
                         <div class="col-md-2 col-0 pc">&nbsp;</div>
                         <div class="col-md-3">
-                            <label for="take_profit" class="form-label fw-bold" aria-hidden="true">Chốt lời</label>
+                            <label for="take_profit" class="form-label fw-bold" aria-hidden="true">Chốt lãi</label>
                         </div>
                         <div class="col-md-4">
                             <input type="text" name="take_profit" class="form-control" id="take_profit" value="">
@@ -149,13 +149,15 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-danger">
             <div class="modal-header">
-                <h4 class="modal-title">Cài đặt cắt lỗ / chốt lời</h4>
+                <h4 class="modal-title">Cài đặt cắt lỗ / chốt lãi</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form data-action="{{ route('bot.update.profit') }}" method="POST" class="form-horizontal"
-                      enctype="multipart/form-data">
+                <form data-action="{{ route('bot.update.profit') }}" method="POST" class="form-horizontal" enctype="multipart/form-data">
                     @csrf
+                    <div class="mt-2">
+                        <ul class="list-group validate-profit"></ul>
+                    </div>
                     <div class="row mt-2">
                         <div class="col-md-2 col-0 pc">&nbsp;</div>
                         <div class="col-md-3">
@@ -168,7 +170,7 @@
                     <div class="row mt-2">
                         <div class="col-md-2 col-0 pc">&nbsp;</div>
                         <div class="col-md-3">
-                            <label for="bot_take_profit" class="form-label fw-bold" aria-hidden="true">Chốt lời</label>
+                            <label for="bot_take_profit" class="form-label fw-bold" aria-hidden="true">Chốt lãi</label>
                         </div>
                         <div class="col-md-4">
                             <input type="text" name="take_profit" class="form-control" id="bot_take_profit" value="">

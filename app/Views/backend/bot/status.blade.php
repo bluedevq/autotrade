@@ -2,7 +2,7 @@
     <h3>Chọn tài khoản</h3>
     <div class="row">
         <div class="col-md-6 col-12">
-            <form method="post" action="{{ $isRunning ? route('bot.stop_auto') : route('bot.start_auto') }}" class="form-horizontal start-auto" enctype="multipart/form-data" show-loading="1">
+            <form method="POST" class="form-horizontal start-auto" enctype="multipart/form-data" show-loading="1">
                 @csrf
                 <div class="row">
                     <div class="col-6">
@@ -12,7 +12,7 @@
                         </select>
                     </div>
                     <div class="col-6">
-                        <button class="btn btn-{{ $isRunning ? 'danger' : 'success' }} btn-block col-12 bot-status-btn" type="submit" {{ $userExpired && $userExpired->greaterThanOrEqualTo(\Carbon\Carbon::now()) ? '' : 'disabled' }}>
+                        <button class="btn btn-{{ $isRunning ? 'danger' : 'success' }} btn-block col-12 bot-status-btn" type="button" onclick="BotController.startAuto()" {{ $userExpired && $userExpired->greaterThanOrEqualTo(\Carbon\Carbon::now()) ? '' : 'disabled' }}>
                             <span class="fas fa-{{ $isRunning ? 'stop' : 'play' }}-circle bot-status-icon" aria-hidden="true">&nbsp;</span><span class="bot-status-text">{{ $isRunning ? 'Dừng' : 'Chạy' }}</span> Auto
                         </button>
                     </div>

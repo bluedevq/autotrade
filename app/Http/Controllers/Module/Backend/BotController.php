@@ -495,7 +495,14 @@ class BotController extends BackendController
         $stopLoss = $this->getParam('stop_loss');
         $takeProfit = $this->getParam('take_profit');
 
-        // @todo validate
+        // validate
+        $rules = $this->fetchModel(BotQueue::class)->rules();
+        $messages = $this->fetchModel(BotQueue::class)->messages();
+        $validator = Validator::make($this->getParams(), $rules, $messages);
+        if ($validator->fails()) {
+            $this->setData(['errors' => $validator->errors()->first()]);
+            return $this->renderErrorJson();
+        }
 
         // check bot user exist
         $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
@@ -665,52 +672,52 @@ class BotController extends BackendController
         // check bot user exist
         $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if (blank($botUser)) {
-            return $this->_to('bot.clear_token');
+            $this->setData(['errors' => 'Lỗi người dùng. Vui lòng thử lại.']);
+            return $this->renderErrorJson();
         }
         // check user exist
         $user = backendGuard()->user();
         if (blank($user)) {
-            return $this->_to('bot.clear_token');
-        }
-        // check user expired
-        $userExpired = Carbon::parse($user->expired_date)->lessThan(Carbon::now());
-        $botQueueData = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
-            ->where('bot_user_id', $botUser->id)
-            ->first();
-        $now = Carbon::now();
-        $botQueue = [
-            'user_id' => backendGuard()->user()->id,
-            'bot_user_id' => $botUser->id,
-            'account_type' => $this->getParam('account_type', Common::getConfig('aresbo.account_demo')),
-            'status' => $stop ? Common::getConfig('aresbo.bot_status.stop') : Common::getConfig('aresbo.bot_status.start'),
-            'created_at' => $now,
-            'updated_at' => $now,
-        ];
-        // check user expired
-        if ($userExpired) {
-            $botQueue['status'] = Common::getConfig('aresbo.bot_status.stop');
-        }
-        if ($botQueueData) {
-            $botQueue['id'] = $botQueueData->id;
-            unset($botQueue['created_at']);
+            $this->setData(['errors' => 'Lỗi người dùng. Vui lòng thử lại.']);
+            return $this->renderErrorJson();
         }
 
         DB::beginTransaction();
         try {
-            $botQueueData ? $this->fetchModel(BotQueue::class)->where('id', $botQueueData->id)->update($botQueue) : $this->fetchModel(BotQueue::class)->insert($botQueue);
+            // check user expired
+            $userExpired = Carbon::parse($user->expired_date)->lessThan(Carbon::now());
+            $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
+                ->where('bot_user_id', $botUser->id)
+                ->first();
+            if (blank($botQueue)) {
+                $botQueue = $this->fetchModel(BotQueue::class);
+                $botQueue->user_id = backendGuard()->user()->id;
+                $botQueue->bot_user_id = $botUser->id;
+            }
+            $botQueue->account_type = $this->getParam('account_type', Common::getConfig('aresbo.account_demo'));
+            $botQueue->status = $stop ? Common::getConfig('aresbo.bot_status.stop') : Common::getConfig('aresbo.bot_status.start');
+
+            // check user expired
+            if ($userExpired) {
+                $botQueue->status = Common::getConfig('aresbo.bot_status.stop');
+            }
+            $botQueue->save();
             DB::commit();
             // check user expired
             if ($userExpired) {
-                return $this->_to('bot.index')->withErrors(new MessageBag(['Tài khoản của bạn đã hết hạn. Vui lòng liên hệ admin để được hỗ trợ.']));
+                $this->setData(['errors' => new MessageBag(['errors' => 'Tài khoản của bạn đã hết hạn. Vui lòng liên hệ admin để được hỗ trợ.'])]);
+                return $this->renderErrorJson();
             }
+            $this->setData(['success' => ($stop ? 'Dừng' : 'Chạy') . ' auto thất bại, vui lòng thử lại.']);
+
+            return $this->renderJson();
         } catch (\Exception $exception) {
-            DB::rollBack();
             Log::error($exception);
-            $errors = new MessageBag([($stop ? 'Dừng' : 'Chạy') . ' auto thất bại, vui lòng thử lại.']);
-            return $this->_to('bot.index')->withErrors($errors);
+            DB::rollBack();
+            $this->setData(['errors' => new MessageBag(['errors' => ($stop ? 'Dừng' : 'Chạy') . ' auto thất bại, vui lòng thử lại.'])]);
         }
 
-        return $this->_to('bot.index');
+        return $this->renderErrorJson();
     }
 
     protected function _getListOrders($params = [], $open = true)

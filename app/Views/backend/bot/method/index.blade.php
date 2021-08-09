@@ -21,7 +21,7 @@
                     <th class="text-start">Lệnh</th>
                     <th>+/-</th>
                     <th class="pc">Cắt lỗ</th>
-                    <th class="pc">Chốt lời</th>
+                    <th class="pc">Chốt lãi</th>
                     <th>Trạng thái</th>
                     <th><span class="pc">Thao tác</span></th>
                     </thead>
