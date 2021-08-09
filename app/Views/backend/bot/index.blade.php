@@ -27,7 +27,7 @@
             <hr>
             @include('backend.bot.method.index')
             @include('backend.bot.history')
-            @include('backend.bot.method.modal')
+            @include('backend.bot.modal')
         </div>
     @endif
 @stop
@@ -38,6 +38,8 @@
             BotController.config.url.login = '{{ route('bot.login') }}';
             BotController.config.url.bet = '{{ route('bot.bet') }}';
             BotController.config.url.research = '{{ route('bot_method.research') }}';
+            BotController.config.url.startAuto = '{{ route('bot.start_auto') }}';
+            BotController.config.url.stopAuto = '{{ route('bot.stop_auto') }}';
             BotController.config.startAt = '{{ time() * 1000 }}';
 
             // show clock

@@ -8,6 +8,8 @@
     <div class="col-md-4 col-lg-3 col-6 mt-sp-2 add-method-btn hide">
         <a class="btn btn-success col-12" href="javascript:void(0)" onclick="BotController.createMethod()"><span class="fas fa-plus">&nbsp;</span>Thêm</a>
     </div>
+</div>
+<div class="row mt-2">
     <div class="list-method hide not-active">
         <div class="row mt-2 list-methods-scroll">
             <div class="col-12">
@@ -28,24 +30,24 @@
                         <tr class="empty"><td colspan="8">Chưa có phương pháp nào</td></tr>
                     @else
                         @foreach($methods as $method)
-                        <tr id="method_{{ $method->id }}">
-                            <td>{{ $method->getNameText() }}</td>
-                            <td class="pc">{{ $method->getTypeText() }}</td>
-                            <td class="method-signal">{!! $method->getSignalText() !!}</td>
-                            <td class="method-pattern">{!! $method->getOrderPatternText() !!}</td>
-                            <td class="method-profit">{!! $method->getProfitText() !!}</td>
-                            <td class="pc">{!! $method->getStopLossText() !!}</td>
-                            <td class="pc">{!! $method->getTakeProfitText() !!}</td>
-                            <td>{{ $method->getMethodStatusText() }}</td>
-                            <td>
-                                <div class="row">
-                                    <ul class="list-inline method-action">
-                                        <li class="list-inline-item"><a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="{{ route('bot_method.edit', $method->id) }}" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a></li>
-                                        <li class="list-inline-item"><a class="btn btn-danger" onclick="BotController.deleteMethodConfirm('{{ $method->getNameText() }}', '{{ $method->id }}')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a></li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
+                            <tr id="method_{{ $method->id }}">
+                                <td>{{ $method->getNameText() }}</td>
+                                <td class="pc">{{ $method->getTypeText() }}</td>
+                                <td class="method-signal">{!! $method->getSignalText() !!}</td>
+                                <td class="method-pattern">{!! $method->getOrderPatternText() !!}</td>
+                                <td class="method-profit">{!! $method->getProfitText() !!}</td>
+                                <td class="pc">{!! $method->getStopLossText() !!}</td>
+                                <td class="pc">{!! $method->getTakeProfitText() !!}</td>
+                                <td>{{ $method->getMethodStatusText() }}</td>
+                                <td>
+                                    <div class="row">
+                                        <ul class="list-inline method-action">
+                                            <li class="list-inline-item"><a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="{{ route('bot_method.edit', $method->id) }}" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a></li>
+                                            <li class="list-inline-item"><a class="btn btn-danger" onclick="BotController.deleteMethodConfirm('{{ $method->getNameText() }}', '{{ $method->id }}')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
                         @endforeach
                     @endif
                     </tbody>

@@ -18,6 +18,9 @@ class CreateBotQueuesTable extends Migration
             $table->integer('user_id');
             $table->integer('bot_user_id');
             $table->smallInteger('account_type');
+            $table->float('profit', 13)->nullable();
+            $table->float('stop_loss', 13)->nullable();
+            $table->float('take_profit', 13)->nullable();
             $table->smallInteger('status');
             $table->timestamps();
             $table->softDeletes();

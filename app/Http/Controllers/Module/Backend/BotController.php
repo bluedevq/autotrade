@@ -52,6 +52,13 @@ class BotController extends BackendController
             $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
                 ->where('bot_user_id', $botUserInfo->id)
                 ->first();
+            if (blank($botQueue)) {
+                $botQueue = $this->fetchModel(BotQueue::class);
+                $botQueue->user_id = backendGuard()->user()->id;
+                $botQueue->bot_user_id = $botUserInfo->id;
+                $botQueue->account_type = Common::getConfig('aresbo.account_demo');
+                $botQueue->status = Common::getConfig('aresbo.bot_status.stop');
+            }
 
             // get list methods
             $listMethods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botUserInfo->id)
@@ -65,14 +72,23 @@ class BotController extends BackendController
                 $listMethods = $this->_getDefaultMethod($botUserInfo->id);
             }
 
-            // reset method when go to first time
+            // reset method and bot queue profit when go to first time
             DB::beginTransaction();
             try {
+                // reset method
                 foreach ($listMethods as $method) {
                     $method->profit = null;
                     $method->step = null;
                     $method->save();
                 }
+
+                // reset bot queue
+                $botQueue->profit = null;
+                $botQueue->stop_loss = null;
+                $botQueue->take_profit = null;
+                $botQueue->save();
+
+                // commit data
                 DB::commit();
             } catch (\Exception $exception) {
                 Log::error($exception);
@@ -217,13 +233,6 @@ class BotController extends BackendController
                 Session::put(self::REFRESH_TOKEN, Arr::get($newRefreshToken, 'd.refresh_token'));
             }
 
-            // get price
-            list($orderPrices, $resultPrices) = $this->_getListPrices();
-            if (blank($resultPrices)) {
-                return $this->renderErrorJson();
-            }
-            $this->setData(['prices' => $resultPrices]);
-
             // check bot queue has running
             $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
             if (blank($botUser)) {
@@ -244,6 +253,13 @@ class BotController extends BackendController
                     $q->orWhereNull('deleted_at');
                 })->get();
 
+            // get price
+            list($orderPrices, $resultPrices) = $this->_getListPrices();
+            if (blank($resultPrices)) {
+                return $this->renderErrorJson();
+            }
+            $this->setData(['prices' => $resultPrices]);
+
             // research method to get bet order data
             $orderData = $this->_getOrderData($botQueue, $methods, $resultPrices);
             if (!is_array($orderData)) {
@@ -261,6 +277,7 @@ class BotController extends BackendController
 
             // mapping result
             $result = $this->_mapOpenOrders([
+                'bot_queue' => $botQueue,
                 'list_open_orders' => $betResult,
                 'order_data' => $orderData,
                 'current_amount' => $currentAmount,
@@ -472,6 +489,42 @@ class BotController extends BackendController
         return $this->renderErrorJson();
     }
 
+    public function updateProfit()
+    {
+        $id = $this->getParam('id');
+        $stopLoss = $this->getParam('stop_loss');
+        $takeProfit = $this->getParam('take_profit');
+
+        // @todo validate
+
+        // check bot user exist
+        $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        if (blank($botUser)) {
+            return $this->_to('bot.clear_token');
+        }
+
+        DB::beginTransaction();
+        try {
+            $entity = $this->fetchModel(BotQueue::class)->where('id', $id)->first();
+            $entity->stop_loss = $stopLoss;
+            $entity->take_profit = $takeProfit;
+            $entity->save();
+            $this->setData([
+                'stop_loss' => $entity->getStopLoss(),
+                'take_profit' => $entity->getTakeProfit(),
+            ]);
+
+            DB::commit();
+
+            return $this->renderJson();
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            DB::rollBack();
+            $this->setData(['errors' => 'Đã xảy ra lỗi. Vui lòng thử lại.']);
+        }
+        return $this->renderErrorJson();
+    }
+
     protected function _getToken($params = [], $isLogin = false)
     {
         $params['client_id'] = 'aresbo-web';
@@ -615,12 +668,7 @@ class BotController extends BackendController
             return $this->_to('bot.clear_token');
         }
         // check user exist
-        $user = $this->fetchModel(User::class)
-            ->where('status', Common::getConfig('user_status.active'))
-            ->where(function ($q) {
-                $q->orWhere('deleted_at', '');
-                $q->orWhereNull('deleted_at');
-            })->first();
+        $user = backendGuard()->user();
         if (blank($user)) {
             return $this->_to('bot.clear_token');
         }
@@ -702,6 +750,7 @@ class BotController extends BackendController
 
         // research and order
         $result = [];
+        $totalProfit = blank($botQueue->profit) ? 0 : $botQueue->profit;
         foreach ($methods as $method) {
             // reverse signal
             $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
@@ -723,6 +772,16 @@ class BotController extends BackendController
                 $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
                 $amount = $this->_getBetPattern($method->order_pattern, 'amount', false, $method->step);
                 $method->profit = $win ? ($method->profit + $amount * 0.95) : ($method->profit - $amount);
+                $totalProfit += $win ? ($amount * 0.95) : (-1 * $amount);
+
+                // check stop loss or take profit total
+                if (($botQueue->stop_loss && $totalProfit - $amount < $botQueue->stop_loss) || ($botQueue->take_profit && $totalProfit > $botQueue->take_profit)) {
+                    $botQueue->profit = $totalProfit;
+                    $botQueue->status = Common::getConfig('aresbo.bot_status.stop');
+                    $botQueue->save();
+                    return [];
+                }
+
                 // Martingale: next step order after lose
                 if ($method->type == Common::getConfig('aresbo.method_type.value.martingale')) {
                     if (!$win && isset($orderPatterns[$method->step + 1])) {
@@ -766,12 +825,19 @@ class BotController extends BackendController
             $method->save();
         }
 
+        // save total profit for bot queue
+        $botQueue->profit = $totalProfit;
+        $botQueue->save();
+
         return $result;
     }
 
     protected function _betProcess($orderData = [])
     {
         $betResult = [];
+        if (blank($orderData)) {
+            return $betResult;
+        }
         // bet new order
         foreach ($orderData as $betData) {
             if (blank($betData)) {
@@ -791,6 +857,7 @@ class BotController extends BackendController
 
     protected function _mapOpenOrders($params = [])
     {
+        $botQueue = Arr::get($params, 'bot_queue');
         $listOpenOrders = Arr::get($params, 'list_open_orders');
         $orderData = Arr::get($params, 'order_data');
         $methods = Arr::get($params, 'methods');
@@ -799,6 +866,7 @@ class BotController extends BackendController
         $accountType = Arr::get($params, 'account_type');
         $result['current_amount'] = $accountType == Common::getConfig('aresbo.account_demo') ? Arr::get($currentAmount, 'demo_balance') : Arr::get($currentAmount, 'available_balance');
         $result['current_amount'] = number_format($result['current_amount'], 2);
+        $result['bot_queue'] = $botQueue->getAttributes();
 
         // update open orders
         foreach ($listOpenOrders as $index => $openOrder) {

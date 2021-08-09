@@ -13,9 +13,15 @@ $(document).ready(function () {
         }
     });
 
+    // reset form method
     $('#form-method').on('hide.bs.modal', function (e) {
         BotController.resetForm();
-    })
+    });
+
+    // reset profit
+    $('#update-bot-queue').on('hide.bs.modal', function (e) {
+        BotController.resetProfit();
+    });
 });
 
 let BotController = {
@@ -28,6 +34,8 @@ let BotController = {
             login: null,
             bet: null,
             research: null,
+            startAuto: null,
+            stopAuto: null,
         },
         orderStatus: {
             new: 'Đang đợi',
@@ -172,10 +180,13 @@ let BotController = {
             }
 
             // update method
-            BotController.updateMethods(betOrder.methods)
+            BotController.updateMethods(betOrder.methods);
 
             // update amount
             $('.current-amount').empty().text(betOrder.current_amount);
+
+            // update bot queue if stop loss / take profit
+            BotController.updateSettingProfit(betOrder.bot_queue);
         });
     },
     updateLastOrders: function ($winType, openOrder, closeOrder) {
@@ -525,5 +536,61 @@ let BotController = {
             $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + response.data.success);
             $('.toast-message-success').toast('show');
         });
-    }
+    },
+    updateSettingProfit: function (botQueue) {
+        let profit = botQueue.profit;
+        // update stop loss percent
+        if (profit <= 0 && botQueue.stop_loss) {
+            $('.stop-loss-percent').css({width: profit * 100 / botQueue.stop_loss + '%'});
+            $('.take-profit-percent').css({width: 0});
+        }
+        // update take profit percent
+        if (profit > 0 && botQueue.take_profit) {
+            let percent = profit >= botQueue.take_profit ? 100 : (profit * 100 / botQueue.take_profit);
+            $('.take-profit-percent').css({width: percent + '%'});
+            $('.stop-loss-percent').css({width: 0});
+        }
+
+        // check bot queue was stopped
+        if (botQueue.status === 0) {
+            showLoading();
+            BotController.options.isRunning = false;
+            $('.bot-status-btn').removeAttr('disabled').removeClass('btn-danger').addClass('btn-success');
+            $('.bot-account').removeAttr('disabled').removeClass('disabled');
+            $('.bot-status-icon').removeClass('fa-stop-circle').addClass('fa-play-circle');
+            $('.bot-status-text').empty().text('Chạy');
+            $('.start-auto').attr('action', BotController.config.url.startAuto);
+            setTimeout(function () {
+                hideLoading();
+            }, 1000);
+            return false;
+        }
+    },
+    stopLossOrTakeProfit: function () {
+        $('#update-bot-queue').modal('show');
+    },
+    updateProfit: function () {
+        let url = $('#update-bot-queue form').data('action');
+        sendRequest({
+            url: url,
+            type: 'POST',
+            data: {
+                id: $('#update-bot-queue #bot_queue_id').val(),
+                stop_loss: $('#update-bot-queue #bot_stop_loss').val(),
+                take_profit: $('#update-bot-queue #bot_take_profit').val(),
+            },
+        }, function (response) {
+            if (!response.status) {
+                return false;
+            }
+            $('.stop-loss').empty().text(response.data.stop_loss);
+            $('.take-profit').empty().text(response.data.take_profit);
+            BotController.resetProfit();
+            $('#update-bot-queue').modal('hide');
+        });
+    },
+    resetProfit: function () {
+        $('#bot_stop_loss').val('');
+        $('#bot_take_profit').val('');
+    },
 };

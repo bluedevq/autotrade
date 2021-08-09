@@ -141,10 +141,15 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot.move.money',
             'uses' => 'BotController@moveMoney'
         ]);
-
+        // move money validation
         Route::post('/move-money-valid', [
             'as' => 'bot.move.money.valid',
             'uses' => 'BotController@moveMoneyValid'
+        ]);
+        // update stop loss / take profit
+        Route::post('/update-profit', [
+            'as' => 'bot.update.profit',
+            'uses' => 'BotController@updateProfit'
         ]);
     });
 });

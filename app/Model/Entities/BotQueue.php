@@ -10,9 +10,11 @@ use App\Model\Base\BaseModel;
  */
 class BotQueue extends BaseModel
 {
+    use \App\Model\Presenters\BotQueue;
+
     protected $table = 'bot_queues';
 
     protected $fillable = [
-        'user_id', 'bot_user_id', 'account_type', 'status', 'created_at', 'updated_at', 'deleted_at'
+        'user_id', 'bot_user_id', 'account_type', 'profit', 'stop_loss', 'take_profit', 'status', 'created_at', 'updated_at', 'deleted_at'
     ];
 }

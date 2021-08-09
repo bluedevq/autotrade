@@ -17,10 +17,12 @@
         <div class="modal-content border-danger">
             <div class="modal-header">
                 <h4 class="modal-title">Thêm phương pháp</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="BotController.resetForm()"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        onclick="BotController.resetForm()"></button>
             </div>
             <div class="modal-body">
-                <form data-action="{{ route('bot_method.valid') }}" method="POST" class="form-horizontal" enctype="multipart/form-data">
+                <form data-action="{{ route('bot_method.valid') }}" method="POST" class="form-horizontal"
+                      enctype="multipart/form-data">
                     @csrf
                     <div class="mt-2">
                         <ul class="list-group validate-method"></ul>
@@ -104,7 +106,8 @@
                             <input type="hidden" name="id" id="id" value="">
                             <input type="hidden" name="step" id="step" value="">
                             <input type="hidden" name="profit" id="profit" value="">
-                            <button class="btn btn-lg btn-primary btn-block col-12" type="button" onclick="BotController.validateMethod()">
+                            <button class="btn btn-lg btn-primary btn-block col-12" type="button"
+                                    onclick="BotController.validateMethod()">
                                 <span class="fas fa-save" aria-hidden="true">&nbsp;</span>Lưu lại
                             </button>
                         </div>
@@ -124,13 +127,59 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form data-action="{{ route('bot_method.delete') }}" method="POST" class="form-horizontal" enctype="multipart/form-data">
+                <form data-action="{{ route('bot_method.delete') }}" method="POST" class="form-horizontal"
+                      enctype="multipart/form-data">
                     @csrf
                     <div class="row mt-2">
                         <div class="col-12 text-center">
                             <input type="hidden" name="id" id="delete_method_id" value="">
-                            <button class="btn btn-lg btn-danger btn-block col-md-2 col-12" type="button" onclick="BotController.deleteMethod()">
+                            <button class="btn btn-lg btn-danger btn-block col-md-2 col-12" type="button"
+                                    onclick="BotController.deleteMethod()">
                                 <span class="fas fa-trash" aria-hidden="true">&nbsp;</span>Xóa
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="update-bot-queue">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-danger">
+            <div class="modal-header">
+                <h4 class="modal-title">Cài đặt cắt lỗ / chốt lời</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form data-action="{{ route('bot.update.profit') }}" method="POST" class="form-horizontal"
+                      enctype="multipart/form-data">
+                    @csrf
+                    <div class="row mt-2">
+                        <div class="col-md-2 col-0 pc">&nbsp;</div>
+                        <div class="col-md-3">
+                            <label for="bot_stop_loss" class="form-label fw-bold" aria-hidden="true">Cắt lỗ</label>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="stop_loss" class="form-control" id="bot_stop_loss" value="">
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-2 col-0 pc">&nbsp;</div>
+                        <div class="col-md-3">
+                            <label for="bot_take_profit" class="form-label fw-bold" aria-hidden="true">Chốt lời</label>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="take_profit" class="form-control" id="bot_take_profit" value="">
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-5">&nbsp;</div>
+                        <div class="col-md-4">
+                            <input type="hidden" id="bot_queue_id" name="id" value="{{ $botQueue->id }}">
+                            <button class="btn btn-lg btn-primary btn-block col-12" type="button" onclick="BotController.updateProfit()">
+                                <span class="fas fa-save" aria-hidden="true">&nbsp;</span>Lưu lại
                             </button>
                         </div>
                     </div>

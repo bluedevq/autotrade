@@ -133,6 +133,44 @@ a {
     overflow-y: auto;
 }
 
+.setting-profit .bg-secondary {
+    border-radius: .25rem;
+    display: flex;
+    flex-wrap: wrap;
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 0;
+}
+
+.setting-profit .bg-secondary div {
+    padding: .375rem .75rem;
+}
+
+.stop-loss-btn, .take-profit-btn {
+    position: relative;
+    cursor: pointer;
+}
+
+.setting-profit .setting-profit-text {
+    z-index: 10;
+}
+
+.setting-profit .bg-secondary .percent {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    opacity: 0.7;
+}
+
+.setting-profit .bg-secondary .stop-loss-percent {
+    background-color: #ff3333;
+    right: 0;
+}
+
+.setting-profit .bg-secondary .take-profit-percent {
+    background-color: #33cc66;
+    left: 0;
+}
+
 .list-methods-scroll {
     max-height: 330px;
     overflow-y: auto;
