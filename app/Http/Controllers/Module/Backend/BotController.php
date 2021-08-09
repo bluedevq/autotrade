@@ -395,7 +395,7 @@ class BotController extends BackendController
 
     public function research()
     {
-        $responseData = $datasets = [];
+        $responseData = [];
 
         // get bot user
         $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
@@ -415,28 +415,49 @@ class BotController extends BackendController
         }
 
         // get price & candles
-        list($orderCandles, $resultCandles) = $this->_getListPrices();
+        $resultCandles = json_decode($this->getParam('list_prices'));
+        if (blank($resultCandles)) {
+            list($orderCandles, $resultCandles) = $this->_getListPrices();
+        }
+        $resultCandles = array_map(function ($item) {
+            return (array)$item;
+        }, $resultCandles);
+
+        // total
+        $responseData['total'] = count($resultCandles);
 
         // get label
-        $resultCandles = array_reverse($resultCandles);
         foreach ($resultCandles as $index => $resultCandle) {
-            $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
-//            if ($index == 0 || ($index + 1) % 10 == 0 || $index == count($resultCandles)) {
-//                $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
-//            }
+            $resultCandle = (array)$resultCandle;
+            if ($index == 0 || ($index + 1) % Common::getConfig('aresbo.chart_x_step_size') == 0 || $index == count($resultCandles)) {
+                $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
+            }
         }
 
         // get data
+        $listProfits = [];
         foreach ($methods as $method) {
-            $datasets[] = [
+            $profit = $this->_getProfitData($method, $resultCandles);
+            $listProfits[] = $profit;
+            $responseData['datasets'][] = [
                 'label' => $method->getNameText(),
-                'data' => $this->_getProfitData($method, $resultCandles),
+                'data' => $profit,
                 'fill' => false,
                 'borderColor' => $method->getColorText(),
                 'tension' => Common::getConfig('aresbo.chart_tension'),
             ];
         }
-        $responseData['datasets'] = $datasets;
+
+        // set data for total
+        $sum = $this->_getAverageArray($listProfits);
+        $responseData['datasets'][count($methods)] = [
+            'label' => 'Tổng',
+            'data' => $sum,
+            'fill' => false,
+            'borderColor' => '#ff0000',
+            'tension' => Common::getConfig('aresbo.chart_tension'),
+        ];
+
         $this->setData($responseData);
 
         return $this->renderJson();
@@ -586,27 +607,58 @@ class BotController extends BackendController
     protected function _getProfitData($method, $candles)
     {
         $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
-        $profitData = [];
+        $patterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
+        $total = count($candles);
+        $profitData = $result = [];
 
         foreach ($candles as $index => $candle) {
-            $profitData[$index] = Arr::get($profitData, $index - 1) + $this->_simulationBet($signals, $candles, $this->_getBetPattern($method->order_pattern, 'type', false), $this->_getBetPattern($method->order_pattern, 'amount'));
+            $profitData[$index] = Arr::get($profitData, $index - 1) + $this->_simulationBet($signals, $patterns, $method->type, $candles);
             unset($candles[$index]);
         }
 
-        return $profitData;
+        foreach ($profitData as $index => $item) {
+            if ($index == 0 || ($index + 1) % Common::getConfig('aresbo.chart_x_step_size') == 0 || $index == $total) {
+                $result[] = $item;
+            }
+        }
+
+        return $result;
     }
 
-    protected function _simulationBet($signals, $candles, $orderType, $amount)
+    protected function _simulationBet($signals, $patterns, $type, $candles)
     {
+        $profit = 0;
         $candles = array_values($candles);
+        // check signal
         foreach ($signals as $index => $signal) {
             if (Str::lower($signal) != Str::lower(Arr::get($candles, $index . '.order_result'))) {
                 return false;
             }
         }
-        $win = $orderType == Str::lower(Arr::get($candles, (count($signals) + 1) . '.order_result'));
+        // check pattern
+        foreach ($patterns as $patternIndex => $pattern) {
+            $orderType = Str::lower(Str::substr($pattern, 0, 1));
+            $amount = Str::substr($pattern, 1);
+            $win = $orderType == Str::lower(Arr::get($candles, (count($signals) + $patternIndex) . '.order_result'));
+            if ($type == Common::getConfig('aresbo.method_type.value.martingale')) {
+                if ($win) {
+                    $profit += $amount * 0.95;
+                    return $profit;
+                } else {
+                    $profit += $amount * -1;
+                }
+            }
+            if ($type == Common::getConfig('aresbo.method_type.value.paroli')) {
+                if ($win) {
+                    $profit += $amount * 0.95;
+                } else {
+                    $profit += $amount * -1;
+                    return $profit;
+                }
+            }
+        }
 
-        return $win ? $amount * 0.95 : $amount * -1;
+        return $profit;
     }
 
     protected function _getUserInfo()
@@ -1024,13 +1076,30 @@ class BotController extends BackendController
         return $balance;
     }
 
-    protected function _randomColor()
+    protected function _randomColor($except = ['ff0000'])
     {
-        return $this->_randomColorPart() . $this->_randomColorPart() . $this->_randomColorPart();
+        $color = $this->_randomColorPart() . $this->_randomColorPart() . $this->_randomColorPart();
+        if (in_array($color, $except)) {
+            $color = $this->_randomColor($except);
+        }
+
+        return $color;
     }
 
     protected function _randomColorPart()
     {
         return str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
+    }
+
+    protected function _getAverageArray($array)
+    {
+        $sum = [];
+        foreach ($array as $item) {
+            foreach ($item as $index => $value) {
+                isset($sum[$index]) ? $sum[$index] += $value : $sum[$index] = $value;
+            }
+        }
+
+        return $sum;
     }
 }

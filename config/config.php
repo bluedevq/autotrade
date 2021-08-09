@@ -99,6 +99,7 @@ return [
             'down' => 'G',
         ],
         'chart_tension' => '0.4',
+        'chart_x_step_size' => 5,
         'move_money_type' => [
             'wallet_to_trade' => 1,
             'trade_to_wallet' => 2,

@@ -132,7 +132,7 @@ Route::middleware(['auth.backend'])->group(function () {
             'uses' => 'BotController@deleteMethod'
         ]);
         // research method
-        Route::get('/research', [
+        Route::post('/research', [
             'as' => 'bot_method.research',
             'uses' => 'BotController@research'
         ]);

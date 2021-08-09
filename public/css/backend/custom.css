@@ -276,7 +276,8 @@ a {
 }
 
 #research-method .modal-content {
-    border: 1px solid #dee2e6;
+    border: 1px solid #ff810f;
+    border-radius: 0;
 }
 
 #research-method .modal-content {

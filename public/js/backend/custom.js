@@ -268,7 +268,7 @@ let BotController = {
         let listPrices = '',
             updateFirstTime = BotController.listPrices.length === 0;
         for (let i = 0; i < prices.length; i++) {
-            if (i === 0 || updateFirstTime) {
+            if (i === prices.length - 1 || updateFirstTime) {
                 BotController.listPrices.push(prices[i]);
             }
             let date = new Date(prices[i].open_order),
@@ -320,13 +320,16 @@ let BotController = {
         }
         sendRequest({
             url: BotController.config.url.research,
-            type: 'GET',
-            data: {},
+            type: 'POST',
+            data: {
+                'list_prices': JSON.stringify(BotController.listPrices)
+            },
         }, function (response) {
             if (!response.status) {
                 return false;
             }
             $('#research-method').modal('show');
+            $('#research-method .total-candles').empty().text(response.data.total);
             let data = response.data,
                 ctx = document.getElementById('chart-method').getContext('2d'),
                 myChart = new Chart(ctx, {
@@ -343,13 +346,22 @@ let BotController = {
                                 title: {
                                     display: false,
                                 },
-                                ticks: {
-                                    stepSize: 10,
-                                },
+                                grid: {
+                                    drawBorder: false,
+                                    color: function(context) {
+                                        return '#5F2413';
+                                    },
+                                }
                             },
                             y: {
                                 title: {
                                     display: false,
+                                },
+                                grid: {
+                                    drawBorder: false,
+                                    color: function(context) {
+                                        return '#5f2413';
+                                    },
                                 },
                             }
                         },
