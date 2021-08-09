@@ -89,6 +89,10 @@ a {
     border-radius: 0.3rem;
 }
 
+.toast-message-custom {
+    position: fixed !important;
+}
+
 .register a {
     text-decoration: underline;
 }
