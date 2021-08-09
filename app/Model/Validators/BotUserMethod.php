@@ -33,7 +33,7 @@ trait BotUserMethod
             'type.required' => 'Vui lòng chọn kiểu phương pháp.',
             'signal.required' => 'Vui lòng nhập tín hiệu nến.',
             'order_pattern.required' => 'Vui lòng nhập lệnh đặt.',
-            'stop_loss.regex' => 'Vui lòng cắt lỗ là số âm bé hơn 0.',
+            'stop_loss.regex' => 'Vui lòng nhập cắt lỗ là số âm bé hơn 0.',
             'take_profit.regex' => 'Vui lòng nhập chốt lãi là số dương lớn hơn 0.',
             'status.required' => 'Vui lòng chọn trạng thái phương pháp.',
         ];

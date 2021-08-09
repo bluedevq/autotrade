@@ -557,6 +557,7 @@ let BotController = {
                 return false;
             }
             BotController.options.isRunning === 'true' ? BotController.afterStopAuto() : BotController.afterStartAuto();
+            BotController.showMessage(response.data.success);
         });
     },
     afterStartAuto: function () {
@@ -619,6 +620,7 @@ let BotController = {
             $('.take-profit').empty().text(response.data.take_profit);
             BotController.resetProfit();
             $('#update-bot-queue').modal('hide');
+            BotController.showMessage(response.data.success);
         });
     },
     resetProfit: function () {

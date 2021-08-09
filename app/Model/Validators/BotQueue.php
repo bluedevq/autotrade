@@ -15,7 +15,7 @@ trait BotQueue
     public function messages()
     {
         return [
-            'stop_loss.regex' => 'Vui lòng cắt lỗ là số âm bé hơn 0.',
+            'stop_loss.regex' => 'Vui lòng nhập cắt lỗ là số âm bé hơn 0.',
             'take_profit.regex' => 'Vui lòng nhập chốt lãi là số dương lớn hơn 0.',
         ];
     }

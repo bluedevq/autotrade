@@ -517,6 +517,7 @@ class BotController extends BackendController
             $entity->take_profit = $takeProfit;
             $entity->save();
             $this->setData([
+                'success' => 'Lưu thành công.',
                 'stop_loss' => $entity->getStopLoss(),
                 'take_profit' => $entity->getTakeProfit(),
             ]);
@@ -708,7 +709,7 @@ class BotController extends BackendController
                 $this->setData(['errors' => new MessageBag(['errors' => 'Tài khoản của bạn đã hết hạn. Vui lòng liên hệ admin để được hỗ trợ.'])]);
                 return $this->renderErrorJson();
             }
-            $this->setData(['success' => ($stop ? 'Dừng' : 'Chạy') . ' auto thất bại, vui lòng thử lại.']);
+            $this->setData(['success' => ($stop ? 'Dừng' : 'Chạy') . ' auto thành công.']);
 
             return $this->renderJson();
         } catch (\Exception $exception) {
