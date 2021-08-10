@@ -98,8 +98,14 @@ return [
             'up' => 'T',
             'down' => 'G',
         ],
-        'chart_tension' => '0.4',
-        'chart_x_step_size' => 5,
+        'chart' => [
+            'chart_tension' => '0.4',
+            'chart_default_step_size' => 5,
+            'chart_step_size' => 10,
+            'chart_border_width' => 1,
+            'chart_total_border_width' => 2.5,
+            'chart_total_color' => '#ff0000',
+        ],
         'move_money_type' => [
             'wallet_to_trade' => 1,
             'trade_to_wallet' => 2,

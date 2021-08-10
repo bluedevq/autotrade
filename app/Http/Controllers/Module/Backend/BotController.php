@@ -423,28 +423,31 @@ class BotController extends BackendController
             return (array)$item;
         }, $resultCandles);
 
-        // total
-        $responseData['total'] = count($resultCandles);
-
         // get label
+        $defaultSize = Common::getConfig('aresbo.chart.chart_default_step_size');
+        $range = Common::getConfig('aresbo.chart.chart_step_size');
+        $stepSize = intdiv(count($resultCandles), $defaultSize) > $range ? intdiv(count($resultCandles), $range) : $defaultSize;
         foreach ($resultCandles as $index => $resultCandle) {
             $resultCandle = (array)$resultCandle;
-            if ($index == 0 || ($index + 1) % Common::getConfig('aresbo.chart_x_step_size') == 0 || $index == count($resultCandles)) {
-                $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
+            if ($index == 0 || ($index + 1) % $stepSize == 0 || $index == count($resultCandles) - 1) {
+                $responseData['label'][] = date('H:i d-m', Arr::get($resultCandle, 'open_order') / 1000);
             }
         }
 
         // get data
         $listProfits = [];
+        $totalVolume = 0;
         foreach ($methods as $method) {
-            $profit = $this->_getProfitData($method, $resultCandles);
+            list($volume, $profit) = $this->_getProfitData($method, $resultCandles);
+            $totalVolume += $volume;
             $listProfits[] = $profit;
             $responseData['datasets'][] = [
                 'label' => $method->getNameText(),
                 'data' => $profit,
                 'fill' => false,
                 'borderColor' => $method->getColorText(),
-                'tension' => Common::getConfig('aresbo.chart_tension'),
+                'borderWidth' => Common::getConfig('aresbo.chart.chart_border_width'),
+                'tension' => Common::getConfig('aresbo.chart.chart_tension'),
             ];
         }
 
@@ -454,9 +457,18 @@ class BotController extends BackendController
             'label' => 'Tổng',
             'data' => $sum,
             'fill' => false,
-            'borderColor' => '#ff0000',
-            'tension' => Common::getConfig('aresbo.chart_tension'),
+            'borderColor' => Common::getConfig('aresbo.chart.chart_total_color'),
+            'borderWidth' => Common::getConfig('aresbo.chart.chart_total_border_width'),
+            'tension' => Common::getConfig('aresbo.chart.chart_tension'),
         ];
+
+        // other configs
+        $responseData['total_prices'] = count($resultCandles);
+        $responseData['total_methods'] = count($methods);
+        $responseData['total_volume'] = $totalVolume;
+        $responseData['total_profit'] = $sum[count($sum) - 1];
+        $responseData['from'] = $responseData['label'][0];
+        $responseData['to'] = $responseData['label'][count($responseData['label']) - 1];
 
         $this->setData($responseData);
 
@@ -609,41 +621,48 @@ class BotController extends BackendController
         $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
         $patterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
         $total = count($candles);
-        $profitData = $result = [];
+        $profitData = $methodProfit = [];
+        $methodVolume = 0;
 
         foreach ($candles as $index => $candle) {
-            $profitData[$index] = Arr::get($profitData, $index - 1) + $this->_simulationBet($signals, $patterns, $method->type, $candles);
+            list($volume, $profit) = $this->_simulationBet($signals, $patterns, $method->type, $candles);
+            $methodVolume += $volume;
+            $profitData[$index] = Arr::get($profitData, $index - 1) + $profit;
             unset($candles[$index]);
         }
 
+        $defaultSize = Common::getConfig('aresbo.chart.chart_default_step_size');
+        $range = Common::getConfig('aresbo.chart.chart_step_size');
+        $stepSize = intdiv($total, $defaultSize) > $range ? intdiv($total, $range) : $defaultSize;
         foreach ($profitData as $index => $item) {
-            if ($index == 0 || ($index + 1) % Common::getConfig('aresbo.chart_x_step_size') == 0 || $index == $total) {
-                $result[] = $item;
+            if ($index == 0 || ($index + 1) % $stepSize == 0 || $index == $total - 1) {
+                $methodProfit[] = $item;
             }
         }
 
-        return $result;
+        return [$methodVolume, $methodProfit];
     }
 
     protected function _simulationBet($signals, $patterns, $type, $candles)
     {
-        $profit = 0;
+        $profit = $volume = 0;
         $candles = array_values($candles);
         // check signal
         foreach ($signals as $index => $signal) {
             if (Str::lower($signal) != Str::lower(Arr::get($candles, $index . '.order_result'))) {
-                return false;
+                return [$volume, $profit];
             }
         }
         // check pattern
         foreach ($patterns as $patternIndex => $pattern) {
             $orderType = Str::lower(Str::substr($pattern, 0, 1));
             $amount = Str::substr($pattern, 1);
+            $volume += $amount;
             $win = $orderType == Str::lower(Arr::get($candles, (count($signals) + $patternIndex) . '.order_result'));
             if ($type == Common::getConfig('aresbo.method_type.value.martingale')) {
                 if ($win) {
                     $profit += $amount * 0.95;
-                    return $profit;
+                    return [$volume, $profit];
                 } else {
                     $profit += $amount * -1;
                 }
@@ -653,12 +672,12 @@ class BotController extends BackendController
                     $profit += $amount * 0.95;
                 } else {
                     $profit += $amount * -1;
-                    return $profit;
+                    return [$volume, $profit];
                 }
             }
         }
 
-        return $profit;
+        return [$volume, $profit];
     }
 
     protected function _getUserInfo()

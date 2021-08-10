@@ -272,7 +272,7 @@ a {
 }
 
 #research-method {
-    color: #dee2e6;
+    color: #fff;
 }
 
 #research-method .modal-content {
@@ -288,6 +288,18 @@ a {
 #research-method .modal-body,
 #research-method .modal-footer {
     background-color: #171b2c;
+}
+
+#research-method .modal-header {
+    border-bottom: none;
+}
+
+#research-method .modal-header .btn-close {
+    background-color: #ffffff;
+}
+
+#research-method .modal-footer {
+    display: block;
 }
 
 .move-money-wrap {

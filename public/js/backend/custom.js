@@ -328,8 +328,20 @@ let BotController = {
             if (!response.status) {
                 return false;
             }
+            let profit = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.total_profit),
+                volume = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.total_volume),
+                profitHtml = null;
+
+            // format profit
+            if (profit < 0) {
+                profitHtml = '<span class="text-danger-custom">' + profit + '</span>';
+            } else {
+                profitHtml = '<span class="text-success-custom">' + profit + '</span>';
+            }
             $('#research-method').modal('show');
-            $('#research-method .total-candles').empty().text(response.data.total);
+            $('#research-method .total-candles').empty().text(response.data.total_prices);
+            $('#research-method .volume').empty().text(volume);
+            $('#research-method .profit').empty().html(profitHtml);
             let data = response.data,
                 ctx = document.getElementById('chart-method').getContext('2d'),
                 myChart = new Chart(ctx, {
@@ -347,7 +359,7 @@ let BotController = {
                                     display: false,
                                 },
                                 grid: {
-                                    drawBorder: false,
+                                    borderDash: [2, 2],
                                     color: function(context) {
                                         return '#5F2413';
                                     },
@@ -358,7 +370,7 @@ let BotController = {
                                     display: false,
                                 },
                                 grid: {
-                                    drawBorder: false,
+                                    borderDash: [2, 2],
                                     color: function(context) {
                                         return '#5f2413';
                                     },
@@ -368,10 +380,22 @@ let BotController = {
                         plugins: {
                             title: {
                                 position: 'bottom',
-                                display: false
+                                display: true,
+                                color: '#ffffff',
+                                font: {
+                                    weight: 400,
+                                    size: 16
+                                },
+                                text: 'Biểu đồ giả lập ' + response.data.total_methods + ' phương pháp từ ' + response.data.from + ' đến ' + response.data.to
                             },
                             legend: {
                                 position: 'bottom',
+                                labels: {
+                                    color: '#ffffff',
+                                    padding: 15,
+                                    boxWidth: 20,
+                                    boxHeight: 1,
+                                },
                             },
                         },
                     },

@@ -2,11 +2,27 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Phân tích <span class="total-candles">50</span> lệnh gần nhất</h4>
+                <h4 class="modal-title">Phân tích <span class="total-candles">50</span> phiên gần nhất</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <canvas id="chart-method" width="400" height="400"></canvas>
+            </div>
+            <div class="modal-footer text-center">
+                <div class="row">
+                    <div class="col-4">
+                        <h6>Tổng lợi nhuận</h6>
+                        <span class="profit"></span>
+                    </div>
+                    <div class="col-4">
+                        <h6>Tổng cược</h6>
+                        <span class="volume"></span>
+                    </div>
+                    <div class="col-4">
+                        <h6>Âm vốn sâu nhất</h6>
+                        <span class="highest-negative"></span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
