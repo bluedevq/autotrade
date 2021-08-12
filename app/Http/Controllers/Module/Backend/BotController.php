@@ -415,30 +415,25 @@ class BotController extends BackendController
         }
 
         // get price & candles
-        $resultCandles = json_decode($this->getParam('list_prices'));
-        if (blank($resultCandles)) {
-            list($orderCandles, $resultCandles) = $this->_getListPrices();
+        $resultPrices = json_decode($this->getParam('list_prices'));
+        if (blank($resultPrices)) {
+            list($orderPrices, $resultPrices) = $this->_getListPrices();
         }
-        $resultCandles = array_map(function ($item) {
+        $resultPrices = array_map(function ($item) {
             return (array)$item;
-        }, $resultCandles);
+        }, $resultPrices);
 
         // get label
-        $defaultSize = Common::getConfig('aresbo.chart.chart_default_step_size');
-        $range = Common::getConfig('aresbo.chart.chart_step_size');
-        $stepSize = intdiv(count($resultCandles), $defaultSize) > $range ? intdiv(count($resultCandles), $range) : $defaultSize;
-        foreach ($resultCandles as $index => $resultCandle) {
-            $resultCandle = (array)$resultCandle;
-            if ($index == 0 || ($index + 1) % $stepSize == 0 || $index == count($resultCandles) - 1) {
-                $responseData['label'][] = date('H:i d-m', Arr::get($resultCandle, 'open_order') / 1000);
-            }
+        foreach ($resultPrices as $index => $resultPrice) {
+            $resultPrice = (array)$resultPrice;
+            $responseData['label'][] = date('H:i d/m', Arr::get($resultPrice, 'open_order') / 1000);
         }
 
         // get data
         $listProfits = [];
         $totalVolume = 0;
         foreach ($methods as $method) {
-            list($volume, $profit) = $this->_getProfitData($method, $resultCandles);
+            list($volume, $profit) = $this->_getProfitData($method, $resultPrices);
             $totalVolume += $volume;
             $listProfits[] = $profit;
             $responseData['datasets'][] = [
@@ -451,23 +446,26 @@ class BotController extends BackendController
             ];
         }
 
-        // set data for total
-        $sum = $this->_getAverageArray($listProfits);
+        // set data for average
+        $average = $this->_getAverageArray($listProfits);
         $responseData['datasets'][count($methods)] = [
             'label' => 'Tổng',
-            'data' => $sum,
+            'data' => $average,
             'fill' => false,
             'borderColor' => Common::getConfig('aresbo.chart.chart_total_color'),
             'borderWidth' => Common::getConfig('aresbo.chart.chart_total_border_width'),
             'tension' => Common::getConfig('aresbo.chart.chart_tension'),
         ];
 
+        // shorten simulation data
+        $this->_shortenSimulationData($responseData);
+
         // other configs
-        $responseData['total_prices'] = count($resultCandles);
+        $responseData['total_prices'] = count($resultPrices);
         $responseData['total_methods'] = count($methods);
         $responseData['total_volume'] = $totalVolume;
-        $responseData['total_profit'] = $sum[count($sum) - 1];
-        $responseData['highest_negative'] = min($sum);
+        $responseData['total_profit'] = $average[count($average) - 1];
+        $responseData['highest_negative'] = min($average);
         $responseData['from'] = $responseData['label'][0];
         $responseData['to'] = $responseData['label'][count($responseData['label']) - 1];
 
@@ -621,24 +619,23 @@ class BotController extends BackendController
     {
         $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
         $patterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
-        $total = count($candles);
         $profitData = $methodProfit = [];
         $methodVolume = 0;
+
+        foreach ($signals as $index => $signal) {
+            $profitData[] = 0;
+        }
 
         foreach ($candles as $index => $candle) {
             list($volume, $profit) = $this->_simulationBet($signals, $patterns, $method->type, $candles);
             $methodVolume += $volume;
-            $profitData[$index] = Arr::get($profitData, $index - 1) + $profit;
+            $position = $index + count($signals);
+            $profitData[$position] = Arr::get($profitData, $position - 1) + $profit;
             unset($candles[$index]);
         }
 
-        $defaultSize = Common::getConfig('aresbo.chart.chart_default_step_size');
-        $range = Common::getConfig('aresbo.chart.chart_step_size');
-        $stepSize = intdiv($total, $defaultSize) > $range ? intdiv($total, $range) : $defaultSize;
         foreach ($profitData as $index => $item) {
-            if ($index == 0 || ($index + 1) % $stepSize == 0 || $index == $total - 1) {
-                $methodProfit[] = $item;
-            }
+            $methodProfit[] = $item;
         }
 
         return [$methodVolume, $methodProfit];
@@ -679,6 +676,30 @@ class BotController extends BackendController
         }
 
         return [$volume, $profit];
+    }
+
+    protected function _shortenSimulationData(&$responseData)
+    {
+        $defaultSize = Common::getConfig('aresbo.chart.chart_default_step_size');
+        $range = Common::getConfig('aresbo.chart.chart_step_size');
+        $stepSize = intdiv(count($responseData['label']), $defaultSize) > $range ? intdiv(count($responseData['label']), $range) : $defaultSize;
+        foreach ($responseData['label'] as $index => $item) {
+            if ($index == 0 || ($index + 1) % $stepSize == 0 || $index == count($responseData['label']) - 1) {
+                continue;
+            }
+            unset($responseData['label'][$index]);
+        }
+        $responseData['label'] = array_values($responseData['label']);
+
+        foreach ($responseData['datasets'] as $datasetIndex => $dataset) {
+            foreach ($dataset['data'] as $dataIndex => $item) {
+                if ($dataIndex == 0 || ($dataIndex + 1) % $stepSize == 0 || $dataIndex == count($dataset['data']) - 1) {
+                    continue;
+                }
+                unset($responseData['datasets'][$datasetIndex]['data'][$dataIndex]);
+            }
+            $responseData['datasets'][$datasetIndex]['data'] = array_values($responseData['datasets'][$datasetIndex]['data']);
+        }
     }
 
     protected function _getUserInfo()
