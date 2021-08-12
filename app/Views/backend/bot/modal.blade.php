@@ -16,11 +16,11 @@
                     </div>
                     <div class="col-4">
                         <h6>Tổng cược</h6>
-                        <span class="volume"></span>
+                        <span class="volume text-info"></span>
                     </div>
                     <div class="col-4">
                         <h6>Âm vốn sâu nhất</h6>
-                        <span class="highest-negative"></span>
+                        <span class="highest-negative text-danger-custom"></span>
                     </div>
                 </div>
             </div>

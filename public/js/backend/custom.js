@@ -330,6 +330,7 @@ let BotController = {
             }
             let profit = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.total_profit),
                 volume = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.total_volume),
+                highestNegative = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.highest_negative),
                 profitHtml = null;
 
             // format profit
@@ -339,9 +340,11 @@ let BotController = {
                 profitHtml = '<span class="text-success-custom">' + profit + '</span>';
             }
             $('#research-method').modal('show');
+            // update modal info
             $('#research-method .total-candles').empty().text(response.data.total_prices);
             $('#research-method .volume').empty().text(volume);
             $('#research-method .profit').empty().html(profitHtml);
+            $('#research-method .highest-negative').empty().text(highestNegative);
             let data = response.data,
                 ctx = document.getElementById('chart-method').getContext('2d'),
                 myChart = new Chart(ctx, {

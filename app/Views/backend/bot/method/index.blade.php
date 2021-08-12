@@ -3,7 +3,7 @@
         <button class="btn btn-primary col-12" type="button" onclick="BotController.showHideMethod()"><span class="fas fa-list-alt">&nbsp;</span>Phương pháp</button>
     </div>
     <div class="col-md-4 col-lg-3 col-6 mt-sp-2 research-btn hide">
-        <a class="btn btn-danger col-12" href="javascript:void(0)" onclick="alert('Chức năng này tạm thời chưa ra mắt.');return false;BotController.research()"><span class="fas fa-chart-line">&nbsp;</span>Phân tích lệnh</a>
+        <a class="btn btn-danger col-12" href="javascript:void(0)" onclick="BotController.research()"><span class="fas fa-chart-line">&nbsp;</span>Phân tích lệnh</a>
     </div>
     <div class="col-md-4 col-lg-3 col-6 mt-sp-2 add-method-btn hide">
         <a class="btn btn-success col-12" href="javascript:void(0)" onclick="BotController.createMethod()"><span class="fas fa-plus">&nbsp;</span>Thêm</a>

@@ -467,6 +467,7 @@ class BotController extends BackendController
         $responseData['total_methods'] = count($methods);
         $responseData['total_volume'] = $totalVolume;
         $responseData['total_profit'] = $sum[count($sum) - 1];
+        $responseData['highest_negative'] = min($sum);
         $responseData['from'] = $responseData['label'][0];
         $responseData['to'] = $responseData['label'][count($responseData['label']) - 1];
 
