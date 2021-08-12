@@ -603,6 +603,7 @@ let BotController = {
     },
     afterStartAuto: function () {
         BotController.options.isRunning = 'true';
+        BotController.config.startAt == null ? BotController.config.startAt = Date.now() : null;
         $('.bot-account').attr('disabled', 'disabled').addClass('disabled');
         $('.bot-status-btn').addClass('btn-danger').removeClass('btn-success');
         $('.bot-status-icon').addClass('fa-stop-circle').removeClass('fa-play-circle');

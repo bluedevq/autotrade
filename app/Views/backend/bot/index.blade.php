@@ -40,7 +40,9 @@
             BotController.config.url.research = '{{ route('bot_method.research') }}';
             BotController.config.url.startAuto = '{{ route('bot.start_auto') }}';
             BotController.config.url.stopAuto = '{{ route('bot.stop_auto') }}';
+            @if($isRunning)
             BotController.config.startAt = '{{ time() * 1000 }}';
+            @endif
 
             // show clock
             @if(isset($botUserInfo) && !blank($botUserInfo))
