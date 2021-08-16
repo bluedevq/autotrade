@@ -24,7 +24,20 @@ trait BotUserMethod
         foreach ($signals as $signal) {
             $text[] = Str::lower($signal) == 't' ? ('<span class="text-success-custom">' . Str::upper($signal) . '</span>') : ('<span class="text-danger-custom">' . Str::upper($signal) . '</span>');
         }
-        return implode(isMobile() ? '<br/>' : '&nbsp;', $text);
+
+        $result = '';
+        $spacePrefix = '&nbsp;';
+        foreach ($text as $index => $item) {
+            $result .= $item . $spacePrefix;
+            if (!isMobile() && ($index + 1) % Common::getConfig('aresbo.method.break_item_pc') == 0) {
+                $result .= '<br/>';
+            }
+            if (isMobile() && ($index + 1) % Common::getConfig('aresbo.method.break_item_mobile') == 0) {
+                $result .= '<br/>';
+            }
+        }
+
+        return $result;
     }
 
     public function getOrderPatternText()
@@ -38,7 +51,20 @@ trait BotUserMethod
             $textTmp = Str::lower($order) == 't' ? ('<span class="text-success-custom step-' . $index . $bgLight . '">' . Str::upper($order) . $amount . '</span>') : ('<span class="text-danger-custom step-' . $index . $bgLight . '">' . Str::upper($order) . $amount . '</span>');
             $text[] = $textTmp;
         }
-        return implode(isMobile() ? '<br/>' : '&nbsp;', $text);
+
+        $result = '';
+        $spacePrefix = '&nbsp;';
+        foreach ($text as $index => $item) {
+            $result .= $item . $spacePrefix;
+            if (!isMobile() && ($index + 1) % Common::getConfig('aresbo.method.break_item_pc') == 0) {
+                $result .= '<br/>';
+            }
+            if (isMobile() && ($index + 1) % Common::getConfig('aresbo.method.break_item_mobile') == 0) {
+                $result .= '<br/>';
+            }
+        }
+
+        return $result;
     }
 
     public function getProfitText()

@@ -122,7 +122,8 @@ a {
 }
 
 .form-select:disabled,
-.form-control.disabled {
+.form-control.disabled,
+.action-method-btn .disabled {
     background-color: #bbb;
     cursor: not-allowed;
 }
@@ -190,16 +191,20 @@ a {
     text-align: left;
 }
 
-.method-action .list-inline-item:not(:last-child) {
-    margin-right: 0;
+.method-item tr {
+    vertical-align: middle;
 }
 
-.method-action .list-inline-item:last-child {
-    margin-top: .25rem;
+.method-item tr.stop {
+    opacity: 0.65;
 }
 
-.method-action .list-inline-item a {
-    min-width: 78px;
+.method-action {
+    min-width: 4.75rem;
+}
+
+.method-action a {
+    min-width: 4.75rem;
     padding: 0.3rem 0.1rem;
 }
 
@@ -399,10 +404,6 @@ input[type=number] {
         border-radius: .3rem;
     }
 
-    .list-methods-scroll {
-        text-align: center;
-    }
-
     .list-methods-scroll::-webkit-scrollbar,
     .bet-result-scroll::-webkit-scrollbar {
         width: .5rem;
@@ -422,10 +423,6 @@ input[type=number] {
     .bet-result-scroll::-webkit-scrollbar-track {
         border-radius: .3rem;
         background-color: #171b2c;
-    }
-
-    .method-action .list-inline-item.updated {
-        margin-right: 5px;
     }
 
     .method-action .list-inline-item a {

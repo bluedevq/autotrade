@@ -337,6 +337,7 @@ class BotController extends BackendController
                 $isCreate = false;
             } else {
                 $entity->color = $this->_randomColor();
+                $entity->status = Common::getConfig('aresbo.method.active');
             }
             $entity->bot_user_id = $botUser->id;
             $entity->save();

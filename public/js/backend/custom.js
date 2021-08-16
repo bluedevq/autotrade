@@ -266,26 +266,32 @@ let BotController = {
 
         prices = prices.reverse();
         let listPrices = '',
+            lastPricePos = prices.length - 1,
             updateFirstTime = BotController.listPrices.length === 0;
+
         for (let i = 0; i < prices.length; i++) {
-            if (i === prices.length - 1 || updateFirstTime) {
+            if (i === lastPricePos || updateFirstTime) {
                 BotController.listPrices.push(prices[i]);
             }
-            let date = new Date(prices[i].open_order),
-                orderType = prices[i].order_result;
 
-            date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth() + 1) + '-' + BotController.pad(date.getFullYear());
-            listPrices += '<li class="list-inline-item new" data-time="' + prices[i].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>';
+            // update last price
+            if (i === lastPricePos) {
+                let date = new Date(prices[i].open_order),
+                    orderType = prices[i].order_result;
+
+                date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth() + 1) + '-' + BotController.pad(date.getFullYear());
+                listPrices += '<li class="list-inline-item new" data-time="' + prices[i].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>';
+            }
         }
 
         // clear list prices and update new list prices
-        $('.list-prices').empty().append(listPrices);
+        $('.list-prices').append(listPrices);
 
         // auto scroll to right
         $('.list-prices').scrollLeft(document.getElementsByClassName('list-prices')[0].scrollWidth);
 
         // update last order
-        BotController.updateLastOrders(prices[prices.length - 1].order_result == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[prices.length - 1].open_order, prices[prices.length - 1].close_order);
+        BotController.updateLastOrders(prices[lastPricePos].order_result == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[lastPricePos].open_order, prices[lastPricePos].close_order);
     },
     updateMethods: function (methods) {
         for (let i = 0; i < methods.length; i++) {
@@ -328,9 +334,18 @@ let BotController = {
             if (!response.status) {
                 return false;
             }
-            let profit = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.total_profit),
-                volume = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.total_volume),
-                highestNegative = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.highest_negative),
+            let profit = new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(response.data.total_profit),
+                volume = new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(response.data.total_volume),
+                highestNegative = new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(response.data.highest_negative),
                 profitHtml = null;
 
             // format profit
@@ -363,7 +378,7 @@ let BotController = {
                                 },
                                 grid: {
                                     borderDash: [2, 2],
-                                    color: function(context) {
+                                    color: function (context) {
                                         return '#5F2413';
                                     },
                                 }
@@ -374,7 +389,7 @@ let BotController = {
                                 },
                                 grid: {
                                     borderDash: [2, 2],
-                                    color: function(context) {
+                                    color: function (context) {
                                         return '#5f2413';
                                     },
                                 },
@@ -413,11 +428,11 @@ let BotController = {
         if ($('.list-method').hasClass('not-active')) {
             $('.list-method').removeClass('not-active').slideDown(500);
             $('.research-btn').show();
-            $('.add-method-btn').show();
+            $('.action-method-btn').show();
         } else {
             $('.list-method').addClass('not-active').slideUp(500);
             $('.research-btn').hide();
-            $('.add-method-btn').hide();
+            $('.action-method-btn').hide();
         }
     },
     createMethod: function () {
@@ -446,7 +461,6 @@ let BotController = {
             $('#form-method #profit').val(entity.profit);
             $('#form-method #stop_loss').val(entity.stop_loss);
             $('#form-method #take_profit').val(entity.take_profit);
-            document.getElementById('status').selectedIndex = entity.status;
             $('#form-method').modal('show');
         });
     },
@@ -465,7 +479,6 @@ let BotController = {
                 profit: $('#form-method #profit').val(),
                 stop_loss: $('#form-method #stop_loss').val(),
                 take_profit: $('#form-method #take_profit').val(),
-                status: $('#form-method #status').val(),
             },
         }, function (response) {
             if (!response.status) {
@@ -473,20 +486,18 @@ let BotController = {
                 return false;
             }
             let entity = response.data,
-                methodItemHtml = '<td>' + entity.name + '</td>' +
+                methodItemHtml =
+                    '<td class="method-id"><input type="checkbox" class="form-check-input" onclick="BotController.selectMethod(this)" value="' + entity.id + '"></td>' +
+                    '<td>' + entity.name + '</td>' +
                     '<td class="pc">' + entity.type + '</td>' +
                     '<td class="method-signal">' + entity.signal + '</td>' +
                     '<td class="method-pattern">' + entity.pattern + '</td>' +
                     '<td class="method-profit">' + entity.profit + '</td>' +
                     '<td class="pc">' + entity.stop.loss + '</td>' +
                     '<td class="pc">' + entity.stop.win + '</td>' +
-                    '<td>' + entity.status + '</td>' +
-                    '<td><div class="row"><ul class="list-inline method-action">' +
-                    '<li class="list-inline-item updated"><a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a></li>' +
-                    '<li class="list-inline-item"><a class="btn btn-danger" onclick="BotController.deleteMethodConfirm(\'' + entity.name + '\', \'' + entity.id + '\')" href="javascript:void(0)"><span class="fas fa-trash">&nbsp;</span>Xóa</a></li>' +
-                    '</ul></div></td>';
+                    '<td class="method-action-wrap"><a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a></td>';
             if (entity.create) {
-                $('.method-item').append('<tr id="method_' + entity.id + '">' + methodItemHtml + '</tr>');
+                $('.method-item').append('<tr id="method_' + entity.id + '" class="' + (entity.status ? 'active' : 'stop') + '">' + methodItemHtml + '</tr>');
             } else {
                 $('.method-item tr#method_' + entity.id).empty().html(methodItemHtml);
             }
@@ -518,6 +529,15 @@ let BotController = {
             $('#delete-method').modal('hide');
             $('.method-item tr#method_' + id).remove();
         });
+    },
+    selectMethod: function (input) {
+    },
+    selectAllMethod: function (input) {
+        if ($(input).is(':checked')) {
+            $(".method-id").prop("checked", false);
+        } else {
+            $(".method-id").prop("checked", true);
+        }
     },
     verifyCount: function (start, url) {
         $('.verify-count').empty().text(start + 's');

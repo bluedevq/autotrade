@@ -77,6 +77,8 @@ return [
                 0 => 'Dừng',
                 1 => 'Hoạt động',
             ],
+            'break_item_pc' => 6,
+            'break_item_mobile' => 2,
         ],
         'method_type' => [
             'value' => [
