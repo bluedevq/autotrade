@@ -36,6 +36,7 @@
         $(document).ready(function () {
             BotController.options.isRunning = '{{ $isRunning ? 'true' : 'false' }}';
             BotController.config.url.login = '{{ route('bot.login') }}';
+            BotController.config.url.requestCode = '{{ route('bot.request.code') }}';
             BotController.config.url.bet = '{{ route('bot.bet') }}';
             BotController.config.url.research = '{{ route('bot_method.research') }}';
             BotController.config.url.startAuto = '{{ route('bot.start_auto') }}';

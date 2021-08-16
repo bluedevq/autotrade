@@ -30,6 +30,8 @@ class BotController extends BackendController
     const ACCESS_TOKEN = 'access_token';
     const REFRESH_TOKEN = 'refresh_token';
     const TWOFA_TOKEN = '2fa_token';
+    const VERIFY_DEVICE = 'verify_device';
+    const VERIFY_DEVICE_TOKEN = 'verify_device_token';
     const BOT_USER_EMAIL = 'bot_user_email';
 
     public function __construct(BotUser $botUser, BotQueue $botQueue, BotUserMethod $botUserMethod, BotMethodDefault $botMethodDefault, User $user)
@@ -144,7 +146,11 @@ class BotController extends BackendController
             $require2Fa = Arr::get($response, 'd.require2Fa');
             if ($require2Fa) {
                 Session::put(self::TWOFA_TOKEN, Arr::get($response, 'd.t'));
-                $this->setData(['require2fa' => route('bot.loginWith2FA')]);
+                Session::put(self::VERIFY_DEVICE, Arr::get($response, 'd.verify-device'));
+                $this->setData([
+                    'require2fa' => route('bot.loginWith2FA'),
+                    'verifyDevice' => Arr::get($response, 'd.verify-device'),
+                ]);
                 return $this->renderJson();
             }
 
@@ -168,8 +174,8 @@ class BotController extends BackendController
             $loginData = [
                 'client_id' => 'aresbo-web',
                 'code' => $this->getParam('code'),
-                'td_code' => '',
-                'td_p_code' => '',
+                'td_code' => $this->getParam('td_code'),
+                'td_p_code' => Session::get(self::VERIFY_DEVICE_TOKEN),
                 'token' => Session::get(self::TWOFA_TOKEN)
             ];
             $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_token2fa_url'), $loginData);
@@ -191,6 +197,32 @@ class BotController extends BackendController
             Log::error($exception);
         }
         return $this->_to('bot.index')->withErrors(new MessageBag(['Đăng nhập thất bại, vui lòng thử lại.']));
+    }
+
+    public function requestCode()
+    {
+        try {
+            // get token from AresBO
+            $loginData = [
+                'captcha' => Common::getConfig('aresbo.api_url.captcha_token'),
+                'clientId' => 'aresbo-web',
+                'token' => Session::get(self::TWOFA_TOKEN)
+            ];
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.request_code'), $loginData);
+            // check status
+            if (!Arr::get($response, 'ok')) {
+                $this->setData(['errors' => 'Gửi mã thất bại, vui lòng thử lại.']);
+                return $this->renderErrorJson();
+            }
+
+            // save token
+            Session::put(self::VERIFY_DEVICE_TOKEN, Arr::get($response, 'd.data'));
+
+            return $this->renderJson();
+        } catch (\Exception $exception) {
+            Log::error($exception);
+        }
+        return $this->renderErrorJson();
     }
 
     public function clearToken()

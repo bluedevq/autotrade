@@ -32,6 +32,7 @@ let BotController = {
     config: {
         url: {
             login: null,
+            requestCode: null,
             bet: null,
             research: null,
             startAuto: null,
@@ -98,6 +99,9 @@ let BotController = {
                 hideLoading();
                 $('.aresbo-login').hide();
                 $('.aresbo-login-with2fa').show();
+                if (response.data.verifyDevice) {
+                    $('.aresbo-login-verify-device').show();
+                }
                 return true;
             }
             // login success without 2fa
@@ -107,6 +111,38 @@ let BotController = {
             }
             hideLoading();
         });
+    },
+    requestCode: function () {
+        sendRequest({
+            url: BotController.config.url.requestCode,
+            type: 'POST',
+            data: {},
+            beforeSend: function () {
+                showLoading();
+            },
+            complete: function () {
+                hideLoading();
+            }
+        }, function (response) {
+            // errors
+            if (!response.status) {
+                BotController.showMessage(response.data.errors, 'error');
+                return false;
+            }
+            // count time if success
+            $('#request-code').addClass('disabled');
+            BotController.showTimeRequestCode(60);
+        });
+    },
+    showTimeRequestCode: function (time) {
+        time = time - 1;
+        time = (time < 10) ? "0" + time : time;
+        if (time == 0) {
+            $('#request-code').removeClass('disabled').empty().text('Gửi mã');
+            return false;
+        }
+        $('#request-code').empty().text(time + 's');
+        setTimeout(BotController.showTimeRequestCode, 1000, time);
     },
     showTime: function () {
         let date = new Date(),
@@ -328,9 +364,18 @@ let BotController = {
             if (!response.status) {
                 return false;
             }
-            let profit = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.total_profit),
-                volume = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.total_volume),
-                highestNegative = new Intl.NumberFormat(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}).format(response.data.highest_negative),
+            let profit = new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(response.data.total_profit),
+                volume = new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(response.data.total_volume),
+                highestNegative = new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(response.data.highest_negative),
                 profitHtml = null;
 
             // format profit
@@ -363,7 +408,7 @@ let BotController = {
                                 },
                                 grid: {
                                     borderDash: [2, 2],
-                                    color: function(context) {
+                                    color: function (context) {
                                         return '#5F2413';
                                     },
                                 }
@@ -374,7 +419,7 @@ let BotController = {
                                 },
                                 grid: {
                                     borderDash: [2, 2],
-                                    color: function(context) {
+                                    color: function (context) {
                                         return '#5f2413';
                                     },
                                 },
