@@ -10,6 +10,7 @@
     @if(!isset($botUserInfo) || blank($botUserInfo))
         @include('backend.bot.login.index')
         @include('backend.bot.login.2fa')
+        @include('backend.bot.login.verify_device')
     @else
         <div class="bot-container">
             <div class="row mt-2">

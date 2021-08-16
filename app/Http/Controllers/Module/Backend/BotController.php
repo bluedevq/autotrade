@@ -144,12 +144,13 @@ class BotController extends BackendController
 
             // check 2fa
             $require2Fa = Arr::get($response, 'd.require2Fa');
-            if ($require2Fa) {
+            $verifyDevice = Arr::get($response, 'd.verify-device');
+            if ($require2Fa || $verifyDevice) {
                 Session::put(self::TWOFA_TOKEN, Arr::get($response, 'd.t'));
-                Session::put(self::VERIFY_DEVICE, Arr::get($response, 'd.verify-device'));
+                Session::put(self::VERIFY_DEVICE, $verifyDevice);
                 $this->setData([
-                    'require2fa' => route('bot.loginWith2FA'),
-                    'verifyDevice' => Arr::get($response, 'd.verify-device'),
+                    'require2fa' => $require2Fa,
+                    'verifyDevice' => $verifyDevice,
                 ]);
                 return $this->renderJson();
             }
@@ -173,7 +174,7 @@ class BotController extends BackendController
             // get token from AresBO
             $loginData = [
                 'client_id' => 'aresbo-web',
-                'code' => $this->getParam('code'),
+                'code' => $this->getParam('require_2fa') ? $this->getParam('code') : $this->getParam('td_code'),
                 'td_code' => $this->getParam('td_code'),
                 'td_p_code' => Session::get(self::VERIFY_DEVICE_TOKEN),
                 'token' => Session::get(self::TWOFA_TOKEN)

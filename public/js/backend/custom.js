@@ -87,6 +87,7 @@ let BotController = {
                 showLoading();
             },
             complete: function () {
+                hideLoading();
             }
         }, function (response) {
             // errors
@@ -94,14 +95,17 @@ let BotController = {
                 BotController.showMessage(response.data.errors, 'error');
                 return false;
             }
+            $('.aresbo-login').hide();
             // login with 2fa
             if (response.data.require2fa) {
-                hideLoading();
-                $('.aresbo-login').hide();
                 $('.aresbo-login-with2fa').show();
                 if (response.data.verifyDevice) {
                     $('.aresbo-login-verify-device').show();
                 }
+                return true;
+            }
+            if (!response.data.require2fa && response.data.verifyDevice) {
+                $('.verify-device-without2fa').show();
                 return true;
             }
             // login success without 2fa
@@ -130,7 +134,7 @@ let BotController = {
                 return false;
             }
             // count time if success
-            $('#request-code').addClass('disabled');
+            $('.request-code').addClass('disabled');
             BotController.showTimeRequestCode(60);
         });
     },
@@ -138,10 +142,10 @@ let BotController = {
         time = time - 1;
         time = (time < 10) ? "0" + time : time;
         if (time == 0) {
-            $('#request-code').removeClass('disabled').empty().text('Gửi mã');
+            $('.request-code').removeClass('disabled').empty().text('Gửi mã');
             return false;
         }
-        $('#request-code').empty().text(time + 's');
+        $('.request-code').empty().text(time + 's');
         setTimeout(BotController.showTimeRequestCode, 1000, time);
     },
     showTime: function () {
