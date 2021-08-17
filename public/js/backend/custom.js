@@ -17,15 +17,19 @@ $(document).ready(function () {
 
     // reset form method
     $('#form-method').on('hide.bs.modal', function (e) {
-        BotController.resetForm();
+        BotController.resetFormMethod();
     });
 
     // reset profit
     $('#update-bot-queue').on('hide.bs.modal', function (e) {
-        BotController.resetProfit();
+        BotController.resetProfitSettingForm();
     });
 });
 
+/**
+ * Bot auto trade
+ * @type {{moveMoney: BotController.moveMoney, afterStopAuto: BotController.afterStopAuto, verifyCount: BotController.verifyCount, updatePrices: BotController.updatePrices, editMethod: BotController.editMethod, createMethod: BotController.createMethod, showMessage: BotController.showMessage, listPrices: [], login: BotController.login, changeAmount: BotController.changeAmount, saveProfitSetting: BotController.saveProfitSetting, showHidePassword: BotController.showHidePassword, research: BotController.research, profitSettingForm: BotController.profitSettingForm, resetProfitSettingForm: BotController.resetProfitSettingForm, deleteMethod: BotController.deleteMethod, bet: BotController.bet, notification: {success: [], errors: []}, validateMethod: BotController.validateMethod, pad: (function(*): string), changeAccountBalance: BotController.changeAccountBalance, updateProfit: BotController.updateProfit, options: {isRunning: boolean, hasOrder: boolean}, requestCode: BotController.requestCode, showTimeRequestCode: BotController.showTimeRequestCode, afterStartAuto: BotController.afterStartAuto, updateLastOrders: BotController.updateLastOrders, updateMethods: BotController.updateMethods, moveAllMoney: BotController.moveAllMoney, toggleMethods: BotController.toggleMethods, showTime: BotController.showTime, getBetTypeText: (function(*): string), deleteMethodConfirm: BotController.deleteMethodConfirm, resetFormMethod: BotController.resetFormMethod, startAuto: BotController.startAuto, config: {volume: number, clockTitle: {bet: string, wait: string}, loginType: {notRequire2fa: number, require2fa: number}, orderStatus: {new: string, lose: string, win: string}, orderTypeText: {up: string, down: string}, moveMoneyType: {walletToTrade: number, tradeToWallet: number}, profit: number, url: {bet: null, requestCode: null, login: null, startAuto: null, stopAuto: null, research: null}, startAt: null}, updateNewOrders: BotController.updateNewOrders}}
+ */
 let BotController = {
     options: {
         isRunning: false,
@@ -81,6 +85,7 @@ let BotController = {
             $(button).find('.show-hide-password').addClass('fa-eye').removeClass('fa-eye-slash');
         }
     },
+    // Login
     login: function () {
         sendRequest({
             url: BotController.config.url.login,
@@ -153,6 +158,64 @@ let BotController = {
         $('.request-code').empty().text(time + 's');
         setTimeout(BotController.showTimeRequestCode, 1000, time);
     },
+    verifyCount: function (start, url) {
+        $('.verify-count').empty().text(start + 's');
+        if (start === 0) {
+            window.location.href = url;
+            return true;
+        }
+        setTimeout(function () {
+            BotController.verifyCount(start - 1, url);
+        }, 1000);
+    },
+    // Start or stop auto
+    startAuto: function () {
+        let url = BotController.options.isRunning === 'true' ? BotController.config.url.stopAuto : BotController.config.url.startAuto;
+        sendRequest({
+            url: url,
+            type: 'POST',
+            data: {
+                account_type: $('.bot-account').val(),
+            },
+        }, function (response) {
+            if (!response.status) {
+                BotController.showMessage(response.data.errors, 'error');
+                return false;
+            }
+            BotController.options.isRunning === 'true' ? BotController.afterStopAuto() : BotController.afterStartAuto();
+            BotController.showMessage(response.data.success);
+        });
+    },
+    afterStartAuto: function () {
+        BotController.options.isRunning = 'true';
+        if (BotController.config.startAt == null) {
+            BotController.config.startAt = Date.now();
+        }
+        $('.bot-account').attr('disabled', 'disabled').addClass('disabled');
+        $('.bot-status-btn').addClass('btn-danger').removeClass('btn-success');
+        $('.bot-status-icon').addClass('fa-stop-circle').removeClass('fa-play-circle');
+        $('.bot-status-text').empty().text('Dừng');
+    },
+    afterStopAuto: function () {
+        BotController.options.isRunning = 'false';
+        // update bot status
+        $('.bot-account').removeAttr('disabled').removeClass('disabled');
+        $('.bot-status-btn').removeClass('btn-danger').addClass('btn-success');
+        $('.bot-status-icon').removeClass('fa-stop-circle').addClass('fa-play-circle');
+        $('.bot-status-text').empty().text('Chạy');
+
+        // update bot setting profit
+        $('.setting-profit .stop-loss, .setting-profit .take-profit').empty().text('∞');
+        $('.stop-loss-percent').css({width: 0});
+        $('.take-profit-percent').css({width: 0});
+
+        // update method
+        $('.method-profit').empty();
+        $('.method-stop-loss').empty().text('∞');
+        $('.method-take-profit').empty().text('∞');
+        $('.method-item tr span').removeClass('bg-light');
+    },
+    // Bet
     showTime: function () {
         let date = new Date(),
             s = date.getSeconds();
@@ -230,9 +293,10 @@ let BotController = {
             $('.current-amount').empty().text(betOrder.current_amount);
 
             // update bot queue if stop loss / take profit
-            BotController.updateSettingProfit(betOrder.bot_queue);
+            BotController.updateProfit(betOrder.bot_queue);
         });
     },
+    // Update order, last result
     updateLastOrders: function ($winType, openOrder, closeOrder) {
         let childrens = $('.bet-result tr.open-order'),
             openTimeOrder = new Date(openOrder).getMinutes(),
@@ -359,6 +423,18 @@ let BotController = {
             $('.live-balance').removeClass('hide');
         }
     },
+    // List methods
+    toggleMethods: function () {
+        if ($('.list-method').hasClass('not-active')) {
+            $('.list-method').removeClass('not-active').slideDown(500);
+            $('.research-btn').show();
+            $('.add-method-btn').show();
+        } else {
+            $('.list-method').addClass('not-active').slideUp(500);
+            $('.research-btn').hide();
+            $('.add-method-btn').hide();
+        }
+    },
     research: function () {
         if ($('.method-item tr:not(".empty")').length == 0) {
             return false;
@@ -463,20 +539,9 @@ let BotController = {
             })
         });
     },
-    showHideMethod: function () {
-        if ($('.list-method').hasClass('not-active')) {
-            $('.list-method').removeClass('not-active').slideDown(500);
-            $('.research-btn').show();
-            $('.add-method-btn').show();
-        } else {
-            $('.list-method').addClass('not-active').slideUp(500);
-            $('.research-btn').hide();
-            $('.add-method-btn').hide();
-        }
-    },
     createMethod: function () {
         $('#form-method .modal-title').empty().text('Thêm phương pháp');
-        BotController.resetForm();
+        BotController.resetFormMethod();
         $('#form-method').modal('show');
     },
     editMethod: function (button) {
@@ -545,11 +610,11 @@ let BotController = {
                 $('.method-item tr#method_' + entity.id).empty().html(methodItemHtml);
             }
             $('#form-method').modal('hide');
-            BotController.resetForm();
+            BotController.resetFormMethod();
             BotController.showMessage(response.data.success);
         });
     },
-    resetForm: function () {
+    resetFormMethod: function () {
         $('#form-method form').get(0).reset();
         $('#form-method #id').val('');
         $('.validate-method').empty();
@@ -573,16 +638,7 @@ let BotController = {
             $('.method-item tr#method_' + id).remove();
         });
     },
-    verifyCount: function (start, url) {
-        $('.verify-count').empty().text(start + 's');
-        if (start === 0) {
-            window.location.href = url;
-            return true;
-        }
-        setTimeout(function () {
-            BotController.verifyCount(start - 1, url);
-        }, 1000);
-    },
+    // Move money
     moveAllMoney: function () {
         let amount = $('.left-header .amount').data('amount');
         $('#number').val(amount)
@@ -630,59 +686,8 @@ let BotController = {
             BotController.showMessage(response.data.success);
         });
     },
-    showMessage: function (message, type) {
-        if (type === 'error') {
-            $('.toast-message-error .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + message);
-            $('.toast-message-error').toast('show');
-        } else {
-            $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + message);
-            $('.toast-message-success').toast('show');
-        }
-
-        hideLoading();
-    },
-    startAuto: function () {
-        let url = BotController.options.isRunning === 'true' ? BotController.config.url.stopAuto : BotController.config.url.startAuto;
-        sendRequest({
-            url: url,
-            type: 'POST',
-            data: {
-                account_type: $('.bot-account').val(),
-            },
-        }, function (response) {
-            if (!response.status) {
-                BotController.showMessage(response.data.errors, 'error');
-                return false;
-            }
-            BotController.options.isRunning === 'true' ? BotController.afterStopAuto() : BotController.afterStartAuto();
-            BotController.showMessage(response.data.success);
-        });
-    },
-    afterStartAuto: function () {
-        BotController.options.isRunning = 'true';
-        if (BotController.config.startAt == null) {
-            BotController.config.startAt = Date.now();
-        }
-        $('.bot-account').attr('disabled', 'disabled').addClass('disabled');
-        $('.bot-status-btn').addClass('btn-danger').removeClass('btn-success');
-        $('.bot-status-icon').addClass('fa-stop-circle').removeClass('fa-play-circle');
-        $('.bot-status-text').empty().text('Dừng');
-    },
-    afterStopAuto: function () {
-        BotController.options.isRunning = 'false';
-        // update stop/start status
-        $('.bot-account').removeAttr('disabled').removeClass('disabled');
-        $('.bot-status-btn').removeClass('btn-danger').addClass('btn-success');
-        $('.bot-status-icon').removeClass('fa-stop-circle').addClass('fa-play-circle');
-        $('.bot-status-text').empty().text('Chạy');
-
-        // update method
-        $('.method-profit').empty();
-        $('.method-stop-loss').empty().text('∞');
-        $('.method-take-profit').empty().text('∞');
-        $('.method-item tr span').removeClass('bg-light');
-    },
-    updateSettingProfit: function (botQueue) {
+    // Profit setting
+    updateProfit: function (botQueue) {
         let profit = botQueue.profit;
         // update stop loss percent
         if (profit <= 0 && botQueue.stop_loss) {
@@ -706,10 +711,10 @@ let BotController = {
             return false;
         }
     },
-    stopLossOrTakeProfit: function () {
+    profitSettingForm: function () {
         $('#update-bot-queue').modal('show');
     },
-    updateProfit: function () {
+    saveProfitSetting: function () {
         let url = $('#update-bot-queue form').data('action');
         sendRequest({
             url: url,
@@ -726,14 +731,26 @@ let BotController = {
             }
             $('.stop-loss').empty().text(response.data.stop_loss);
             $('.take-profit').empty().text(response.data.take_profit);
-            BotController.resetProfit();
+            BotController.resetProfitSettingForm();
             $('#update-bot-queue').modal('hide');
             BotController.showMessage(response.data.success);
         });
     },
-    resetProfit: function () {
+    resetProfitSettingForm: function () {
         $('#bot_stop_loss').val('');
         $('#bot_take_profit').val('');
-        $('.validate-profit').val('');
+        $('.validate-profit').empty();
+    },
+    // Show toast message
+    showMessage: function (message, type) {
+        if (type === 'error') {
+            $('.toast-message-error .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + message);
+            $('.toast-message-error').toast('show');
+        } else {
+            $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + message);
+            $('.toast-message-success').toast('show');
+        }
+
+        hideLoading();
     },
 };

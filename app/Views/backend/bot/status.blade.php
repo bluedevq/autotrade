@@ -22,8 +22,8 @@
         <div class="col-md-6 col-12 mt-sp-2 mx-auto text-center setting-profit">
             <div class="bg-secondary">
                 <div class="col-2 stop-loss">{!! $botQueue->getStopLoss() !!}</div>
-                <div class="col-4 stop-loss-btn" onclick="BotController.stopLossOrTakeProfit()"><span class="setting-profit-text">Cắt lỗ</span><span class="percent stop-loss-percent"></span></div>
-                <div class="col-4 take-profit-btn" onclick="BotController.stopLossOrTakeProfit()"><span class="setting-profit-text">Chốt lãi</span><span class="percent take-profit-percent"></span></div>
+                <div class="col-4 stop-loss-btn" onclick="BotController.profitSettingForm()"><span class="setting-profit-text">Cắt lỗ</span><span class="percent stop-loss-percent"></span></div>
+                <div class="col-4 take-profit-btn" onclick="BotController.profitSettingForm()"><span class="setting-profit-text">Chốt lãi</span><span class="percent take-profit-percent"></span></div>
                 <div class="col-2 take-profit">{!! $botQueue->getTakeProfit() !!}</div>
             </div>
         </div>

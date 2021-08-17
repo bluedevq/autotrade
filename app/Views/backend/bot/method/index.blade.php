@@ -1,6 +1,6 @@
 <div class="row mt-2">
     <div class="col-md-4 col-lg-3 col-12">
-        <button class="btn btn-primary col-12" type="button" onclick="BotController.showHideMethod()"><span class="fas fa-list-alt">&nbsp;</span>Phương pháp</button>
+        <button class="btn btn-primary col-12" type="button" onclick="BotController.toggleMethods()"><span class="fas fa-list-alt">&nbsp;</span>Phương pháp</button>
     </div>
     <div class="col-md-4 col-lg-3 col-6 mt-sp-2 research-btn hide">
         <a class="btn btn-danger col-12" href="javascript:void(0)" onclick="BotController.research()"><span class="fas fa-chart-line">&nbsp;</span>Phân tích lệnh</a>
