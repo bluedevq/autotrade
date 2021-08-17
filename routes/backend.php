@@ -131,6 +131,11 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot_method.valid',
             'uses' => 'BotController@validateMethod'
         ]);
+        // update method status
+        Route::post('/update-status-method', [
+            'as' => 'bot.method.update.status',
+            'uses' => 'BotController@updateStatusMethod'
+        ]);
         // delete method
         Route::post('/delete-method', [
             'as' => 'bot_method.delete',

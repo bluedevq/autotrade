@@ -294,6 +294,9 @@ class BotController extends BackendController
                     $q->orWhere('deleted_at', '');
                     $q->orWhereNull('deleted_at');
                 })->get();
+            if (blank($methods)) {
+                return $this->renderErrorJson();
+            }
 
             // research method to get bet order data
             $orderData = $this->_getOrderData($botQueue, $methods, $resultPrices);
@@ -410,23 +413,58 @@ class BotController extends BackendController
     public function deleteMethod()
     {
         // validate data
-        $id = request()->get('id');
-        $entity = $this->fetchModel(BotUserMethod::class)->where('id', $id)->first();
-        if (blank($entity)) {
+        $listMethodIds = request()->get('method_ids');
+        $entities = $this->fetchModel(BotUserMethod::class)->whereIn('id', $listMethodIds)->get();
+        if (blank($entities)) {
+            $this->setData(['errors' => 'Phương pháp không tồn tại.']);
             return $this->renderErrorJson();
         }
 
         // delete data
         DB::beginTransaction();
         try {
-            $entity->delete();
+            foreach ($entities as $entity) {
+                $entity->delete();
+            }
+            $this->setData([
+                'method_ids' => $this->getParam('method_ids'),
+                'success' => 'Xóa phương pháp thành công.'
+            ]);
             DB::commit();
+
+            return $this->renderJson();
         } catch (\Exception $exception) {
             DB::rollBack();
             Log::error($exception);
+            $this->setData(['errors' => 'Lỗi hệ thống. Vui lòng thử lại.']);
         }
 
-        return $this->renderJson();
+        return $this->renderErrorJson();
+    }
+
+    public function updateStatusMethod()
+    {
+        DB::beginTransaction();
+        try {
+            $entities = $this->fetchModel(BotUserMethod::class)->whereIn('id', $this->getParam('method_ids'))->get();
+            foreach ($entities as $entity) {
+                $entity->status = $this->getParam('status') == 'true' ? Common::getConfig('aresbo.method.active') : Common::getConfig('aresbo.method.stop');
+                $entity->save();
+            }
+            $this->setData([
+                'method_ids' => $this->getParam('method_ids'),
+                'success' => ($this->getParam('status') ? 'Chạy' : 'Dừng') . ' phương pháp thành công.'
+            ]);
+            DB::commit();
+
+            return $this->renderJson();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $this->setData(['errors' => 'Lỗi hệ thống. Vui lòng thử lại.']);
+        }
+
+        return $this->renderErrorJson();
     }
 
     public function research()
@@ -436,6 +474,7 @@ class BotController extends BackendController
         // get bot user
         $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if (blank($user)) {
+            $this->setData(['url' => route('bot.clear_token')]);
             return $this->renderErrorJson();
         }
 
@@ -447,6 +486,7 @@ class BotController extends BackendController
                 $q->orWhereNull('deleted_at');
             })->get();
         if (blank($methods)) {
+            $this->setData(['errors' => 'Không có phương pháp nào đang chạy.']);
             return $this->renderErrorJson();
         }
 

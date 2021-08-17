@@ -191,6 +191,10 @@ a {
     text-align: left;
 }
 
+.list-methods-scroll input[type="checkbox"]:hover {
+    cursor: pointer;
+}
+
 .method-item tr {
     vertical-align: middle;
 }

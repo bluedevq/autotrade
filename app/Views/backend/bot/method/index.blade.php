@@ -11,17 +11,17 @@
                 <a class="btn btn-success col-12" href="javascript:void(0)" onclick="BotController.createMethod()"><span class="fas fa-plus">&nbsp;</span>Thêm</a>
             </div>
             <div class="col-6">
-                <a class="btn btn-success col-12 disabled" href="javascript:void(0)" onclick="BotController.activeMethod()"><span class="fas fa-play">&nbsp;</span>Chạy</a>
+                <a class="btn btn-success col-12 run-method disabled" href="javascript:void(0)" onclick="BotController.updateStatusMethod(true)"><span class="fas fa-play">&nbsp;</span>Chạy</a>
             </div>
         </div>
     </div>
     <div class="col-md-3 col-12 mt-sp-2 action-method-btn hide">
         <div class="row">
             <div class="col-6">
-                <a class="btn btn-danger col-12 disabled" href="javascript:void(0)" onclick="BotController.stopMethod()"><span class="fas fa-stop">&nbsp;</span>Dừng</a>
+                <a class="btn btn-danger col-12 stop-method disabled" href="javascript:void(0)" onclick="BotController.updateStatusMethod(false)"><span class="fas fa-stop">&nbsp;</span>Dừng</a>
             </div>
             <div class="col-6">
-                <a class="btn btn-danger col-12 disabled" href="javascript:void(0)" onclick="BotController.deleteMethod()"><span class="fas fa-trash">&nbsp;</span>Xóa</a>
+                <a class="btn btn-danger col-12 delete-method disabled" href="javascript:void(0)" onclick="BotController.deleteMethodConfirm()"><span class="fas fa-trash">&nbsp;</span>Xóa</a>
             </div>
         </div>
     </div>
@@ -32,7 +32,7 @@
             <div class="col-12">
                 <table class="table table-striped table-dark table-hover col-12">
                     <thead>
-                    <th><input type="checkbox" class="form-check-input" onclick="BotController.selectAllMethod(this)"></th>
+                    <th><input type="checkbox" id="select-all-methods" class="form-check-input" onclick="BotController.selectAllMethod()"></th>
                     <th>Tên PP</th>
                     <th class="pc">Loại PP</th>
                     <th class="text-start">Tín hiệu</th>

@@ -120,7 +120,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-danger">
             <div class="modal-header">
-                <h4 class="modal-title">Xóa phương pháp <span class="method-title fw-bold"></span> ?</h4>
+                <h4 class="modal-title">Bạn có chắc chắn muốn xóa phương pháp <span class="method-title fw-bold"></span> ?</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">

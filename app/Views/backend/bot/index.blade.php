@@ -41,6 +41,7 @@
             BotController.config.url.research = '{{ route('bot_method.research') }}';
             BotController.config.url.startAuto = '{{ route('bot.start_auto') }}';
             BotController.config.url.stopAuto = '{{ route('bot.stop_auto') }}';
+            BotController.config.url.statusMethod = '{{ route('bot.method.update.status') }}';
             @if($isRunning)
             BotController.config.startAt = '{{ time() * 1000 }}';
             @endif

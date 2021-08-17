@@ -43,6 +43,7 @@ let BotController = {
             research: null,
             startAuto: null,
             stopAuto: null,
+            statusMethod: null,
         },
         orderStatus: {
             new: 'Đang đợi',
@@ -73,7 +74,10 @@ let BotController = {
         success: [],
         errors: [],
     },
-    listPrices: [],
+    data: {
+        listPrices: [],
+        listMethodIds: [],
+    },
     showHidePassword: function (button) {
         let passwordInput = $(button).parent('.input-group').find('input#password');
         console.log($(passwordInput).attr('type'));
@@ -355,7 +359,7 @@ let BotController = {
             BotController.config.volume += listOpenOrders[i].amount;
 
             // update method pattern
-            $('.method-item tr#method_' + listOpenOrders[i]['method_id'] + ' .method-pattern .step-' + listOpenOrders[i]['step']).addClass('bg-light');
+            $('.method-item #method_' + listOpenOrders[i]['method_id'] + ' .method-pattern .step-' + listOpenOrders[i]['step']).addClass('bg-light');
         }
         // show volume
         $('.volume').empty().text(new Intl.NumberFormat(undefined, {
@@ -376,11 +380,11 @@ let BotController = {
         prices = prices.reverse();
         let listPrices = '',
             lastPricePos = prices.length - 1,
-            updateFirstTime = BotController.listPrices.length === 0;
+            updateFirstTime = BotController.data.listPrices.length === 0;
 
         for (let i = 0; i < prices.length; i++) {
             if (i === lastPricePos || updateFirstTime) {
-                BotController.listPrices.push(prices[i]);
+                BotController.data.listPrices.push(prices[i]);
             }
 
             // update last price
@@ -405,7 +409,7 @@ let BotController = {
     updateMethods: function (methods) {
         for (let i = 0; i < methods.length; i++) {
             // update method profit
-            $('.method-item tr#method_' + methods[i]['id'] + ' .method-profit').empty().html(methods[i]['profit']);
+            $('.method-item #method_' + methods[i]['id'] + ' .method-profit').empty().html(methods[i]['profit']);
         }
     },
     pad: function (t) {
@@ -449,12 +453,14 @@ let BotController = {
             url: BotController.config.url.research,
             type: 'POST',
             data: {
-                'list_prices': JSON.stringify(BotController.listPrices)
+                'list_prices': JSON.stringify(BotController.data.listPrices)
             },
         }, function (response) {
             if (!response.status) {
+                BotController.showMessage(response.data.errors, 'error');
                 return false;
             }
+
             let profit = new Intl.NumberFormat(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
@@ -609,7 +615,7 @@ let BotController = {
             if (entity.create) {
                 $('.method-item').append('<tr id="method_' + entity.id + '" class="' + (entity.status ? 'active' : 'stop') + '">' + methodItemHtml + '</tr>');
             } else {
-                $('.method-item tr#method_' + entity.id).empty().html(methodItemHtml);
+                $('.method-item #method_' + entity.id).empty().html(methodItemHtml);
             }
             $('#form-method').modal('hide');
             BotController.resetFormMethod();
@@ -621,33 +627,86 @@ let BotController = {
         $('#form-method #id').val('');
         $('.validate-method').empty();
     },
-    deleteMethodConfirm: function (title, id) {
-        $('#delete-method .method-title').empty().text(title);
-        $('#delete-method #delete_method_id').val(id);
+    deleteMethodConfirm: function () {
         $('#delete-method').modal('show');
     },
     deleteMethod: function () {
-        let url = $('#delete-method form').data('action'),
-            id = $('#delete-method #delete_method_id').val();
+        let url = $('#delete-method form').data('action');
         sendRequest({
             url: url,
             type: 'POST',
             data: {
-                id: id
+                method_ids: BotController.data.listMethodIds
             },
         }, function (response) {
             $('#delete-method').modal('hide');
-            $('.method-item tr#method_' + id).remove();
+            if (!response.status) {
+                BotController.showMessage(response.data.errors, 'error');
+                return false;
+            }
+
+            // update list method
+            let listMethodIds = response.data.method_ids;
+            for (let i = 0; i < listMethodIds.length; i++) {
+                let tr = $('.method-item #method_' + listMethodIds[i]),
+                    input = $('.method-item #method_' + listMethodIds[i] + ' .method-id input[type="checkbox"]');
+
+                input.prop('checked', false);
+                BotController.selectMethod(input);
+                tr.remove();
+            }
+            BotController.showMessage(response.data.success);
         });
     },
     selectMethod: function (input) {
-    },
-    selectAllMethod: function (input) {
+        let id = $(input).val();
         if ($(input).is(':checked')) {
-            $(".method-id").prop("checked", false);
+            BotController.data.listMethodIds.push(id);
+            $('.run-method, .stop-method, .delete-method').removeClass('disabled');
         } else {
-            $(".method-id").prop("checked", true);
+            let index = BotController.data.listMethodIds.indexOf(id);
+            if (index > -1) {
+                BotController.data.listMethodIds.splice(index, 1);
+            }
         }
+        if (BotController.data.listMethodIds.length === 0) {
+            $('#select-all-methods').prop('checked', false);
+            $('.run-method, .stop-method, .delete-method').addClass('disabled');
+        }
+    },
+    selectAllMethod: function () {
+        let listMethods = $('.method-id input[type="checkbox"]');
+        for (let i = 0; i < listMethods.length; i++) {
+            $(listMethods[i]).prop('checked', $('#select-all-methods').prop('checked'));
+            BotController.selectMethod($(listMethods[i]));
+        }
+    },
+    updateStatusMethod: function (active) {
+        sendRequest({
+            url: BotController.config.url.statusMethod,
+            type: 'POST',
+            data: {
+                method_ids: BotController.data.listMethodIds,
+                status: active
+            },
+        }, function (response) {
+            if (!response.status) {
+                BotController.showMessage(response.data.errors, 'error');
+                return false;
+            }
+
+            // update list method
+            let listMethodIds = response.data.method_ids;
+            for (let i = 0; i < listMethodIds.length; i++) {
+                let tr = $('.method-item #method_' + listMethodIds[i]),
+                    input = $('.method-item #method_' + listMethodIds[i] + ' .method-id input[type="checkbox"]');
+
+                active ? tr.addClass('active').removeClass('stop') : tr.addClass('stop').removeClass('active');
+                input.prop('checked', false);
+                BotController.selectMethod(input);
+            }
+            BotController.showMessage(response.data.success);
+        });
     },
     // Move money
     moveAllMoney: function () {
