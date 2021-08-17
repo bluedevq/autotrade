@@ -33,11 +33,10 @@
         <div class="modal-content border-danger">
             <div class="modal-header">
                 <h4 class="modal-title">Thêm phương pháp</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="BotController.resetForm()"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="BotController.resetFormMethod()"></button>
             </div>
             <div class="modal-body">
-                <form data-action="{{ route('bot_method.valid') }}" method="POST" class="form-horizontal"
-                      enctype="multipart/form-data">
+                <form data-action="{{ route('bot_method.valid') }}" method="POST" class="form-horizontal" enctype="multipart/form-data">
                     @csrf
                     <div class="mt-2">
                         <ul class="list-group validate-method"></ul>
@@ -175,7 +174,7 @@
                         <div class="col-md-5">&nbsp;</div>
                         <div class="col-md-4">
                             <input type="hidden" id="bot_queue_id" name="id" value="{{ $botQueue->id }}">
-                            <button class="btn btn-lg btn-primary btn-block col-12" type="button" onclick="BotController.updateProfit()"><span class="fas fa-save" aria-hidden="true">&nbsp;</span>Lưu lại</button>
+                            <button class="btn btn-lg btn-primary btn-block col-12" type="button" onclick="BotController.saveProfitSetting()"><span class="fas fa-save" aria-hidden="true">&nbsp;</span>Lưu lại</button>
                         </div>
                     </div>
                 </form>

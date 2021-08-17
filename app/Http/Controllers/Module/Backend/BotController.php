@@ -831,10 +831,15 @@ class BotController extends BackendController
             if ($userExpired) {
                 $botQueue->status = Common::getConfig('aresbo.bot_status.stop');
             }
-            $botQueue->save();
 
-            // stop list methods
+            // update bot queue and list methods after stop auto
             if ($stop) {
+                // update bot queue
+                $botQueue->profit = null;
+                $botQueue->stop_loss = null;
+                $botQueue->take_profit = null;
+
+                // update list methods
                 $listMethods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botUser->id)
                     ->where(function ($q) {
                         $q->orWhere('deleted_at', '');
@@ -849,6 +854,7 @@ class BotController extends BackendController
                 }
             }
 
+            $botQueue->save();
             DB::commit();
             // check user expired
             if ($userExpired) {
