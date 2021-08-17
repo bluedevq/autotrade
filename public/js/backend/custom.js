@@ -1,7 +1,9 @@
 $(document).ready(function () {
     $('form').on('submit', function (e) {
         e.preventDefault();
-        $(this).attr('show-loading') == 1 ? showLoading() : null;
+        if ($(this).attr('show-loading') == 1) {
+            showLoading();
+        }
         $(this).off('submit').submit();
     });
 
@@ -55,6 +57,10 @@ let BotController = {
             walletToTrade: 1,
             tradeToWallet: 2
         },
+        loginType: {
+            notRequire2fa: 0,
+            require2fa: 1,
+        },
         startAt: null,
         profit: 0,
         volume: 0,
@@ -96,16 +102,15 @@ let BotController = {
                 return false;
             }
             $('.aresbo-login').hide();
-            // login with 2fa
-            if (response.data.require2fa) {
+            // login with 2fa or verify device
+            if (response.data.require2fa || response.data.verifyDevice) {
                 $('.aresbo-login-with2fa').show();
-                if (response.data.verifyDevice) {
-                    $('.aresbo-login-verify-device').show();
+                $('.aresbo-login-verify-device').show();
+                $('#require_2fa').val(BotController.config.loginType.require2fa);
+                if (!response.data.require2fa) {
+                    $('.aresbo-login-authentication').hide();
+                    $('#require_2fa').val(BotController.config.loginType.notRequire2fa);
                 }
-                return true;
-            }
-            if (!response.data.require2fa && response.data.verifyDevice) {
-                $('.verify-device-without2fa').show();
                 return true;
             }
             // login success without 2fa
@@ -655,7 +660,9 @@ let BotController = {
     },
     afterStartAuto: function () {
         BotController.options.isRunning = 'true';
-        BotController.config.startAt == null ? BotController.config.startAt = Date.now() : null;
+        if (BotController.config.startAt == null) {
+            BotController.config.startAt = Date.now();
+        }
         $('.bot-account').attr('disabled', 'disabled').addClass('disabled');
         $('.bot-status-btn').addClass('btn-danger').removeClass('btn-success');
         $('.bot-status-icon').addClass('fa-stop-circle').removeClass('fa-play-circle');
