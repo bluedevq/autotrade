@@ -36,6 +36,7 @@
                     </div>
                 </div>
             </div>
+            @if (false)
             <div class="mt-4 register">
                 <div class="row">
                     <div class="col-12 text-start">
@@ -50,6 +51,7 @@
                     </div>
                 </div>
             </div>
+            @endif
         </form>
     </div>
 @stop

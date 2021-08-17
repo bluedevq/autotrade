@@ -88,6 +88,11 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot.login',
             'uses' => 'BotController@login'
         ]);
+        // request code
+        Route::post('/request-code', [
+            'as' => 'bot.request.code',
+            'uses' => 'BotController@requestCode'
+        ]);
         Route::post('/login-2fa', [
             'as' => 'bot.loginWith2FA',
             'uses' => 'BotController@loginWith2FA'

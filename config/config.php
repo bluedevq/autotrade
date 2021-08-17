@@ -58,6 +58,7 @@ return [
             'move_usdtbo' => 'https://aresbo.com/api/wallet/binaryoption/move-usdtbo',
             'move_bousdt' => 'https://aresbo.com/api/wallet/binaryoption/move-bousdt',
             'reload_demo_balance' => 'https://aresbo.com/api/wallet/binaryoption/demo',
+            'request_code' => 'https://aresbo.com/api/auth/2fa/trusted-device/request-code',
         ],
         // config
         'bot_status' => [

@@ -1,7 +1,9 @@
 $(document).ready(function () {
     $('form').on('submit', function (e) {
         e.preventDefault();
-        $(this).attr('show-loading') == 1 ? showLoading() : null;
+        if ($(this).attr('show-loading') == 1) {
+            showLoading();
+        }
         $(this).off('submit').submit();
     });
 
@@ -32,6 +34,7 @@ let BotController = {
     config: {
         url: {
             login: null,
+            requestCode: null,
             bet: null,
             research: null,
             startAuto: null,
@@ -53,6 +56,10 @@ let BotController = {
         moveMoneyType: {
             walletToTrade: 1,
             tradeToWallet: 2
+        },
+        loginType: {
+            notRequire2fa: 0,
+            require2fa: 1,
         },
         startAt: null,
         profit: 0,
@@ -86,6 +93,7 @@ let BotController = {
                 showLoading();
             },
             complete: function () {
+                hideLoading();
             }
         }, function (response) {
             // errors
@@ -93,11 +101,16 @@ let BotController = {
                 BotController.showMessage(response.data.errors, 'error');
                 return false;
             }
-            // login with 2fa
-            if (response.data.require2fa) {
-                hideLoading();
-                $('.aresbo-login').hide();
+            $('.aresbo-login').hide();
+            // login with 2fa or verify device
+            if (response.data.require2fa || response.data.verifyDevice) {
                 $('.aresbo-login-with2fa').show();
+                $('.aresbo-login-verify-device').show();
+                $('#require_2fa').val(BotController.config.loginType.require2fa);
+                if (!response.data.require2fa) {
+                    $('.aresbo-login-authentication').hide();
+                    $('#require_2fa').val(BotController.config.loginType.notRequire2fa);
+                }
                 return true;
             }
             // login success without 2fa
@@ -107,6 +120,38 @@ let BotController = {
             }
             hideLoading();
         });
+    },
+    requestCode: function () {
+        sendRequest({
+            url: BotController.config.url.requestCode,
+            type: 'POST',
+            data: {},
+            beforeSend: function () {
+                showLoading();
+            },
+            complete: function () {
+                hideLoading();
+            }
+        }, function (response) {
+            // errors
+            if (!response.status) {
+                BotController.showMessage(response.data.errors, 'error');
+                return false;
+            }
+            // count time if success
+            $('.request-code').addClass('disabled');
+            BotController.showTimeRequestCode(60);
+        });
+    },
+    showTimeRequestCode: function (time) {
+        time = time - 1;
+        time = (time < 10) ? "0" + time : time;
+        if (time == 0) {
+            $('.request-code').removeClass('disabled').empty().text('Gửi mã');
+            return false;
+        }
+        $('.request-code').empty().text(time + 's');
+        setTimeout(BotController.showTimeRequestCode, 1000, time);
     },
     showTime: function () {
         let date = new Date(),
@@ -626,7 +671,9 @@ let BotController = {
     },
     afterStartAuto: function () {
         BotController.options.isRunning = 'true';
-        BotController.config.startAt == null ? BotController.config.startAt = Date.now() : null;
+        if (BotController.config.startAt == null) {
+            BotController.config.startAt = Date.now();
+        }
         $('.bot-account').attr('disabled', 'disabled').addClass('disabled');
         $('.bot-status-btn').addClass('btn-danger').removeClass('btn-success');
         $('.bot-status-icon').addClass('fa-stop-circle').removeClass('fa-play-circle');
