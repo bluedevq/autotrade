@@ -207,15 +207,15 @@ let BotController = {
             // update list prices
             BotController.updatePrices(betOrder.prices);
 
+            // remove method background running
+            $('.method-item tr span').removeClass('bg-light');
+
             if (!response.status) {
                 if (betOrder.url) {
                     window.location.href = betOrder.url;
                 }
                 return false;
             }
-
-            // remove method background running
-            $('.method-item tr span').removeClass('bg-light');
 
             // update new orders
             let listOpenOrders = betOrder.open_orders;
