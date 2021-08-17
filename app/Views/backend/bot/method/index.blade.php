@@ -1,27 +1,27 @@
 <div class="row mt-2">
     <div class="col-md-3 col-12">
-        <a class="btn btn-primary col-12" href="javascript:void(0)" onclick="BotController.toggleMethods()"><span class="fas fa-list-alt">&nbsp;</span>Phương pháp</a>
+        <a class="btn btn-info col-12" href="javascript:void(0)" onclick="BotController.toggleMethods()"><span class="fas fa-list-alt">&nbsp;</span>Phương pháp</a>
     </div>
     <div class="col-md-3 col-12 mt-sp-2 research-btn hide">
-        <a class="btn btn-danger col-12" href="javascript:void(0)" onclick="BotController.research()"><span class="fas fa-chart-line">&nbsp;</span>Phân tích lệnh</a>
+        <a class="btn btn-outline-danger-custom col-12" href="javascript:void(0)" onclick="BotController.research()"><span class="fas fa-chart-line">&nbsp;</span>Phân tích lệnh</a>
     </div>
     <div class="col-md-3 col-12 mt-sp-2 action-method-btn hide">
         <div class="row">
             <div class="col-6">
-                <a class="btn btn-success col-12" href="javascript:void(0)" onclick="BotController.createMethod()"><span class="fas fa-plus">&nbsp;</span>Thêm</a>
+                <a class="btn btn-outline-success-custom col-12" href="javascript:void(0)" onclick="BotController.createMethod()"><span class="fas fa-plus">&nbsp;</span>Thêm</a>
             </div>
             <div class="col-6">
-                <a class="btn btn-success col-12 run-method disabled" href="javascript:void(0)" onclick="BotController.updateStatusMethod(true)"><span class="fas fa-play">&nbsp;</span>Chạy</a>
+                <a class="btn btn-outline-primary-custom col-12 run-method disabled" href="javascript:void(0)" onclick="BotController.updateStatusMethod(true)"><span class="fas fa-play">&nbsp;</span>Chạy</a>
             </div>
         </div>
     </div>
     <div class="col-md-3 col-12 mt-sp-2 action-method-btn hide">
         <div class="row">
             <div class="col-6">
-                <a class="btn btn-danger col-12 stop-method disabled" href="javascript:void(0)" onclick="BotController.updateStatusMethod(false)"><span class="fas fa-stop">&nbsp;</span>Dừng</a>
+                <a class="btn btn-outline-warning-custom col-12 stop-method disabled" href="javascript:void(0)" onclick="BotController.updateStatusMethod(false)"><span class="fas fa-stop">&nbsp;</span>Dừng</a>
             </div>
             <div class="col-6">
-                <a class="btn btn-danger col-12 delete-method disabled" href="javascript:void(0)" onclick="BotController.deleteMethodConfirm()"><span class="fas fa-trash">&nbsp;</span>Xóa</a>
+                <a class="btn btn-outline-danger-custom col-12 delete-method disabled" href="javascript:void(0)" onclick="BotController.deleteMethodConfirm()"><span class="fas fa-trash">&nbsp;</span>Xóa</a>
             </div>
         </div>
     </div>

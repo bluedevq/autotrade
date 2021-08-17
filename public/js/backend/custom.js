@@ -446,9 +446,6 @@ let BotController = {
         }
     },
     research: function () {
-        if ($('.method-item tr:not(".empty")').length == 0) {
-            return false;
-        }
         sendRequest({
             url: BotController.config.url.research,
             type: 'POST',
