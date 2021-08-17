@@ -207,15 +207,15 @@ let BotController = {
             // update list prices
             BotController.updatePrices(betOrder.prices);
 
+            // remove method background running
+            $('.method-item tr span').removeClass('bg-light');
+
             if (!response.status) {
                 if (betOrder.url) {
                     window.location.href = betOrder.url;
                 }
                 return false;
             }
-
-            // remove method background running
-            $('.method-item tr span').removeClass('bg-light');
 
             // update new orders
             let listOpenOrders = betOrder.open_orders;
@@ -538,8 +538,8 @@ let BotController = {
                     '<td class="method-signal">' + entity.signal + '</td>' +
                     '<td class="method-pattern">' + entity.pattern + '</td>' +
                     '<td class="method-profit">' + entity.profit + '</td>' +
-                    '<td class="pc">' + entity.stop.loss + '</td>' +
-                    '<td class="pc">' + entity.stop.win + '</td>' +
+                    '<td class="pc method-stop-loss">' + entity.stop.loss + '</td>' +
+                    '<td class="pc method-take-profit">' + entity.stop.win + '</td>' +
                     '<td class="method-action-wrap"><a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a></td>';
             if (entity.create) {
                 $('.method-item').append('<tr id="method_' + entity.id + '" class="' + (entity.status ? 'active' : 'stop') + '">' + methodItemHtml + '</tr>');
@@ -681,10 +681,17 @@ let BotController = {
     },
     afterStopAuto: function () {
         BotController.options.isRunning = 'false';
+        // update stop/start status
         $('.bot-account').removeAttr('disabled').removeClass('disabled');
         $('.bot-status-btn').removeClass('btn-danger').addClass('btn-success');
         $('.bot-status-icon').removeClass('fa-stop-circle').addClass('fa-play-circle');
         $('.bot-status-text').empty().text('Chạy');
+
+        // update method
+        $('.method-profit').empty();
+        $('.method-stop-loss').empty().text('∞');
+        $('.method-take-profit').empty().text('∞');
+        $('.method-item tr span').removeClass('bg-light');
     },
     updateSettingProfit: function (botQueue) {
         let profit = botQueue.profit;

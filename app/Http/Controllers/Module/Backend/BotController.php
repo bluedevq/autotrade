@@ -79,8 +79,10 @@ class BotController extends BackendController
             try {
                 // reset method
                 foreach ($listMethods as $method) {
-                    $method->profit = null;
                     $method->step = null;
+                    $method->profit = null;
+                    $method->stop_loss = null;
+                    $method->take_profit = null;
                     $method->save();
                 }
 
@@ -830,6 +832,23 @@ class BotController extends BackendController
                 $botQueue->status = Common::getConfig('aresbo.bot_status.stop');
             }
             $botQueue->save();
+
+            // stop list methods
+            if ($stop) {
+                $listMethods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botUser->id)
+                    ->where(function ($q) {
+                        $q->orWhere('deleted_at', '');
+                        $q->orWhereNull('deleted_at');
+                    })->get();
+                foreach ($listMethods as $method) {
+                    $method->step = null;
+                    $method->profit = null;
+                    $method->stop_loss = null;
+                    $method->take_profit = null;
+                    $method->save();
+                }
+            }
+
             DB::commit();
             // check user expired
             if ($userExpired) {

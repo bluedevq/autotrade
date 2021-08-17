@@ -54,8 +54,8 @@
                                 <td class="method-signal">{!! $method->getSignalText() !!}</td>
                                 <td class="method-pattern">{!! $method->getOrderPatternText() !!}</td>
                                 <td class="method-profit">{!! $method->getProfitText() !!}</td>
-                                <td class="pc">{!! $method->getStopLossText() !!}</td>
-                                <td class="pc">{!! $method->getTakeProfitText() !!}</td>
+                                <td class="pc method-stop-loss">{!! $method->getStopLossText() !!}</td>
+                                <td class="pc method-take-profit">{!! $method->getTakeProfitText() !!}</td>
                                 <td class="method-action">
                                     <a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="{{ route('bot_method.edit', $method->id) }}" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a>
                                 </td>
