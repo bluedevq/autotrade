@@ -79,8 +79,10 @@ class BotController extends BackendController
             try {
                 // reset method
                 foreach ($listMethods as $method) {
-                    $method->profit = null;
                     $method->step = null;
+                    $method->profit = null;
+                    $method->stop_loss = null;
+                    $method->take_profit = null;
                     $method->save();
                 }
 
@@ -838,8 +840,10 @@ class BotController extends BackendController
                         $q->orWhereNull('deleted_at');
                     })->get();
                 foreach ($listMethods as $method) {
-                    $method->profit = null;
                     $method->step = null;
+                    $method->profit = null;
+                    $method->stop_loss = null;
+                    $method->take_profit = null;
                     $method->save();
                 }
             }

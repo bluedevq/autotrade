@@ -532,8 +532,8 @@ let BotController = {
                     '<td class="method-signal">' + entity.signal + '</td>' +
                     '<td class="method-pattern">' + entity.pattern + '</td>' +
                     '<td class="method-profit">' + entity.profit + '</td>' +
-                    '<td class="pc">' + entity.stop.loss + '</td>' +
-                    '<td class="pc">' + entity.stop.win + '</td>' +
+                    '<td class="pc method-stop-loss">' + entity.stop.loss + '</td>' +
+                    '<td class="pc method-take-profit">' + entity.stop.win + '</td>' +
                     '<td>' + entity.status + '</td>' +
                     '<td><div class="row"><ul class="list-inline method-action">' +
                     '<li class="list-inline-item updated"><a class="btn btn-info" onclick="BotController.editMethod(this)" data-href="' + entity.url.edit + '" href="javascript:void(0)"><span class="fas fa-edit">&nbsp;</span>Sửa</a></li>' +
@@ -670,10 +670,17 @@ let BotController = {
     },
     afterStopAuto: function () {
         BotController.options.isRunning = 'false';
+        // update stop/start status
         $('.bot-account').removeAttr('disabled').removeClass('disabled');
         $('.bot-status-btn').removeClass('btn-danger').addClass('btn-success');
         $('.bot-status-icon').removeClass('fa-stop-circle').addClass('fa-play-circle');
         $('.bot-status-text').empty().text('Chạy');
+
+        // update method
+        $('.method-profit').empty();
+        $('.method-stop-loss').empty().text('∞');
+        $('.method-take-profit').empty().text('∞');
+        $('.method-item tr span').removeClass('bg-light');
     },
     updateSettingProfit: function (botQueue) {
         let profit = botQueue.profit;

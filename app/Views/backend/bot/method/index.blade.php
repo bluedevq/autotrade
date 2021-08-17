@@ -36,8 +36,8 @@
                                 <td class="method-signal">{!! $method->getSignalText() !!}</td>
                                 <td class="method-pattern">{!! $method->getOrderPatternText() !!}</td>
                                 <td class="method-profit">{!! $method->getProfitText() !!}</td>
-                                <td class="pc">{!! $method->getStopLossText() !!}</td>
-                                <td class="pc">{!! $method->getTakeProfitText() !!}</td>
+                                <td class="pc method-stop-loss">{!! $method->getStopLossText() !!}</td>
+                                <td class="pc method-take-profit">{!! $method->getTakeProfitText() !!}</td>
                                 <td>{{ $method->getMethodStatusText() }}</td>
                                 <td>
                                     <div class="row">
