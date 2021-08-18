@@ -39,6 +39,8 @@ return [
     'verify_expired' => 60, // minutes
     // forgot password expired date time
     'forgot_password_expired' => 60, // minutes
+    // free days after register
+    'free_days_after_register' => 3,
     // aresbo config
     'aresbo' => [
         // api
@@ -53,8 +55,10 @@ return [
             'open_order' => 'https://aresbo.com/api/wallet/binaryoption/transaction/open',
             'close_order' => 'https://aresbo.com/api/wallet/binaryoption/transaction/close',
             'get_prices' => 'https://aresbo.com/api/wallet/binaryoption/prices',
-            'move_usdtbo' => 'https://aresbo.com/api/wallet/binaryoption/move-usdtbo', // POST {amount: '2', confirmed: true}
-            'move_bousdt' => 'https://aresbo.com/api/wallet/binaryoption/move-bousdt', // POST {amount: '2', confirmed: true}
+            'move_usdtbo' => 'https://aresbo.com/api/wallet/binaryoption/move-usdtbo',
+            'move_bousdt' => 'https://aresbo.com/api/wallet/binaryoption/move-bousdt',
+            'reload_demo_balance' => 'https://aresbo.com/api/wallet/binaryoption/demo',
+            'request_code' => 'https://aresbo.com/api/auth/2fa/trusted-device/request-code',
         ],
         // config
         'bot_status' => [
@@ -74,6 +78,8 @@ return [
                 0 => 'Dừng',
                 1 => 'Hoạt động',
             ],
+            'break_item_pc' => 6,
+            'break_item_mobile' => 2,
         ],
         'method_type' => [
             'value' => [
@@ -81,8 +87,8 @@ return [
                 'martingale' => 2,
             ],
             'text' => [
-                1 => 'PAROLI',
-                2 => 'MARTINGALE',
+                1 => 'Đánh sau thắng',
+                2 => 'Đánh sau thua',
             ],
         ],
         'order_signal_delimiter' => '-',
@@ -95,7 +101,14 @@ return [
             'up' => 'T',
             'down' => 'G',
         ],
-        'chart_tension' => '0.4',
+        'chart' => [
+            'chart_tension' => '0.4',
+            'chart_default_step_size' => 5,
+            'chart_step_size' => 10,
+            'chart_border_width' => 1,
+            'chart_total_border_width' => 2.5,
+            'chart_total_color' => '#ff0000',
+        ],
         'move_money_type' => [
             'wallet_to_trade' => 1,
             'trade_to_wallet' => 2,

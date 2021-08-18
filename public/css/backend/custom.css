@@ -76,6 +76,64 @@ a {
     background-color: #33cc66 !important;
 }
 
+.btn-primary-custom {
+    background-color: #0d6efd !important;
+}
+
+.btn-info-custom {
+    background-color: #0dcaf0 !important;
+}
+
+.btn-outline-primary-custom {
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+
+.btn-outline-primary-custom:hover {
+    color: #fff !important;
+    background-color: #0d6efd !important;
+}
+
+.btn-outline-success-custom {
+    color: #33cc66 !important;
+    border-color: #33cc66 !important;
+}
+
+.btn-outline-success-custom:hover {
+    color: #fff !important;
+    background-color: #33cc66 !important;
+}
+
+.btn-outline-info-custom {
+    color: #0dcaf0 !important;
+    border-color: #0dcaf0 !important;
+}
+
+.btn-outline-info-custom:hover {
+    color: #fff !important;
+    background-color: #0dcaf0 !important;
+}
+
+.btn-outline-warning-custom {
+    color: #ffc107 !important;
+    border-color: #ffc107 !important;
+}
+
+.btn-outline-warning-custom:hover {
+    color: #fff !important;
+    background-color: #ffc107 !important;
+}
+
+.btn-outline-danger-custom {
+    color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+.btn-outline-danger-custom:hover {
+    color: #fff !important;
+    background-color: #dc3545 !important;
+}
+
 .text-danger-custom {
     color: #ff3333 !important;
 }
@@ -87,6 +145,10 @@ a {
 .border-radius-custom {
     border: none;
     border-radius: 0.3rem;
+}
+
+.toast-message-custom {
+    position: fixed !important;
 }
 
 .register a {
@@ -123,6 +185,11 @@ a {
     cursor: not-allowed;
 }
 
+.action-method-btn .disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
 .clock {
     font-size: 80px;
     letter-spacing: 7px;
@@ -133,21 +200,78 @@ a {
     overflow-y: auto;
 }
 
+.setting-profit .bg-secondary {
+    border-radius: .25rem;
+    display: flex;
+    flex-wrap: wrap;
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 0;
+    background-color: #333366 !important;
+}
+
+.setting-profit .bg-secondary div {
+    padding: .438rem .75rem;
+}
+
+.stop-loss-btn, .take-profit-btn {
+    position: relative;
+    cursor: pointer;
+}
+
+.stop-loss-btn {
+    border-left: 1px solid #ff810f;
+}
+
+.take-profit-btn {
+    border-right: 1px solid #ff810f;
+}
+
+.setting-profit .setting-profit-text {
+    position: relative;
+    z-index: 10;
+}
+
+.setting-profit .bg-secondary .percent {
+    position: absolute;
+    top: 0;
+    height: 100%;
+}
+
+.setting-profit .bg-secondary .stop-loss-percent {
+    background-color: #ff3333;
+    right: 0;
+}
+
+.setting-profit .bg-secondary .take-profit-percent {
+    background-color: #33cc66;
+    left: 0;
+}
+
 .list-methods-scroll {
     max-height: 330px;
     overflow-y: auto;
+    text-align: left;
 }
 
-.method-action .list-inline-item:not(:last-child) {
-    margin-right: 0;
+.list-methods-scroll input[type="checkbox"]:hover {
+    cursor: pointer;
 }
 
-.method-action .list-inline-item:last-child {
-    margin-top: .25rem;
+.method-item tr {
+    vertical-align: middle;
 }
 
-.method-action .list-inline-item a {
-    min-width: 76px;
+.method-item tr.stop {
+    opacity: 0.65;
+}
+
+.method-action {
+    min-width: 4.75rem;
+}
+
+.method-action a {
+    min-width: 4.75rem;
+    padding: 0.3rem 0.1rem;
 }
 
 .method-item .method-pattern .bg-light {
@@ -155,7 +279,13 @@ a {
     border-radius: .2rem;
 }
 
-.validate-method .list-group-item {
+.method-item .method-signal,
+.method-item .method-pattern {
+    text-align: left;
+}
+
+.validate-method .list-group-item,
+.validate-profit .list-group-item {
     color: #ffffff;
 }
 
@@ -213,11 +343,12 @@ a {
 }
 
 #research-method {
-    color: #dee2e6;
+    color: #fff;
 }
 
 #research-method .modal-content {
-    border: 1px solid #dee2e6;
+    border: 1px solid #ff810f;
+    border-radius: 0;
 }
 
 #research-method .modal-content {
@@ -228,6 +359,18 @@ a {
 #research-method .modal-body,
 #research-method .modal-footer {
     background-color: #171b2c;
+}
+
+#research-method .modal-header {
+    border-bottom: none;
+}
+
+#research-method .modal-header .btn-close {
+    background-color: #ffffff;
+}
+
+#research-method .modal-footer {
+    display: block;
 }
 
 .move-money-wrap {
@@ -348,7 +491,7 @@ input[type=number] {
         background-color: #171b2c;
     }
 
-    .method-action .list-inline-item.updated {
-        margin-right: 5px;
+    .method-action .list-inline-item a {
+        padding: 0.37rem 0.75rem;
     }
 }

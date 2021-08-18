@@ -88,6 +88,11 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot.login',
             'uses' => 'BotController@login'
         ]);
+        // request code
+        Route::post('/request-code', [
+            'as' => 'bot.request.code',
+            'uses' => 'BotController@requestCode'
+        ]);
         Route::post('/login-2fa', [
             'as' => 'bot.loginWith2FA',
             'uses' => 'BotController@loginWith2FA'
@@ -126,13 +131,18 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot_method.valid',
             'uses' => 'BotController@validateMethod'
         ]);
+        // update method status
+        Route::post('/update-status-method', [
+            'as' => 'bot.method.update.status',
+            'uses' => 'BotController@updateStatusMethod'
+        ]);
         // delete method
         Route::post('/delete-method', [
             'as' => 'bot_method.delete',
             'uses' => 'BotController@deleteMethod'
         ]);
         // research method
-        Route::get('/research', [
+        Route::post('/research', [
             'as' => 'bot_method.research',
             'uses' => 'BotController@research'
         ]);
@@ -141,10 +151,15 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot.move.money',
             'uses' => 'BotController@moveMoney'
         ]);
-
+        // move money validation
         Route::post('/move-money-valid', [
             'as' => 'bot.move.money.valid',
             'uses' => 'BotController@moveMoneyValid'
+        ]);
+        // update stop loss / take profit
+        Route::post('/update-profit', [
+            'as' => 'bot.update.profit',
+            'uses' => 'BotController@updateProfit'
         ]);
     });
 });

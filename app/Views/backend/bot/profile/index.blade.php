@@ -53,7 +53,7 @@
             </div>
             <div class="row">
                 <div class="col-6 col-md-4">
-                    <label class="form-label" aria-hidden="true"><i class="fas fa-hand-holding-usd">&nbsp;</i>Tổng lãi</label>
+                    <label class="form-label" aria-hidden="true"><i class="fas fa-hand-holding-usd">&nbsp;</i>Lợi nhuận</label>
                 </div>
                 <div class="col-6 col-md-8">
                     <i class="fas fa-dollar-sign">&nbsp;</i><span class="profit">0</span>

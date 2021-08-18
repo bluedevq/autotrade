@@ -1,5 +1,9 @@
 @extends('layouts.backend.default')
 @section('content')
+    @php
+        $walletAmount = \Illuminate\Support\Arr::get($balance, 'usdt_available_balance');
+        $liveAmount = \Illuminate\Support\Arr::get($balance, 'available_balance');
+    @endphp
     <div class="col-md-6 mx-auto">
         <div class="row m-0">
             <div class="col-12  text-center">
@@ -16,7 +20,7 @@
                             <span class="font-14"><span class="text-danger">USDT</span>&nbsp;Wallet</span>
                         </div>
                         <div class="col-12 text-center">
-                            <span class="font-26 font-weight-700 amount" id="wallet-amount">{{ \Illuminate\Support\Arr::get($balance, 'usdt_available_balance') }}</span>
+                            <span class="font-26 font-weight-700 amount" data-amount="{{ intval($walletAmount * 100) / 100 }}" id="wallet-amount">{{ number_format(intval($walletAmount * 100) / 100, 2) }}</span>
                         </div>
                     </div>
                     <div class="col-6 right-header">
@@ -24,7 +28,7 @@
                             <span class="font-14">Tài khoản Thực</span>
                         </div>
                         <div class="col-12 text-center">
-                            <span class="font-26 font-weight-700 amount" id="live-amount">{{ \Illuminate\Support\Arr::get($balance, 'available_balance') }}</span>
+                            <span class="font-26 font-weight-700 amount" data-amount="{{ intval($liveAmount * 100) / 100 }}" id="live-amount">{{ number_format(intval($liveAmount * 100) / 100, 2) }}</span>
                         </div>
                     </div>
                 </div>

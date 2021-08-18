@@ -13,7 +13,7 @@
                         <label for="email" class="form-label" aria-hidden="true">Địa chỉ Email *</label>
                     </div>
                     <div class="col-12">
-                        <input type="email" name="email" class="form-control" id="email" value="{{ old('email') }}">
+                        <input type="text" name="email" class="form-control" id="email" value="{{ old('email') }}">
                     </div>
                 </div>
             </div>
@@ -36,6 +36,7 @@
                     </div>
                 </div>
             </div>
+            @if (false)
             <div class="mt-4 register">
                 <div class="row">
                     <div class="col-12 text-start">
@@ -50,6 +51,7 @@
                     </div>
                 </div>
             </div>
+            @endif
         </form>
     </div>
 @stop

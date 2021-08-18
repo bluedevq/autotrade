@@ -9,9 +9,8 @@ trait BotUserMethod
         $rules = [
             'name' => 'required|max:255',
             'type' => 'required|integer|in:1,2',
-            'stop_loss' => 'nullable|integer',
-            'take_profit' => 'nullable|integer',
-            'status' => 'required|integer|in:0,1',
+            'stop_loss' => 'nullable|regex:/^\-\d+(\.\d{1,2})?$/',
+            'take_profit' => 'nullable|regex:/^\d+(\.\d{1,2})?$/',
         ];
 
         $params = $this->getParams();
@@ -33,7 +32,8 @@ trait BotUserMethod
             'type.required' => 'Vui lòng chọn kiểu phương pháp.',
             'signal.required' => 'Vui lòng nhập tín hiệu nến.',
             'order_pattern.required' => 'Vui lòng nhập lệnh đặt.',
-            'status.required' => 'Vui lòng chọn trạng thái phương pháp.',
+            'stop_loss.regex' => 'Vui lòng nhập cắt lỗ là số âm bé hơn 0.',
+            'take_profit.regex' => 'Vui lòng nhập chốt lãi là số dương lớn hơn 0.',
         ];
 
         $params = $this->getParams();

@@ -30,6 +30,8 @@ class BotController extends BackendController
     const ACCESS_TOKEN = 'access_token';
     const REFRESH_TOKEN = 'refresh_token';
     const TWOFA_TOKEN = '2fa_token';
+    const VERIFY_DEVICE = 'verify_device';
+    const VERIFY_DEVICE_TOKEN = 'verify_device_token';
     const BOT_USER_EMAIL = 'bot_user_email';
 
     public function __construct(BotUser $botUser, BotQueue $botQueue, BotUserMethod $botUserMethod, BotMethodDefault $botMethodDefault, User $user)
@@ -52,6 +54,13 @@ class BotController extends BackendController
             $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
                 ->where('bot_user_id', $botUserInfo->id)
                 ->first();
+            if (blank($botQueue)) {
+                $botQueue = $this->fetchModel(BotQueue::class);
+                $botQueue->user_id = backendGuard()->user()->id;
+                $botQueue->bot_user_id = $botUserInfo->id;
+                $botQueue->account_type = Common::getConfig('aresbo.account_demo');
+                $botQueue->status = Common::getConfig('aresbo.bot_status.stop');
+            }
 
             // get list methods
             $listMethods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botUserInfo->id)
@@ -63,6 +72,31 @@ class BotController extends BackendController
                 ->get();
             if (blank($listMethods)) {
                 $listMethods = $this->_getDefaultMethod($botUserInfo->id);
+            }
+
+            // reset method and bot queue profit when go to first time
+            DB::beginTransaction();
+            try {
+                // reset method
+                foreach ($listMethods as $method) {
+                    $method->step = null;
+                    $method->profit = null;
+                    $method->stop_loss = null;
+                    $method->take_profit = null;
+                    $method->save();
+                }
+
+                // reset bot queue
+                $botQueue->profit = null;
+                $botQueue->stop_loss = null;
+                $botQueue->take_profit = null;
+                $botQueue->save();
+
+                // commit data
+                DB::commit();
+            } catch (\Exception $exception) {
+                Log::error($exception);
+                DB::rollBack();
             }
 
             // get price & candles
@@ -112,9 +146,14 @@ class BotController extends BackendController
 
             // check 2fa
             $require2Fa = Arr::get($response, 'd.require2Fa');
-            if ($require2Fa) {
+            $verifyDevice = Arr::get($response, 'd.verify-device');
+            if ($require2Fa || $verifyDevice) {
                 Session::put(self::TWOFA_TOKEN, Arr::get($response, 'd.t'));
-                $this->setData(['require2fa' => route('bot.loginWith2FA')]);
+                Session::put(self::VERIFY_DEVICE, $verifyDevice);
+                $this->setData([
+                    'require2fa' => $require2Fa,
+                    'verifyDevice' => $verifyDevice,
+                ]);
                 return $this->renderJson();
             }
 
@@ -137,9 +176,9 @@ class BotController extends BackendController
             // get token from AresBO
             $loginData = [
                 'client_id' => 'aresbo-web',
-                'code' => $this->getParam('code'),
-                'td_code' => '',
-                'td_p_code' => '',
+                'code' => $this->getParam('require_2fa') ? $this->getParam('code') : $this->getParam('td_code'),
+                'td_code' => $this->getParam('td_code'),
+                'td_p_code' => Session::get(self::VERIFY_DEVICE_TOKEN),
                 'token' => Session::get(self::TWOFA_TOKEN)
             ];
             $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_token2fa_url'), $loginData);
@@ -161,6 +200,32 @@ class BotController extends BackendController
             Log::error($exception);
         }
         return $this->_to('bot.index')->withErrors(new MessageBag(['Đăng nhập thất bại, vui lòng thử lại.']));
+    }
+
+    public function requestCode()
+    {
+        try {
+            // get token from AresBO
+            $loginData = [
+                'captcha' => Common::getConfig('aresbo.api_url.captcha_token'),
+                'clientId' => 'aresbo-web',
+                'token' => Session::get(self::TWOFA_TOKEN)
+            ];
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.request_code'), $loginData);
+            // check status
+            if (!Arr::get($response, 'ok')) {
+                $this->setData(['errors' => 'Gửi mã thất bại, vui lòng thử lại.']);
+                return $this->renderErrorJson();
+            }
+
+            // save token
+            Session::put(self::VERIFY_DEVICE_TOKEN, Arr::get($response, 'd.data'));
+
+            return $this->renderJson();
+        } catch (\Exception $exception) {
+            Log::error($exception);
+        }
+        return $this->renderErrorJson();
     }
 
     public function clearToken()
@@ -222,8 +287,19 @@ class BotController extends BackendController
                 return $this->renderErrorJson();
             }
 
+            // get method order from database
+            $methods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botQueue->bot_user_id)
+                ->where('status', Common::getConfig('aresbo.method.active'))
+                ->where(function ($q) {
+                    $q->orWhere('deleted_at', '');
+                    $q->orWhereNull('deleted_at');
+                })->get();
+            if (blank($methods)) {
+                return $this->renderErrorJson();
+            }
+
             // research method to get bet order data
-            $orderData = $this->_getOrderData($botQueue, $resultPrices);
+            $orderData = $this->_getOrderData($botQueue, $methods, $resultPrices);
             if (!is_array($orderData)) {
                 return $this->renderErrorJson();
             }
@@ -239,10 +315,12 @@ class BotController extends BackendController
 
             // mapping result
             $result = $this->_mapOpenOrders([
+                'bot_queue' => $botQueue,
                 'list_open_orders' => $betResult,
                 'order_data' => $orderData,
                 'current_amount' => $currentAmount,
-                'account_type' => $botQueue->account_type
+                'account_type' => $botQueue->account_type,
+                'methods' => $methods,
             ]);
             $this->setData($result);
             return $this->renderJson();
@@ -297,6 +375,7 @@ class BotController extends BackendController
                 $isCreate = false;
             } else {
                 $entity->color = $this->_randomColor();
+                $entity->status = Common::getConfig('aresbo.method.active');
             }
             $entity->bot_user_id = $botUser->id;
             $entity->save();
@@ -308,6 +387,8 @@ class BotController extends BackendController
                 'type' => $entity->getTypeText(),
                 'signal' => $entity->getSignalText(),
                 'pattern' => $entity->getOrderPatternText(),
+                'step' => $entity->step,
+                'profit' => $entity->getProfitText(),
                 'stop' => [
                     'loss' => $entity->getStopLossText(),
                     'win' => $entity->getTakeProfitText(),
@@ -332,32 +413,68 @@ class BotController extends BackendController
     public function deleteMethod()
     {
         // validate data
-        $id = request()->get('id');
-        $entity = $this->fetchModel(BotUserMethod::class)->where('id', $id)->first();
-        if (blank($entity)) {
+        $listMethodIds = request()->get('method_ids');
+        $entities = $this->fetchModel(BotUserMethod::class)->whereIn('id', $listMethodIds)->get();
+        if (blank($entities)) {
+            $this->setData(['errors' => 'Phương pháp không tồn tại.']);
             return $this->renderErrorJson();
         }
 
         // delete data
         DB::beginTransaction();
         try {
-            $entity->delete();
+            foreach ($entities as $entity) {
+                $entity->delete();
+            }
+            $this->setData([
+                'method_ids' => $this->getParam('method_ids'),
+                'success' => 'Xóa phương pháp thành công.'
+            ]);
             DB::commit();
+
+            return $this->renderJson();
         } catch (\Exception $exception) {
             DB::rollBack();
             Log::error($exception);
+            $this->setData(['errors' => 'Lỗi hệ thống. Vui lòng thử lại.']);
         }
 
-        return $this->renderJson();
+        return $this->renderErrorJson();
+    }
+
+    public function updateStatusMethod()
+    {
+        DB::beginTransaction();
+        try {
+            $entities = $this->fetchModel(BotUserMethod::class)->whereIn('id', $this->getParam('method_ids'))->get();
+            foreach ($entities as $entity) {
+                $entity->status = $this->getParam('status') == 'true' ? Common::getConfig('aresbo.method.active') : Common::getConfig('aresbo.method.stop');
+                $entity->save();
+            }
+            $this->setData([
+                'method_ids' => $this->getParam('method_ids'),
+                'success' => ($this->getParam('status') ? 'Chạy' : 'Dừng') . ' phương pháp thành công.'
+            ]);
+            DB::commit();
+
+            return $this->renderJson();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+            $this->setData(['errors' => 'Lỗi hệ thống. Vui lòng thử lại.']);
+        }
+
+        return $this->renderErrorJson();
     }
 
     public function research()
     {
-        $responseData = $datasets = [];
+        $responseData = [];
 
         // get bot user
         $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if (blank($user)) {
+            $this->setData(['url' => route('bot.clear_token')]);
             return $this->renderErrorJson();
         }
 
@@ -369,32 +486,65 @@ class BotController extends BackendController
                 $q->orWhereNull('deleted_at');
             })->get();
         if (blank($methods)) {
+            $this->setData(['errors' => 'Không có phương pháp nào đang chạy.']);
             return $this->renderErrorJson();
         }
 
         // get price & candles
-        list($orderCandles, $resultCandles) = $this->_getListPrices();
+        $resultPrices = json_decode($this->getParam('list_prices'));
+        if (blank($resultPrices)) {
+            list($orderPrices, $resultPrices) = $this->_getListPrices();
+        }
+        $resultPrices = array_map(function ($item) {
+            return (array)$item;
+        }, $resultPrices);
 
         // get label
-        $resultCandles = array_reverse($resultCandles);
-        foreach ($resultCandles as $index => $resultCandle) {
-            $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
-//            if ($index == 0 || ($index + 1) % 10 == 0 || $index == count($resultCandles)) {
-//                $responseData['label'][] = date('H:i', Arr::get($resultCandle, 'open_order') / 1000);
-//            }
+        foreach ($resultPrices as $index => $resultPrice) {
+            $resultPrice = (array)$resultPrice;
+            $responseData['label'][] = date('H:i d/m', Arr::get($resultPrice, 'open_order') / 1000);
         }
 
         // get data
+        $listProfits = [];
+        $totalVolume = 0;
         foreach ($methods as $method) {
-            $datasets[] = [
+            list($volume, $profit) = $this->_getProfitData($method, $resultPrices);
+            $totalVolume += $volume;
+            $listProfits[] = $profit;
+            $responseData['datasets'][] = [
                 'label' => $method->getNameText(),
-                'data' => $this->_getProfitData($method, $resultCandles),
+                'data' => $profit,
                 'fill' => false,
                 'borderColor' => $method->getColorText(),
-                'tension' => Common::getConfig('aresbo.chart_tension'),
+                'borderWidth' => Common::getConfig('aresbo.chart.chart_border_width'),
+                'tension' => Common::getConfig('aresbo.chart.chart_tension'),
             ];
         }
-        $responseData['datasets'] = $datasets;
+
+        // set data for average
+        $average = $this->_getAverageArray($listProfits);
+        $responseData['datasets'][count($methods)] = [
+            'label' => 'Tổng',
+            'data' => $average,
+            'fill' => false,
+            'borderColor' => Common::getConfig('aresbo.chart.chart_total_color'),
+            'borderWidth' => Common::getConfig('aresbo.chart.chart_total_border_width'),
+            'tension' => Common::getConfig('aresbo.chart.chart_tension'),
+        ];
+
+        // shorten simulation data
+        $this->_shortenSimulationData($responseData);
+
+        // other configs
+        $responseData['total_prices'] = count($resultPrices);
+        $responseData['total_methods'] = count($methods);
+        $responseData['total_volume'] = $totalVolume;
+        $responseData['total_profit'] = $average[count($average) - 1];
+        $responseData['highest_negative'] = min($average);
+        $responseData['from'] = $responseData['label'][0];
+        $responseData['to'] = $responseData['label'][count($responseData['label']) - 1];
+
         $this->setData($responseData);
 
         return $this->renderJson();
@@ -402,7 +552,7 @@ class BotController extends BackendController
 
     public function moveMoney()
     {
-        $balance = $this->_getBalance(true);
+        $balance = $this->_getBalance();
         if ($balance instanceof RedirectResponse) {
             return $balance;
         }
@@ -443,6 +593,50 @@ class BotController extends BackendController
             if ($exception->getCode() == 401) {
                 $this->setData(['url' => route('bot.clear_token')]);
             }
+        }
+        return $this->renderErrorJson();
+    }
+
+    public function updateProfit()
+    {
+        $id = $this->getParam('id');
+        $stopLoss = $this->getParam('stop_loss');
+        $takeProfit = $this->getParam('take_profit');
+
+        // validate
+        $rules = $this->fetchModel(BotQueue::class)->rules();
+        $messages = $this->fetchModel(BotQueue::class)->messages();
+        $validator = Validator::make($this->getParams(), $rules, $messages);
+        if ($validator->fails()) {
+            $this->setData(['errors' => $validator->errors()->first()]);
+            return $this->renderErrorJson();
+        }
+
+        // check bot user exist
+        $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        if (blank($botUser)) {
+            return $this->_to('bot.clear_token');
+        }
+
+        DB::beginTransaction();
+        try {
+            $entity = $this->fetchModel(BotQueue::class)->where('id', $id)->first();
+            $entity->stop_loss = $stopLoss;
+            $entity->take_profit = $takeProfit;
+            $entity->save();
+            $this->setData([
+                'success' => 'Lưu thành công.',
+                'stop_loss' => $entity->getStopLoss(),
+                'take_profit' => $entity->getTakeProfit(),
+            ]);
+
+            DB::commit();
+
+            return $this->renderJson();
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            DB::rollBack();
+            $this->setData(['errors' => 'Đã xảy ra lỗi. Vui lòng thử lại.']);
         }
         return $this->renderErrorJson();
     }
@@ -500,27 +694,88 @@ class BotController extends BackendController
     protected function _getProfitData($method, $candles)
     {
         $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
-        $profitData = [];
+        $patterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
+        $profitData = $methodProfit = [];
+        $methodVolume = 0;
+
+        foreach ($signals as $index => $signal) {
+            $profitData[] = 0;
+        }
 
         foreach ($candles as $index => $candle) {
-            $profitData[$index] = Arr::get($profitData, $index - 1) + $this->_simulationBet($signals, $candles, $this->_getBetPattern($method->order_pattern, 'type', false), $this->_getBetPattern($method->order_pattern, 'amount'));
+            list($volume, $profit) = $this->_simulationBet($signals, $patterns, $method->type, $candles);
+            $methodVolume += $volume;
+            $position = $index + count($signals);
+            $profitData[$position] = Arr::get($profitData, $position - 1) + $profit;
             unset($candles[$index]);
         }
 
-        return $profitData;
+        foreach ($profitData as $index => $item) {
+            $methodProfit[] = $item;
+        }
+
+        return [$methodVolume, $methodProfit];
     }
 
-    protected function _simulationBet($signals, $candles, $orderType, $amount)
+    protected function _simulationBet($signals, $patterns, $type, $candles)
     {
+        $profit = $volume = 0;
         $candles = array_values($candles);
+        // check signal
         foreach ($signals as $index => $signal) {
             if (Str::lower($signal) != Str::lower(Arr::get($candles, $index . '.order_result'))) {
-                return false;
+                return [$volume, $profit];
             }
         }
-        $win = $orderType == Str::lower(Arr::get($candles, (count($signals) + 1) . '.order_result'));
+        // check pattern
+        foreach ($patterns as $patternIndex => $pattern) {
+            $orderType = Str::lower(Str::substr($pattern, 0, 1));
+            $amount = Str::substr($pattern, 1);
+            $volume += $amount;
+            $win = $orderType == Str::lower(Arr::get($candles, (count($signals) + $patternIndex) . '.order_result'));
+            if ($type == Common::getConfig('aresbo.method_type.value.martingale')) {
+                if ($win) {
+                    $profit += $amount * 0.95;
+                    return [$volume, $profit];
+                } else {
+                    $profit += $amount * -1;
+                }
+            }
+            if ($type == Common::getConfig('aresbo.method_type.value.paroli')) {
+                if ($win) {
+                    $profit += $amount * 0.95;
+                } else {
+                    $profit += $amount * -1;
+                    return [$volume, $profit];
+                }
+            }
+        }
 
-        return $win ? $amount * 0.95 : $amount * -1;
+        return [$volume, $profit];
+    }
+
+    protected function _shortenSimulationData(&$responseData)
+    {
+        $defaultSize = Common::getConfig('aresbo.chart.chart_default_step_size');
+        $range = Common::getConfig('aresbo.chart.chart_step_size');
+        $stepSize = intdiv(count($responseData['label']), $defaultSize) > $range ? intdiv(count($responseData['label']), $range) : $defaultSize;
+        foreach ($responseData['label'] as $index => $item) {
+            if ($index == 0 || ($index + 1) % $stepSize == 0 || $index == count($responseData['label']) - 1) {
+                continue;
+            }
+            unset($responseData['label'][$index]);
+        }
+        $responseData['label'] = array_values($responseData['label']);
+
+        foreach ($responseData['datasets'] as $datasetIndex => $dataset) {
+            foreach ($dataset['data'] as $dataIndex => $item) {
+                if ($dataIndex == 0 || ($dataIndex + 1) % $stepSize == 0 || $dataIndex == count($dataset['data']) - 1) {
+                    continue;
+                }
+                unset($responseData['datasets'][$datasetIndex]['data'][$dataIndex]);
+            }
+            $responseData['datasets'][$datasetIndex]['data'] = array_values($responseData['datasets'][$datasetIndex]['data']);
+        }
     }
 
     protected function _getUserInfo()
@@ -587,57 +842,75 @@ class BotController extends BackendController
         // check bot user exist
         $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
         if (blank($botUser)) {
-            return $this->_to('bot.clear_token');
+            $this->setData(['errors' => 'Lỗi người dùng. Vui lòng thử lại.']);
+            return $this->renderErrorJson();
         }
         // check user exist
-        $user = $this->fetchModel(User::class)
-            ->where('status', Common::getConfig('user_status.active'))
-            ->where(function ($q) {
-                $q->orWhere('deleted_at', '');
-                $q->orWhereNull('deleted_at');
-            })->first();
+        $user = backendGuard()->user();
         if (blank($user)) {
-            return $this->_to('bot.clear_token');
-        }
-        // check user expired
-        $userExpired = Carbon::parse($user->expired_date)->lessThan(Carbon::now());
-        $botQueueData = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
-            ->where('bot_user_id', $botUser->id)
-            ->first();
-        $now = Carbon::now();
-        $botQueue = [
-            'user_id' => backendGuard()->user()->id,
-            'bot_user_id' => $botUser->id,
-            'account_type' => $this->getParam('account_type', Common::getConfig('aresbo.account_demo')),
-            'status' => $stop ? Common::getConfig('aresbo.bot_status.stop') : Common::getConfig('aresbo.bot_status.start'),
-            'created_at' => $now,
-            'updated_at' => $now,
-        ];
-        // check user expired
-        if ($userExpired) {
-            $botQueue['status'] = Common::getConfig('aresbo.bot_status.stop');
-        }
-        if ($botQueueData) {
-            $botQueue['id'] = $botQueueData->id;
-            unset($botQueue['created_at']);
+            $this->setData(['errors' => 'Lỗi người dùng. Vui lòng thử lại.']);
+            return $this->renderErrorJson();
         }
 
         DB::beginTransaction();
         try {
-            $botQueueData ? $this->fetchModel(BotQueue::class)->where('id', $botQueueData->id)->update($botQueue) : $this->fetchModel(BotQueue::class)->insert($botQueue);
+            // check user expired
+            $userExpired = Carbon::parse($user->expired_date)->lessThan(Carbon::now());
+            $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
+                ->where('bot_user_id', $botUser->id)
+                ->first();
+            if (blank($botQueue)) {
+                $botQueue = $this->fetchModel(BotQueue::class);
+                $botQueue->user_id = backendGuard()->user()->id;
+                $botQueue->bot_user_id = $botUser->id;
+            }
+            $botQueue->account_type = $this->getParam('account_type', Common::getConfig('aresbo.account_demo'));
+            $botQueue->status = $stop ? Common::getConfig('aresbo.bot_status.stop') : Common::getConfig('aresbo.bot_status.start');
+
+            // check user expired
+            if ($userExpired) {
+                $botQueue->status = Common::getConfig('aresbo.bot_status.stop');
+            }
+
+            // update bot queue and list methods after stop auto
+            if ($stop) {
+                // update bot queue
+                $botQueue->profit = null;
+                $botQueue->stop_loss = null;
+                $botQueue->take_profit = null;
+
+                // update list methods
+                $listMethods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botUser->id)
+                    ->where(function ($q) {
+                        $q->orWhere('deleted_at', '');
+                        $q->orWhereNull('deleted_at');
+                    })->get();
+                foreach ($listMethods as $method) {
+                    $method->step = null;
+                    $method->profit = null;
+                    $method->stop_loss = null;
+                    $method->take_profit = null;
+                    $method->save();
+                }
+            }
+
+            $botQueue->save();
             DB::commit();
             // check user expired
             if ($userExpired) {
-                return $this->_to('bot.index')->withErrors(new MessageBag(['Tài khoản của bạn đã hết hạn. Vui lòng liên hệ admin để được hỗ trợ.']));
+                $this->setData(['errors' => new MessageBag(['errors' => 'Tài khoản của bạn đã hết hạn. Vui lòng liên hệ admin để được hỗ trợ.'])]);
+                return $this->renderErrorJson();
             }
+            $this->setData(['success' => ($stop ? 'Dừng' : 'Chạy') . ' auto thành công.']);
+
+            return $this->renderJson();
         } catch (\Exception $exception) {
-            DB::rollBack();
             Log::error($exception);
-            $errors = new MessageBag([($stop ? 'Dừng' : 'Chạy') . ' auto thất bại, vui lòng thử lại.']);
-            return $this->_to('bot.index')->withErrors($errors);
+            DB::rollBack();
+            $this->setData(['errors' => new MessageBag(['errors' => ($stop ? 'Dừng' : 'Chạy') . ' auto thất bại, vui lòng thử lại.'])]);
         }
 
-        return $this->_to('bot.index');
+        return $this->renderErrorJson();
     }
 
     protected function _getListOrders($params = [], $open = true)
@@ -671,56 +944,90 @@ class BotController extends BackendController
         return $result;
     }
 
-    protected function _getOrderData($botQueue, $resultPrices)
+    protected function _getOrderData($botQueue, $methods, $resultPrices)
     {
-        // get method order from database
-        $methods = $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botQueue->bot_user_id)
-            ->where('status', Common::getConfig('aresbo.method.active'))
-            ->where(function ($q) {
-                $q->orWhere('deleted_at', '');
-                $q->orWhereNull('deleted_at');
-            })->get();
-
         $accountType = $botQueue->account_type;
 
         // research and order
         $result = [];
+        $totalProfit = blank($botQueue->profit) ? 0 : $botQueue->profit;
         foreach ($methods as $method) {
             // reverse signal
             $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
             $signals = array_reverse($signals);
-            // check method has used last order
-//            if (!blank($method->step)) {
-//                // Martingale: next step order after lose
-//                if ($method->type == Common::getConfig('aresbo.method_type.value.martingale')) {
-//                    $orderTmp = $this->_getOrder($method, $accountType, $method->step + 1);
-//                    // save step method
-//                    $method->step = $method->step + 1;
-//                    $method->save();
-//                    blank($orderTmp) ? null : $result[] = $orderTmp;
-//                }
-//                // Paroli: next step order after win
-//                if ($method->type == Common::getConfig('aresbo.method_type.value.paroli')) {
-//                    $orderTmp = $this->_getOrder($method, $accountType, $method->step + 1);
-//                    // save step method
-//                    $method->step = $method->step + 1;
-//                    $method->save();
-//                    blank($orderTmp) ? null : $result[] = $orderTmp;
-//                }
-//                continue;
-//            }
 
-            // check method mapping with signal
-            if ($this->_mapMethod($signals, $resultPrices)) {
-                // get order data from method
-                $orderTmp = $this->_getOrder($method, $accountType);
-                blank($orderTmp) ? null : $result[] = $orderTmp;
+            // check step has used
+            if (blank($method->step)) {
+                // check method mapping with signal
+                $method->step = null;
+                if ($this->_mapMethod($signals, $resultPrices)) {
+                    // get order data from method
+                    $result[] = $this->_getOrder($method, $accountType);
+                    $method->step = 0;
+                }
+            } else {
+                // check win or loss
+                $lastOrder = $this->_getBetPattern($method->order_pattern, 'type', false, $method->step);
+                $win = Str::lower($lastOrder) == Str::lower($resultPrices[0]['order_result']);
+                $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
+                $amount = $this->_getBetPattern($method->order_pattern, 'amount', false, $method->step);
+                $method->profit = $win ? ($method->profit + $amount * 0.95) : ($method->profit - $amount);
+                $totalProfit += $win ? ($amount * 0.95) : (-1 * $amount);
 
-                // save step method
-//                $method->step = 0;
-//                $method->save();
+                // check stop loss or take profit total
+                if (($botQueue->stop_loss && $totalProfit - $amount < $botQueue->stop_loss) || ($botQueue->take_profit && $totalProfit > $botQueue->take_profit)) {
+                    $botQueue->profit = $totalProfit;
+                    $botQueue->status = Common::getConfig('aresbo.bot_status.stop');
+                    $botQueue->save();
+                    return [];
+                }
+
+                // Martingale: next step order after lose
+                if ($method->type == Common::getConfig('aresbo.method_type.value.martingale')) {
+                    if (!$win && isset($orderPatterns[$method->step + 1])) {
+                        $orderTmp = $this->_getOrder($method, $accountType, $method->step + 1);
+                        if (blank($orderTmp)) {
+                            $method->step = null;
+                        } else {
+                            $result[] = $orderTmp;
+                            $method->step = $method->step + 1;
+                        }
+                    } else {
+                        $method->step = null;
+                        if ($this->_mapMethod($signals, $resultPrices)) {
+                            // get order data from method
+                            $result[] = $this->_getOrder($method, $accountType);
+                            $method->step = 0;
+                        }
+                    }
+                }
+                // Paroli: next step order after win
+                if ($method->type == Common::getConfig('aresbo.method_type.value.paroli')) {
+                    if ($win && isset($orderPatterns[$method->step + 1])) {
+                        $orderTmp = $this->_getOrder($method, $accountType, $method->step + 1);
+                        if (blank($orderTmp)) {
+                            $method->step = null;
+                        } else {
+                            $result[] = $orderTmp;
+                            $method->step = $method->step + 1;
+                        }
+                    } else {
+                        $method->step = null;
+                        if ($this->_mapMethod($signals, $resultPrices)) {
+                            // get order data from method
+                            $result[] = $this->_getOrder($method, $accountType);
+                            $method->step = 0;
+                        }
+                    }
+                }
             }
+            // save step method
+            $method->save();
         }
+
+        // save total profit for bot queue
+        $botQueue->profit = $totalProfit;
+        $botQueue->save();
 
         return $result;
     }
@@ -728,8 +1035,14 @@ class BotController extends BackendController
     protected function _betProcess($orderData = [])
     {
         $betResult = [];
+        if (blank($orderData)) {
+            return $betResult;
+        }
         // bet new order
         foreach ($orderData as $betData) {
+            if (blank($betData)) {
+                continue;
+            }
             $response = $this->requestApi(Common::getConfig('aresbo.api_url.bet'), $betData, 'POST', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
             // check status
             if (!Arr::get($response, 'ok')) {
@@ -744,23 +1057,34 @@ class BotController extends BackendController
 
     protected function _mapOpenOrders($params = [])
     {
+        $botQueue = Arr::get($params, 'bot_queue');
         $listOpenOrders = Arr::get($params, 'list_open_orders');
         $orderData = Arr::get($params, 'order_data');
-        $orderData = array_reverse($orderData);
+        $methods = Arr::get($params, 'methods');
 
         $currentAmount = Arr::get($params, 'current_amount');
         $accountType = Arr::get($params, 'account_type');
         $result['current_amount'] = $accountType == Common::getConfig('aresbo.account_demo') ? Arr::get($currentAmount, 'demo_balance') : Arr::get($currentAmount, 'available_balance');
         $result['current_amount'] = number_format($result['current_amount'], 2);
+        $result['bot_queue'] = $botQueue->getAttributes();
 
+        // update open orders
         foreach ($listOpenOrders as $index => $openOrder) {
             $result['open_orders'][] = [
                 'time' => $openOrder['time'],
                 'amount' => $openOrder['amt'],
                 'type' => $openOrder['type'],
-                'method' => Arr::get($orderData, $index . '.method'),
+                'method_name' => Arr::get($orderData, $index . '.method_name'),
                 'method_id' => Arr::get($orderData, $index . '.method_id'),
                 'step' => Arr::get($orderData, $index . '.step'),
+            ];
+        }
+
+        // update list method
+        foreach ($methods as $method) {
+            $result['methods'][] = [
+                'id' => $method->id,
+                'profit' => $method->getProfitText()
             ];
         }
 
@@ -780,11 +1104,26 @@ class BotController extends BackendController
 
     protected function _getOrder($method, $accountType, $step = 0)
     {
+        // check order pattern
+        $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
+        if ($method->type == Common::getConfig('aresbo.method_type.value.martingale') && !isset($orderPatterns[$step])) {
+            return [];
+        }
+
+        // bet amount
+        $amount = $this->_getBetPattern($method->order_pattern, 'amount', true, $step);
+
+        // check profit
+        if (($method->stop_loss && ($method->profit - $amount < $method->stop_loss)) ||
+            ($method->take_profit && ($method->profit + $amount * 0.95 > $method->take_profit))) {
+            return [];
+        }
+
         return [
             'betAccountType' => Common::getConfig('aresbo.bet_account_type.' . $accountType),
-            'betAmount' => $this->_getBetPattern($method->order_pattern, 'amount', true, $step),
+            'betAmount' => $amount,
             'betType' => $this->_getBetPattern($method->order_pattern, 'type', true, $step),
-            'method' => $method->name,
+            'method_name' => $method->name,
             'method_id' => $method->id,
             'step' => $step,
         ];
@@ -793,7 +1132,7 @@ class BotController extends BackendController
     protected function _getBetPattern($orderPattern, $key = '', $convertType = true, $step = 0)
     {
         $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $orderPattern);
-        $orderPattern = $orderPatterns[$step];
+        $orderPattern = isset($orderPatterns[$step]) ? $orderPatterns[$step] : $orderPatterns[0];
         $order = [
             'type' => $convertType ? Common::getConfig('aresbo.order_type_pattern.' . Str::lower(Str::substr($orderPattern, 0, 1))) : Str::lower(Str::substr($orderPattern, 0, 1)),
             'amount' => Str::substr($orderPattern, 1)
@@ -877,13 +1216,30 @@ class BotController extends BackendController
         return $balance;
     }
 
-    protected function _randomColor()
+    protected function _randomColor($except = ['ff0000'])
     {
-        return $this->_randomColorPart() . $this->_randomColorPart() . $this->_randomColorPart();
+        $color = $this->_randomColorPart() . $this->_randomColorPart() . $this->_randomColorPart();
+        if (in_array($color, $except)) {
+            $color = $this->_randomColor($except);
+        }
+
+        return $color;
     }
 
     protected function _randomColorPart()
     {
         return str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
+    }
+
+    protected function _getAverageArray($array)
+    {
+        $sum = [];
+        foreach ($array as $item) {
+            foreach ($item as $index => $value) {
+                isset($sum[$index]) ? $sum[$index] += $value : $sum[$index] = $value;
+            }
+        }
+
+        return $sum;
     }
 }

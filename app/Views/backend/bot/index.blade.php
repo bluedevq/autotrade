@@ -27,7 +27,7 @@
             <hr>
             @include('backend.bot.method.index')
             @include('backend.bot.history')
-            @include('backend.bot.method.modal')
+            @include('backend.bot.modal')
         </div>
     @endif
 @stop
@@ -36,9 +36,15 @@
         $(document).ready(function () {
             BotController.options.isRunning = '{{ $isRunning ? 'true' : 'false' }}';
             BotController.config.url.login = '{{ route('bot.login') }}';
+            BotController.config.url.requestCode = '{{ route('bot.request.code') }}';
             BotController.config.url.bet = '{{ route('bot.bet') }}';
             BotController.config.url.research = '{{ route('bot_method.research') }}';
+            BotController.config.url.startAuto = '{{ route('bot.start_auto') }}';
+            BotController.config.url.stopAuto = '{{ route('bot.stop_auto') }}';
+            BotController.config.url.statusMethod = '{{ route('bot.method.update.status') }}';
+            @if($isRunning)
             BotController.config.startAt = '{{ time() * 1000 }}';
+            @endif
 
             // show clock
             @if(isset($botUserInfo) && !blank($botUserInfo))
