@@ -23,4 +23,9 @@ class User extends UserAuthenticate
     {
         return $this->password;
     }
+
+    public function getExpiredDate()
+    {
+        return $this->expired_date;
+    }
 }

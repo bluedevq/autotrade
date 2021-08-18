@@ -34,6 +34,14 @@ class BotController extends BackendController
     const VERIFY_DEVICE_TOKEN = 'verify_device_token';
     const BOT_USER_EMAIL = 'bot_user_email';
 
+    /**
+     * BotController constructor.
+     * @param BotUser $botUser
+     * @param BotQueue $botQueue
+     * @param BotUserMethod $botUserMethod
+     * @param BotMethodDefault $botMethodDefault
+     * @param User $user
+     */
     public function __construct(BotUser $botUser, BotQueue $botQueue, BotUserMethod $botUserMethod, BotMethodDefault $botMethodDefault, User $user)
     {
         parent::__construct();
@@ -41,9 +49,14 @@ class BotController extends BackendController
         $this->registModel($botQueue, $botUserMethod, $botMethodDefault, $user);
     }
 
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|RedirectResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function index()
     {
         if (Session::has(self::REFRESH_TOKEN)) {
+            $userId = backendGuard()->user()->getAuthIdentifier();
             // get user info
             $botUserInfo = $this->_getUserInfo();
             if (blank($botUserInfo)) {
@@ -51,12 +64,12 @@ class BotController extends BackendController
             }
 
             // get bot queue
-            $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
+            $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', $userId)
                 ->where('bot_user_id', $botUserInfo->id)
                 ->first();
             if (blank($botQueue)) {
                 $botQueue = $this->fetchModel(BotQueue::class);
-                $botQueue->user_id = backendGuard()->user()->id;
+                $botQueue->user_id = $userId;
                 $botQueue->bot_user_id = $botUserInfo->id;
                 $botQueue->account_type = Common::getConfig('aresbo.account_demo');
                 $botQueue->status = Common::getConfig('aresbo.bot_status.stop');
@@ -114,6 +127,10 @@ class BotController extends BackendController
         return $this->render();
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function login()
     {
         try {
@@ -170,6 +187,10 @@ class BotController extends BackendController
         return $this->renderJson();
     }
 
+    /**
+     * @return RedirectResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function loginWith2FA()
     {
         try {
@@ -202,6 +223,10 @@ class BotController extends BackendController
         return $this->_to('bot.index')->withErrors(new MessageBag(['Đăng nhập thất bại, vui lòng thử lại.']));
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function requestCode()
     {
         try {
@@ -228,6 +253,9 @@ class BotController extends BackendController
         return $this->renderErrorJson();
     }
 
+    /**
+     * @return RedirectResponse
+     */
     public function clearToken()
     {
         Session::forget(self::ACCESS_TOKEN);
@@ -237,16 +265,26 @@ class BotController extends BackendController
         return $this->_to('bot.index');
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function startAuto()
     {
         return $this->_processAuto();
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function stopAuto()
     {
         return $this->_processAuto(true);
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse|RedirectResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function bet()
     {
         try {
@@ -280,7 +318,7 @@ class BotController extends BackendController
             if (blank($botUser)) {
                 return $this->_to('bot.clear_token');
             }
-            $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
+            $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->getAuthIdentifier())
                 ->where('bot_user_id', $botUser->id)
                 ->first();
             if (blank($botQueue) || $botQueue->status == Common::getConfig('aresbo.bot_status.stop')) {
@@ -300,7 +338,7 @@ class BotController extends BackendController
 
             // research method to get bet order data
             $orderData = $this->_getOrderData($botQueue, $methods, $resultPrices);
-            if (!is_array($orderData)) {
+            if (blank($orderData)) {
                 return $this->renderErrorJson();
             }
 
@@ -330,12 +368,18 @@ class BotController extends BackendController
         }
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function createMethod()
     {
-        $entity = $this->_prepareFormMethod();
         return $this->renderJson();
     }
 
+    /**
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function editMethod($id)
     {
         $entity = $this->_prepareFormMethod($id);
@@ -343,6 +387,9 @@ class BotController extends BackendController
         return $this->renderJson();
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function validateMethod()
     {
         // validate data
@@ -410,6 +457,9 @@ class BotController extends BackendController
         return $this->renderErrorJson();
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteMethod()
     {
         // validate data
@@ -442,6 +492,9 @@ class BotController extends BackendController
         return $this->renderErrorJson();
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateStatusMethod()
     {
         DB::beginTransaction();
@@ -467,6 +520,10 @@ class BotController extends BackendController
         return $this->renderErrorJson();
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function research()
     {
         $responseData = [];
@@ -491,7 +548,7 @@ class BotController extends BackendController
         }
 
         // get price & candles
-        $resultPrices = json_decode($this->getParam('list_prices'));
+        $resultPrices = json_decode($this->getParam('list_prices', ''));
         if (blank($resultPrices)) {
             list($orderPrices, $resultPrices) = $this->_getListPrices();
         }
@@ -550,6 +607,10 @@ class BotController extends BackendController
         return $this->renderJson();
     }
 
+    /**
+     * @return array|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|RedirectResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function moveMoney()
     {
         $balance = $this->_getBalance();
@@ -560,6 +621,10 @@ class BotController extends BackendController
         return $this->render();
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function moveMoneyValid()
     {
         try {
@@ -597,6 +662,9 @@ class BotController extends BackendController
         return $this->renderErrorJson();
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse|RedirectResponse
+     */
     public function updateProfit()
     {
         $id = $this->getParam('id');
@@ -641,6 +709,12 @@ class BotController extends BackendController
         return $this->renderErrorJson();
     }
 
+    /**
+     * @param array $params
+     * @param bool $isLogin
+     * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     protected function _getToken($params = [], $isLogin = false)
     {
         $params['client_id'] = 'aresbo-web';
@@ -652,6 +726,10 @@ class BotController extends BackendController
         return $this->requestApi(Common::getConfig('aresbo.api_url.get_token_url'), $params);
     }
 
+    /**
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     protected function _getListPrices()
     {
         $orderCandles = $resultCandles = [];
@@ -661,7 +739,7 @@ class BotController extends BackendController
             if (!Arr::get($prices, 'ok')) {
                 return [$orderCandles, $resultCandles];
             }
-            $listCandles = array_reverse(Arr::get($prices, 'd'));
+            $listCandles = array_reverse(Arr::get($prices, 'd', []));
             $candlesKey = [
                 'open_order',
                 'open_price',
@@ -691,6 +769,11 @@ class BotController extends BackendController
         return [$orderCandles, $resultCandles];
     }
 
+    /**
+     * @param $method
+     * @param $candles
+     * @return array
+     */
     protected function _getProfitData($method, $candles)
     {
         $signals = explode(Common::getConfig('aresbo.order_signal_delimiter'), $method->signal);
@@ -717,6 +800,13 @@ class BotController extends BackendController
         return [$methodVolume, $methodProfit];
     }
 
+    /**
+     * @param $signals
+     * @param $patterns
+     * @param $type
+     * @param $candles
+     * @return array
+     */
     protected function _simulationBet($signals, $patterns, $type, $candles)
     {
         $profit = $volume = 0;
@@ -754,6 +844,9 @@ class BotController extends BackendController
         return [$volume, $profit];
     }
 
+    /**
+     * @param $responseData
+     */
     protected function _shortenSimulationData(&$responseData)
     {
         $defaultSize = Common::getConfig('aresbo.chart.chart_default_step_size');
@@ -778,6 +871,10 @@ class BotController extends BackendController
         }
     }
 
+    /**
+     * @return array|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     protected function _getUserInfo()
     {
         // check profile in database
@@ -837,6 +934,10 @@ class BotController extends BackendController
         }
     }
 
+    /**
+     * @param bool $stop
+     * @return \Illuminate\Http\JsonResponse
+     */
     protected function _processAuto($stop = false)
     {
         // check bot user exist
@@ -855,13 +956,13 @@ class BotController extends BackendController
         DB::beginTransaction();
         try {
             // check user expired
-            $userExpired = Carbon::parse($user->expired_date)->lessThan(Carbon::now());
-            $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', backendGuard()->user()->id)
+            $userExpired = Carbon::parse($user->getExpiredDate())->lessThan(Carbon::now());
+            $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', $user->getAuthIdentifier())
                 ->where('bot_user_id', $botUser->id)
                 ->first();
             if (blank($botQueue)) {
                 $botQueue = $this->fetchModel(BotQueue::class);
-                $botQueue->user_id = backendGuard()->user()->id;
+                $botQueue->user_id = $user->getAuthIdentifier();
                 $botQueue->bot_user_id = $botUser->id;
             }
             $botQueue->account_type = $this->getParam('account_type', Common::getConfig('aresbo.account_demo'));
@@ -913,6 +1014,12 @@ class BotController extends BackendController
         return $this->renderErrorJson();
     }
 
+    /**
+     * @param array $params
+     * @param bool $open
+     * @return array|\Illuminate\Http\JsonResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     protected function _getListOrders($params = [], $open = true)
     {
         $params['page'] = 1;
@@ -944,6 +1051,12 @@ class BotController extends BackendController
         return $result;
     }
 
+    /**
+     * @param $botQueue
+     * @param $methods
+     * @param $resultPrices
+     * @return array
+     */
     protected function _getOrderData($botQueue, $methods, $resultPrices)
     {
         $accountType = $botQueue->account_type;
@@ -967,8 +1080,8 @@ class BotController extends BackendController
                 }
             } else {
                 // check win or loss
-                $lastOrder = $this->_getBetPattern($method->order_pattern, 'type', false, $method->step);
-                $win = Str::lower($lastOrder) == Str::lower($resultPrices[0]['order_result']);
+                $lastOrder = (string)$this->_getBetPattern($method->order_pattern, 'type', false, $method->step);
+                $win = Str::lower($lastOrder) == Str::lower(Arr::get($resultPrices, '0.order_result', ''));
                 $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $method->order_pattern);
                 $amount = $this->_getBetPattern($method->order_pattern, 'amount', false, $method->step);
                 $method->profit = $win ? ($method->profit + $amount * 0.95) : ($method->profit - $amount);
@@ -1032,6 +1145,11 @@ class BotController extends BackendController
         return $result;
     }
 
+    /**
+     * @param array $orderData
+     * @return array|bool
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     protected function _betProcess($orderData = [])
     {
         $betResult = [];
@@ -1055,6 +1173,10 @@ class BotController extends BackendController
         return $betResult;
     }
 
+    /**
+     * @param array $params
+     * @return mixed
+     */
     protected function _mapOpenOrders($params = [])
     {
         $botQueue = Arr::get($params, 'bot_queue');
@@ -1091,6 +1213,11 @@ class BotController extends BackendController
         return $result;
     }
 
+    /**
+     * @param $signals
+     * @param $candles
+     * @return bool
+     */
     protected function _mapMethod($signals, $candles)
     {
         foreach ($signals as $index => $signal) {
@@ -1102,6 +1229,12 @@ class BotController extends BackendController
         return true;
     }
 
+    /**
+     * @param $method
+     * @param $accountType
+     * @param int $step
+     * @return array
+     */
     protected function _getOrder($method, $accountType, $step = 0)
     {
         // check order pattern
@@ -1129,6 +1262,13 @@ class BotController extends BackendController
         ];
     }
 
+    /**
+     * @param $orderPattern
+     * @param string $key
+     * @param bool $convertType
+     * @param int $step
+     * @return mixed
+     */
     protected function _getBetPattern($orderPattern, $key = '', $convertType = true, $step = 0)
     {
         $orderPatterns = explode(Common::getConfig('aresbo.order_pattern_delimiter'), $orderPattern);
@@ -1141,6 +1281,10 @@ class BotController extends BackendController
         return Arr::get($order, $key, $order);
     }
 
+    /**
+     * @param null $id
+     * @return mixed|null
+     */
     protected function _prepareFormMethod($id = null)
     {
         $entity = $this->fetchModel(BotUserMethod::class);
@@ -1151,6 +1295,10 @@ class BotController extends BackendController
         return $entity;
     }
 
+    /**
+     * @param $botUserId
+     * @return array
+     */
     protected function _getDefaultMethod($botUserId)
     {
         $userMethods = [];
@@ -1186,6 +1334,11 @@ class BotController extends BackendController
         return $userMethods;
     }
 
+    /**
+     * @param bool $format
+     * @return array|RedirectResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     protected function _getBalance($format = false)
     {
         // get balance
@@ -1203,9 +1356,9 @@ class BotController extends BackendController
             ];
             if ($format) {
                 $balance = [
-                    'demo_balance' => $demoBalance > 0 ? number_format($demoBalance, 2) : 0,
-                    'available_balance' => $availableBalance > 0 ? number_format($availableBalance, 2) : 0,
-                    'usdt_available_balance' => $usdtAvailableBalance > 0 ? number_format($usdtAvailableBalance, 2) : 0,
+                    'demo_balance' => blank($demoBalance) || $demoBalance <= 0 ? 0 : number_format($demoBalance, 2),
+                    'available_balance' => blank($availableBalance) || $availableBalance <= 0 ? 0 : number_format($availableBalance, 2),
+                    'usdt_available_balance' => blank($usdtAvailableBalance) || $usdtAvailableBalance <= 0 ? 0 : number_format($usdtAvailableBalance, 2),
                 ];
             }
         } catch (\Exception $exception) {
@@ -1216,6 +1369,10 @@ class BotController extends BackendController
         return $balance;
     }
 
+    /**
+     * @param array $except
+     * @return string
+     */
     protected function _randomColor($except = ['ff0000'])
     {
         $color = $this->_randomColorPart() . $this->_randomColorPart() . $this->_randomColorPart();
@@ -1226,11 +1383,18 @@ class BotController extends BackendController
         return $color;
     }
 
+    /**
+     * @return string
+     */
     protected function _randomColorPart()
     {
         return str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
     }
 
+    /**
+     * @param $array
+     * @return array
+     */
     protected function _getAverageArray($array)
     {
         $sum = [];
