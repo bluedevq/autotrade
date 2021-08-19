@@ -234,7 +234,7 @@ let BotController = {
         }
 
         // bet
-        if (0 < s && s < 30) {
+        if (10 < s && s < 30) {
             let balance = $('.account-balance:not(".hide") .current-amount').text();
             if (balance <= 0) {
                 BotController.options.hasOrder = true;

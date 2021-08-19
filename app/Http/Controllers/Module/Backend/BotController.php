@@ -289,7 +289,7 @@ class BotController extends BackendController
     {
         try {
             // check time to bet
-            if (date('s') > 30) {
+            if (date('s') > 25) {
                 return $this->renderErrorJson();
             }
 
