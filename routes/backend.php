@@ -169,4 +169,28 @@ Route::middleware(['auth.backend'])->group(function () {
             'uses' => 'MoveMoneyController@valid'
         ]);
     });
+
+    // management user
+    Route::prefix('user')->group(function () {
+        Route::get('/', [
+            'as' => 'user.index',
+            'uses' => 'UserController@index'
+        ]);
+        Route::get('/create', [
+            'as' => 'user.create',
+            'uses' => 'UserController@create'
+        ]);
+        Route::get('/edit/{id}', [
+            'as' => 'user.edit',
+            'uses' => 'UserController@edit'
+        ]);
+        Route::post('/valid', [
+            'as' => 'user.valid',
+            'uses' => 'UserController@valid'
+        ]);
+        Route::post('/delete/{id}', [
+            'as' => 'user.delete',
+            'uses' => 'UserController@delete'
+        ]);
+    });
 });

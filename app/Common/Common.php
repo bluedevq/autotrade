@@ -172,6 +172,37 @@ if (!function_exists('isMobile')) {
         return false;
     }
 }
+if (!function_exists('is_multi_array')) {
+
+    function is_multi_array($arr)
+    {
+        rsort($arr);
+        return isset($arr[0]) && is_array($arr[0]);
+    }
+}
+if (!function_exists('sql_binding')) {
+
+    function sql_binding($sql, $bindings)
+    {
+        $boundSql = str_replace(['%', '?'], ['%%', '%s'], $sql);
+        foreach ($bindings as &$binding) {
+            if ($binding instanceof \DateTime) {
+                $binding = $binding->format('\'Y-m-d H:i:s\'');
+            } elseif (is_string($binding)) {
+                $binding = "'$binding'";
+            }
+        }
+        $boundSql = vsprintf($boundSql, $bindings);
+        return $boundSql;
+    }
+}
+if (!function_exists('toSql')) {
+
+    function toSql($query)
+    {
+        return sql_binding($query->toSql(), $query->getBindings());
+    }
+}
 // migrate
 if (!function_exists('getUpdatedAtColumn')) {
 

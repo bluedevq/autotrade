@@ -2,6 +2,20 @@
 return [
     // title bot
     'bot_title' => env('APP_NAME'),
+    // pagination
+    'pagination' => [
+        'default' => 10,
+        'users' => 10,
+    ],
+    // role
+    'user_role' => [
+        'admin' => 0,
+        'normal' => 1,
+    ],
+    'user_role_text' => [
+        0 => 'Admin',
+        1 => 'Tài khoản thường',
+    ],
     // mail config
     'mail' => [
         'from' => 'no-reply@xoano.net',
@@ -18,7 +32,13 @@ return [
         'stop' => 0,
         'active' => 1,
         'verify' => 2,
-        'forgot_password' => 2,
+        'forgot_password' => 3,
+    ],
+    'user_status_text' => [
+        0 => 'Dừng',
+        1 => 'Đang hoạt động',
+        2 => 'Chưa xác nhận',
+        3 => 'Lấy lại mật khẩu',
     ],
     // hash config
     'hash' => [

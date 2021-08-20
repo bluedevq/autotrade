@@ -138,6 +138,14 @@ class BaseController extends Controller
         return request()->get($key, $default);
     }
 
+    public function setEntities($entities)
+    {
+        $this->setViewData([
+            'paginator' => $entities,
+            'entities' => $entities->items(),
+        ]);
+    }
+
     protected function _back()
     {
         return Redirect::back();

@@ -134,6 +134,16 @@ a {
     background-color: #dc3545 !important;
 }
 
+.btn-outline-default-custom {
+    color: #dbdbdb !important;
+    border-color: #dbdbdb !important;
+}
+
+.btn-outline-default-custom:hover {
+    color: #000 !important;
+    background-color: #dbdbdb !important;
+}
+
 .text-danger-custom {
     color: #ff3333 !important;
 }
@@ -445,6 +455,10 @@ input[type=number] {
 
 .hide {
     display: none;
+}
+
+.list-user {
+    vertical-align: middle;
 }
 
 @media (min-width: 767px) {

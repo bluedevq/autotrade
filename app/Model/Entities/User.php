@@ -3,6 +3,7 @@
 namespace App\Model\Entities;
 
 use App\Model\Base\Auth\UserAuthenticate;
+use App\Model\Presenters\PUser;
 
 /**
  * Class User
@@ -10,6 +11,7 @@ use App\Model\Base\Auth\UserAuthenticate;
  */
 class User extends UserAuthenticate
 {
+    use PUser;
     use \App\Model\Validators\User;
 
     protected $table = 'users';

@@ -13,6 +13,9 @@
                 <li class="nav-item">
                     <a class="nav-link {{ $currentRoute == 'bot.move.money' ? 'active' : '' }}" href="{{ route('bot.move.money') }}"><span class="fas fa-retweet">&nbsp;</span>Chuyển tiền</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ $currentRoute == 'user.index' ? 'active' : '' }}" href="{{ route('user.index') }}"><span class="fas fa-users">&nbsp;</span>Quản lý người dùng</a>
+                </li>
             </ul>
             <ul class="nav nav-pills">
                 <li class="nav-item">
