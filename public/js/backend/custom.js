@@ -378,27 +378,25 @@ let BotController = {
         }
 
         prices = prices.reverse();
-        let listPrices = '',
-            lastPricePos = prices.length - 1,
+        let lastPricePos = prices.length - 1,
             updateFirstTime = BotController.data.listPrices.length === 0;
 
         for (let i = 0; i < prices.length; i++) {
             if (i === lastPricePos || updateFirstTime) {
                 BotController.data.listPrices.push(prices[i]);
             }
-
-            // update last price
-            if (i === lastPricePos) {
-                let date = new Date(prices[i].open_order),
-                    orderType = prices[i].order_result;
-
-                date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth() + 1) + '-' + BotController.pad(date.getFullYear());
-                listPrices += '<li class="list-inline-item new" data-time="' + prices[i].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>';
-            }
         }
 
-        // clear list prices and update new list prices
-        $('.list-prices').append(listPrices);
+        let lastResult = $('.list-prices .list-inline-item');
+        if ($(lastResult[lastResult.length - 1]).data('time') != prices[lastPricePos].open_order) {
+            let date = new Date(prices[lastPricePos].open_order),
+                orderType = prices[lastPricePos].order_result;
+
+            date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth() + 1) + '-' + BotController.pad(date.getFullYear());
+            let listPrices = '<li class="list-inline-item new" data-time="' + prices[lastPricePos].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>';
+            // clear list prices and update new list prices
+            $('.list-prices').append(listPrices);
+        }
 
         // auto scroll to right
         $('.list-prices').scrollLeft(document.getElementsByClassName('list-prices')[0].scrollWidth);
@@ -707,7 +705,7 @@ let BotController = {
     },
     // Move money
     moveAllMoney: function () {
-        let amount = $('.left-header .amount').data('amount');
+        let amount = $('.left-header .amount').attr('data-amount');
         $('#number').val(amount)
     },
     changeAmount: function () {
@@ -745,10 +743,16 @@ let BotController = {
             leftAmount = leftAmount - response.data.amount == 0 ? 0 : (parseFloat(leftAmount) - parseFloat(response.data.amount));
             rightAmount = parseFloat(rightAmount) + parseFloat(response.data.amount);
             $('.left-header .amount').attr('data-amount', leftAmount);
-            $('.left-header .amount').text(Number(leftAmount.toString().match(/^\d+(?:\.\d{0,2})?/)));
+            $('.left-header .amount').text(new Intl.NumberFormat(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(leftAmount));
 
             $('.right-header .amount').attr('data-amount', rightAmount);
-            $('.right-header .amount').text(Number(rightAmount.toString().match(/^\d+(?:\.\d{0,2})?/)));
+            $('.right-header .amount').text(new Intl.NumberFormat(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(rightAmount));
 
             BotController.showMessage(response.data.success);
         });

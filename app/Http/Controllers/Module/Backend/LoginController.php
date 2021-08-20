@@ -30,16 +30,13 @@ class LoginController extends BackendController
 
     public function auth()
     {
+        // validate params
+        $valid = $this->getModel()->validateLogin($this->getParams());
+        if ($valid !== true) {
+            return $this->_backWithError($valid);
+        }
         $email = request()->get('email');
         $password = request()->get('password');
-        // validate email
-        if (blank($email)) {
-            return $this->_backWithError(new MessageBag(['email' => ['Vui lòng nhập email.']]));
-        }
-        // validate password
-        if (blank($password)) {
-            return $this->_backWithError(new MessageBag(['password' => ['Vui lòng nhập mật khẩu.']]));
-        }
         // validate exist
         $user = $this->getModel()
             ->where('email', $email)
@@ -54,7 +51,7 @@ class LoginController extends BackendController
         if ($user->status != Common::getConfig('user_status.active')) {
             return $this->_backWithError(new MessageBag(['email' => ['Tài khoản chưa được kích hoạt.']]));
         }
-        if (Carbon::parse($user->expired_date)->lessThan(Carbon::now())) {
+        if (Carbon::parse($user->getExpiredDate())->lessThan(Carbon::now())) {
             return $this->_backWithError(new MessageBag(['email' => ['Tài khoản của bạn đã hết hạn. Vui lòng liên hệ admin để được hỗ trợ.']]));
         }
         $userData = [
@@ -65,8 +62,7 @@ class LoginController extends BackendController
             Session::flash('success', ['Đăng nhập thành công.']);
             return $this->_redirectToHome();
         }
-        $errors = new MessageBag(['login_password' => ['Sai mật khẩu. Vui lòng thử lại.']]);
-        return $this->_backWithError($errors);
+        return $this->_backWithError(new MessageBag(['login_password' => ['Sai mật khẩu. Vui lòng thử lại.']]));
     }
 
     public function logout()

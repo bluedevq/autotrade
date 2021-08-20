@@ -19,3 +19,4 @@ composer.lock
 config/debugbar.php
 /config/debugbar.php
 /node_modules/*
+/myreport/*

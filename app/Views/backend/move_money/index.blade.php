@@ -62,10 +62,3 @@
         </div>
     </div>
 @stop
-@push('scripts')
-    <script type="application/javascript">
-        $(document).ready(function () {
-
-        });
-    </script>
-@endpush

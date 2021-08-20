@@ -116,50 +116,57 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot.bet',
             'uses' => 'BotController@bet'
         ]);
-        // create method
-        Route::get('/create-method', [
-            'as' => 'bot_method.create',
-            'uses' => 'BotController@createMethod'
-        ]);
-        // edit method
-        Route::get('/edit-method/{id}', [
-            'as' => 'bot_method.edit',
-            'uses' => 'BotController@editMethod'
-        ]);
-        // validation method
-        Route::post('/validate-method', [
-            'as' => 'bot_method.valid',
-            'uses' => 'BotController@validateMethod'
-        ]);
-        // update method status
-        Route::post('/update-status-method', [
-            'as' => 'bot.method.update.status',
-            'uses' => 'BotController@updateStatusMethod'
-        ]);
-        // delete method
-        Route::post('/delete-method', [
-            'as' => 'bot_method.delete',
-            'uses' => 'BotController@deleteMethod'
-        ]);
-        // research method
-        Route::post('/research', [
-            'as' => 'bot_method.research',
-            'uses' => 'BotController@research'
-        ]);
-        // move usdt
-        Route::get('/move-money', [
-            'as' => 'bot.move.money',
-            'uses' => 'BotController@moveMoney'
-        ]);
-        // move money validation
-        Route::post('/move-money-valid', [
-            'as' => 'bot.move.money.valid',
-            'uses' => 'BotController@moveMoneyValid'
-        ]);
         // update stop loss / take profit
         Route::post('/update-profit', [
             'as' => 'bot.update.profit',
             'uses' => 'BotController@updateProfit'
+        ]);
+    });
+
+    // method
+    Route::prefix('method')->group(function () {
+        // create method
+        Route::get('/create-method', [
+            'as' => 'bot_method.create',
+            'uses' => 'MethodController@createMethod'
+        ]);
+        // edit method
+        Route::get('/edit-method/{id}', [
+            'as' => 'bot_method.edit',
+            'uses' => 'MethodController@editMethod'
+        ]);
+        // validation method
+        Route::post('/validate-method', [
+            'as' => 'bot_method.valid',
+            'uses' => 'MethodController@validateMethod'
+        ]);
+        // update method status
+        Route::post('/update-status-method', [
+            'as' => 'bot.method.update.status',
+            'uses' => 'MethodController@updateStatusMethod'
+        ]);
+        // delete method
+        Route::post('/delete-method', [
+            'as' => 'bot_method.delete',
+            'uses' => 'MethodController@deleteMethod'
+        ]);
+        // research method
+        Route::post('/research', [
+            'as' => 'bot_method.research',
+            'uses' => 'MethodController@research'
+        ]);
+    });
+
+    // move usdt
+    Route::prefix('move-money')->group(function () {
+        Route::get('/', [
+            'as' => 'bot.move.money',
+            'uses' => 'MoveMoneyController@index'
+        ]);
+        // move money validation
+        Route::post('/valid', [
+            'as' => 'bot.move.money.valid',
+            'uses' => 'MoveMoneyController@valid'
         ]);
     });
 });

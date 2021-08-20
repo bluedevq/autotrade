@@ -101,6 +101,22 @@ return [
             'up' => 'T',
             'down' => 'G',
         ],
+        'order_type' => [
+            'oder' => 1,
+            'result' => 0,
+        ],
+        'price_keys' => [
+            'open_order',
+            'open_price',
+            'high_price',
+            'low_price',
+            'close_price',
+            'base_volume',
+            'close_order',
+            'xxx',
+            'order_type',
+            'session',
+        ],
         'chart' => [
             'chart_tension' => '0.4',
             'chart_default_step_size' => 5,

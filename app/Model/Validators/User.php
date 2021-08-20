@@ -2,7 +2,8 @@
 
 namespace App\Model\Validators;
 
-use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Validator;
 
 trait User
 {
@@ -60,5 +61,24 @@ trait User
         }
 
         return $result;
+    }
+
+    public function validateLogin($params = [])
+    {
+        $rules = [
+            'email' => 'required|email',
+            'password' => 'required',
+        ];
+        $messages = [
+            'email.required' => 'Vui lòng nhập email.',
+            'email.email' => 'Vui lòng nhập đúng định dạng email.',
+            'password.required' => 'Vui lòng nhập mật khẩu.',
+        ];
+        $validator = Validator::make($params, $rules, $messages);
+        if ($validator->fails()) {
+            return $validator->errors()->first();
+        }
+
+        return true;
     }
 }
