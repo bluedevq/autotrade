@@ -22,9 +22,6 @@ class MethodController extends BackendController
 {
     use ApiResponse;
 
-    const REFRESH_TOKEN = 'refresh_token';
-    const BOT_USER_EMAIL = 'bot_user_email';
-
     /**
      * BotController constructor.
      * @param BotUser $botUser
@@ -76,7 +73,7 @@ class MethodController extends BackendController
         }
 
         // check bot user
-        $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        $botUser = $this->getModel()->where('email', Session::get($this->getSessionKey('bot_user_email')))->first();
         if (blank($botUser)) {
             $this->setData(['errors' => 'Lỗi người dùng. Vui lòng thử lại.']);
             return $this->renderErrorJson();
@@ -200,7 +197,7 @@ class MethodController extends BackendController
         $listProfits = [];
         $totalVolume = 0;
         // get bot user
-        $user = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        $user = $this->getModel()->where('email', Session::get($this->getSessionKey('bot_user_email')))->first();
         if (blank($user)) {
             $this->setData(['url' => route('bot.clear_token')]);
             return $this->renderErrorJson();
@@ -284,43 +281,10 @@ class MethodController extends BackendController
         $params['client_id'] = 'aresbo-web';
         $params['grant_type'] = $isLogin ? 'password' : 'refresh_token';
         if (!$isLogin) {
-            $params['refresh_token'] = Session::get(self::REFRESH_TOKEN);
+            $params['refresh_token'] = Session::get($this->getSessionKey('refresh_token'));
         }
 
         return $this->requestApi(Common::getConfig('aresbo.api_url.get_token_url'), $params);
-    }
-
-    /**
-     * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    protected function _getListPrices()
-    {
-        $orderCandles = $resultCandles = [];
-        $orderPriceType = Common::getConfig('aresbo.order_type.oder');
-        $priceUp = Common::getConfig('aresbo.order_type_text.up');
-        $priceDown = Common::getConfig('aresbo.order_type_text.down');
-        try {
-            // get list prices
-            $prices = $this->requestApi(Common::getConfig('aresbo.api_url.get_prices'), [], 'GET', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
-            if (!Arr::get($prices, 'ok')) {
-                return [$orderCandles, $resultCandles];
-            }
-            $listCandles = array_reverse(Arr::get($prices, 'd', []));
-            // get price keys
-            $priceKeys = Common::getConfig('aresbo.price_keys');
-            // get list order prices, result prices
-            foreach ($listCandles as $item) {
-                $priceTmp = array_combine($priceKeys, $item);
-                $orderResult = Arr::get($priceTmp, 'close_price') - Arr::get($priceTmp, 'open_price');
-                $priceTmp['order_result'] = $orderResult > 0 ? $priceUp : $priceDown;
-                Arr::get($priceTmp, 'order_type') == $orderPriceType ? $orderCandles[] = $priceTmp : $resultCandles[] = $priceTmp;
-            }
-        } catch (\Exception $exception) {
-            Log::error($exception);
-        }
-
-        return [$orderCandles, $resultCandles];
     }
 
     /**

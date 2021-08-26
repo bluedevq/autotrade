@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Module\Backend;
 
 use App\Helper\Common;
 use App\Http\Supports\ApiResponse;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -16,8 +15,6 @@ use Illuminate\Support\Facades\Session;
 class MoveMoneyController extends BackendController
 {
     use ApiResponse;
-
-    const REFRESH_TOKEN = 'refresh_token';
 
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
@@ -52,7 +49,7 @@ class MoveMoneyController extends BackendController
                 'amount' => $amount,
                 'confirmed' => true
             ];
-            $response = $this->requestApi($url, $data, 'POST', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
+            $response = $this->requestApi($url, $data, 'POST', ['Authorization' => 'Bearer ' . Session::get($this->getSessionKey('refresh_token'))]);
             if (!Arr::get($response, 'ok')) {
                 $message = Arr::get($response, 'd.err_code') == 'err_invalid_balance' ? 'Số dư của bạn không đủ.' : '';
                 $this->setData(['errors' => $message]);
@@ -72,40 +69,5 @@ class MoveMoneyController extends BackendController
             }
         }
         return $this->renderErrorJson();
-    }
-
-    /**
-     * @param bool $format
-     * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    protected function _getBalance($format = false)
-    {
-        // get balance
-        try {
-            $refreshToken = Session::get(self::REFRESH_TOKEN);
-            $headers = ['Authorization' => 'Bearer ' . $refreshToken];
-            $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_balance'), [], 'GET', $headers, true);
-            $demoBalance = Arr::get($response, 'd.demoBalance');
-            $availableBalance = Arr::get($response, 'd.availableBalance');
-            $usdtAvailableBalance = Arr::get($response, 'd.usdtAvailableBalance');
-            $balance = [
-                'demo_balance' => $demoBalance,
-                'available_balance' => $availableBalance,
-                'usdt_available_balance' => $usdtAvailableBalance,
-            ];
-            if ($format) {
-                $balance = [
-                    'demo_balance' => blank($demoBalance) || $demoBalance <= 0 ? 0 : number_format($demoBalance, 2),
-                    'available_balance' => blank($availableBalance) || $availableBalance <= 0 ? 0 : number_format($availableBalance, 2),
-                    'usdt_available_balance' => blank($usdtAvailableBalance) || $usdtAvailableBalance <= 0 ? 0 : number_format($usdtAvailableBalance, 2),
-                ];
-            }
-        } catch (\Exception $exception) {
-            Log::error($exception);
-            return [];
-        }
-
-        return $balance;
     }
 }

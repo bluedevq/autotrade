@@ -18,7 +18,7 @@ class User extends UserAuthenticate
 
     protected $fillable = [
         'id', 'email', 'password', 'name', 'phone', 'sex', 'address', 'expired_date', 'forgot_password_token', 'forgot_password_expired',
-        'verify_token', 'verify_expired', 'status', 'created_at', 'updated_at', 'deleted_at'
+        'verify_token', 'verify_expired', 'parent_id', 'role', 'status', 'created_at', 'updated_at', 'deleted_at'
     ];
 
     public function getAuthPassword()

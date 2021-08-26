@@ -27,13 +27,6 @@ class BotController extends BackendController
 {
     use ApiResponse;
 
-    const ACCESS_TOKEN = 'access_token';
-    const REFRESH_TOKEN = 'refresh_token';
-    const TWOFA_TOKEN = '2fa_token';
-    const VERIFY_DEVICE = 'verify_device';
-    const VERIFY_DEVICE_TOKEN = 'verify_device_token';
-    const BOT_USER_EMAIL = 'bot_user_email';
-
     /**
      * BotController constructor.
      * @param BotUser $botUser
@@ -55,7 +48,7 @@ class BotController extends BackendController
      */
     public function index()
     {
-        if (Session::has(self::REFRESH_TOKEN)) {
+        if (Session::has($this->getSessionKey('refresh_token'))) {
             $userId = backendGuard()->user()->getAuthIdentifier();
             // get user info
             $botUserInfo = $this->_getUserInfo();
@@ -159,14 +152,14 @@ class BotController extends BackendController
             }
 
             // save session email login
-            Session::put(self::BOT_USER_EMAIL, $email);
+            Session::put($this->getSessionKey('bot_user_email'), $email);
 
             // check 2fa
             $require2Fa = Arr::get($response, 'd.require2Fa');
             $verifyDevice = Arr::get($response, 'd.verify-device');
             if ($require2Fa || $verifyDevice) {
-                Session::put(self::TWOFA_TOKEN, Arr::get($response, 'd.t'));
-                Session::put(self::VERIFY_DEVICE, $verifyDevice);
+                Session::put($this->getSessionKey('2fa_token'), Arr::get($response, 'd.t'));
+                Session::put($this->getSessionKey('verify_device'), $verifyDevice);
                 $this->setData([
                     'require2fa' => $require2Fa,
                     'verifyDevice' => $verifyDevice,
@@ -175,8 +168,8 @@ class BotController extends BackendController
             }
 
             // save token
-            Session::put(self::ACCESS_TOKEN, Arr::get($response, 'd.access_token'));
-            Session::put(self::REFRESH_TOKEN, Arr::get($response, 'd.refresh_token'));
+            Session::put($this->getSessionKey('access_token'), Arr::get($response, 'd.access_token'));
+            Session::put($this->getSessionKey('refresh_token'), Arr::get($response, 'd.refresh_token'));
 
             $this->setData(['url' => route('bot.index')]);
         } catch (\Exception $exception) {
@@ -199,13 +192,13 @@ class BotController extends BackendController
                 'client_id' => 'aresbo-web',
                 'code' => $this->getParam('require_2fa') ? $this->getParam('code') : $this->getParam('td_code'),
                 'td_code' => $this->getParam('td_code'),
-                'td_p_code' => Session::get(self::VERIFY_DEVICE_TOKEN),
-                'token' => Session::get(self::TWOFA_TOKEN)
+                'td_p_code' => Session::get($this->getSessionKey('verify_device_token')),
+                'token' => Session::get($this->getSessionKey('2fa_token'))
             ];
             $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_token2fa_url'), $loginData);
 
             // clear 2fa required
-            Session::forget(self::TWOFA_TOKEN);
+            Session::forget($this->getSessionKey('2fa_token'));
 
             // check status
             if (!Arr::get($response, 'ok')) {
@@ -213,8 +206,8 @@ class BotController extends BackendController
             }
 
             // save token
-            Session::put(self::ACCESS_TOKEN, Arr::get($response, 'd.access_token'));
-            Session::put(self::REFRESH_TOKEN, Arr::get($response, 'd.refresh_token'));
+            Session::put($this->getSessionKey('access_token'), Arr::get($response, 'd.access_token'));
+            Session::put($this->getSessionKey('refresh_token'), Arr::get($response, 'd.refresh_token'));
 
             return $this->_to('bot.index');
         } catch (\Exception $exception) {
@@ -234,7 +227,7 @@ class BotController extends BackendController
             $loginData = [
                 'captcha' => Common::getConfig('aresbo.api_url.captcha_token'),
                 'clientId' => 'aresbo-web',
-                'token' => Session::get(self::TWOFA_TOKEN)
+                'token' => Session::get($this->getSessionKey('2fa_token'))
             ];
             $response = $this->requestApi(Common::getConfig('aresbo.api_url.request_code'), $loginData);
             // check status
@@ -244,7 +237,7 @@ class BotController extends BackendController
             }
 
             // save token
-            Session::put(self::VERIFY_DEVICE_TOKEN, Arr::get($response, 'd.data'));
+            Session::put($this->getSessionKey('verify_device_token'), Arr::get($response, 'd.data'));
 
             return $this->renderJson();
         } catch (\Exception $exception) {
@@ -258,9 +251,9 @@ class BotController extends BackendController
      */
     public function clearToken()
     {
-        Session::forget(self::ACCESS_TOKEN);
-        Session::forget(self::REFRESH_TOKEN);
-        Session::forget(self::BOT_USER_EMAIL);
+        Session::forget($this->getSessionKey('access_token'));
+        Session::forget($this->getSessionKey('refresh_token'));
+        Session::forget($this->getSessionKey('bot_user_email'));
 
         return $this->_to('bot.index');
     }
@@ -302,8 +295,8 @@ class BotController extends BackendController
                     return $this->renderErrorJson();
                 }
                 // save token
-                Session::put(self::ACCESS_TOKEN, Arr::get($newRefreshToken, 'd.access_token'));
-                Session::put(self::REFRESH_TOKEN, Arr::get($newRefreshToken, 'd.refresh_token'));
+                Session::put($this->getSessionKey('access_token'), Arr::get($newRefreshToken, 'd.access_token'));
+                Session::put($this->getSessionKey('refresh_token'), Arr::get($newRefreshToken, 'd.refresh_token'));
             }
 
             // get price
@@ -314,7 +307,7 @@ class BotController extends BackendController
             $this->setData(['prices' => $resultPrices]);
 
             // check bot queue has running
-            $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+            $botUser = $this->getModel()->where('email', Session::get($this->getSessionKey('bot_user_email')))->first();
             if (blank($botUser)) {
                 return $this->_to('bot.clear_token');
             }
@@ -369,61 +362,6 @@ class BotController extends BackendController
     }
 
     /**
-     * @return array|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|RedirectResponse
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function moveMoney()
-    {
-        $balance = $this->_getBalance();
-        if (blank($balance)) {
-            $this->_to('bot.clear_token');
-        }
-        $this->setViewData(['balance' => $balance]);
-        return $this->render();
-    }
-
-    /**
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function moveMoneyValid()
-    {
-        try {
-            $param = $this->getParams();
-            $amount = Arr::get($param, 'amount');
-            $type = Arr::get($param, 'type');
-            $url = $type == Common::getConfig('aresbo.move_money_type.wallet_to_trade') ? Common::getConfig('aresbo.api_url.move_usdtbo') : Common::getConfig('aresbo.api_url.move_bousdt');
-            if ($amount <= 0) {
-                $this->setData(['errors' => 'Giá trị không hợp lệ.']);
-                return $this->renderErrorJson();
-            }
-            $data = [
-                'amount' => $amount,
-                'confirmed' => true
-            ];
-            $response = $this->requestApi($url, $data, 'POST', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
-            if (!Arr::get($response, 'ok')) {
-                $message = Arr::get($response, 'd.err_code') == 'err_invalid_balance' ? 'Số dư của bạn không đủ.' : '';
-                $this->setData(['errors' => $message]);
-                return $this->renderErrorJson();
-            }
-            $this->setData([
-                'amount' => $amount,
-                'success' => $type == Common::getConfig('aresbo.move_money_type.wallet_to_trade') ? 'Bạn đã chuyển thành công ' . $amount . ' USDT đến Tài khoản Thực' : 'Bạn đã chuyển thành công ' . $amount . ' USDT đến Ví USDT'
-            ]);
-
-            return $this->renderJson();
-        } catch (\Exception $exception) {
-            Log::error($exception);
-            $this->setData(['errors' => 'Đã xảy ra lỗi. Vui lòng thử lại.']);
-            if ($exception->getCode() == 401) {
-                $this->setData(['url' => route('bot.clear_token')]);
-            }
-        }
-        return $this->renderErrorJson();
-    }
-
-    /**
      * @return \Illuminate\Http\JsonResponse|RedirectResponse
      */
     public function updateProfit()
@@ -442,7 +380,7 @@ class BotController extends BackendController
         }
 
         // check bot user exist
-        $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        $botUser = $this->getModel()->where('email', Session::get($this->getSessionKey('bot_user_email')))->first();
         if (blank($botUser)) {
             return $this->_to('bot.clear_token');
         }
@@ -481,43 +419,10 @@ class BotController extends BackendController
         $params['client_id'] = 'aresbo-web';
         $params['grant_type'] = $isLogin ? 'password' : 'refresh_token';
         if (!$isLogin) {
-            $params['refresh_token'] = Session::get(self::REFRESH_TOKEN);
+            $params['refresh_token'] = Session::get($this->getSessionKey('refresh_token'));
         }
 
         return $this->requestApi(Common::getConfig('aresbo.api_url.get_token_url'), $params);
-    }
-
-    /**
-     * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    protected function _getListPrices()
-    {
-        $orderCandles = $resultCandles = [];
-        $orderPriceType = Common::getConfig('aresbo.order_type.oder');
-        $priceUp = Common::getConfig('aresbo.order_type_text.up');
-        $priceDown = Common::getConfig('aresbo.order_type_text.down');
-        try {
-            // get list prices
-            $prices = $this->requestApi(Common::getConfig('aresbo.api_url.get_prices'), [], 'GET', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
-            if (!Arr::get($prices, 'ok')) {
-                return [$orderCandles, $resultCandles];
-            }
-            $listCandles = array_reverse(Arr::get($prices, 'd', []));
-            // get price keys
-            $priceKeys = Common::getConfig('aresbo.price_keys');
-            // get list order prices, result prices
-            foreach ($listCandles as $item) {
-                $priceTmp = array_combine($priceKeys, $item);
-                $orderResult = Arr::get($priceTmp, 'close_price') - Arr::get($priceTmp, 'open_price');
-                $priceTmp['order_result'] = $orderResult > 0 ? $priceUp : $priceDown;
-                Arr::get($priceTmp, 'order_type') == $orderPriceType ? $orderCandles[] = $priceTmp : $resultCandles[] = $priceTmp;
-            }
-        } catch (\Exception $exception) {
-            Log::error($exception);
-        }
-
-        return [$orderCandles, $resultCandles];
     }
 
     /**
@@ -527,12 +432,12 @@ class BotController extends BackendController
     protected function _getUserInfo()
     {
         // check profile in database
-        $dbProfile = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        $dbProfile = $this->getModel()->where('email', Session::get($this->getSessionKey('bot_user_email')))->first();
 
         // begin transaction
         DB::beginTransaction();
         try {
-            $refreshToken = Session::get(self::REFRESH_TOKEN);
+            $refreshToken = Session::get($this->getSessionKey('refresh_token'));
             $headers = ['Authorization' => 'Bearer ' . $refreshToken];
 
             // get profile
@@ -556,8 +461,8 @@ class BotController extends BackendController
                 'nick_name' => Arr::get($profile, 'nn'),
                 'reference_name' => Arr::get($profile, 'sponsor'),
                 'rank' => Arr::get($profile, 'rank'),
-                'access_token' => Session::get(self::ACCESS_TOKEN),
-                'refresh_token' => Session::get(self::REFRESH_TOKEN),
+                'access_token' => Session::get($this->getSessionKey('access_token')),
+                'refresh_token' => Session::get($this->getSessionKey('refresh_token')),
                 'demo_balance' => Arr::get($profile, 'demo_balance'),
                 'available_balance' => Arr::get($profile, 'available_balance'),
                 'usdt_available_balance' => Arr::get($profile, 'usdt_available_balance'),
@@ -590,7 +495,7 @@ class BotController extends BackendController
     protected function _processAuto($stop = false)
     {
         // check bot user exist
-        $botUser = $this->getModel()->where('email', Session::get(self::BOT_USER_EMAIL))->first();
+        $botUser = $this->getModel()->where('email', Session::get($this->getSessionKey('bot_user_email')))->first();
         if (blank($botUser)) {
             $this->setData(['errors' => 'Lỗi người dùng. Vui lòng thử lại.']);
             return $this->renderErrorJson();
@@ -776,7 +681,7 @@ class BotController extends BackendController
             if (blank($betData)) {
                 return [];
             }
-            $response = $this->requestApi(Common::getConfig('aresbo.api_url.bet'), $betData, 'POST', ['Authorization' => 'Bearer ' . Session::get(self::REFRESH_TOKEN)]);
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.bet'), $betData, 'POST', ['Authorization' => 'Bearer ' . Session::get($this->getSessionKey('refresh_token'))]);
             // check status
             if (!Arr::get($response, 'ok')) {
                 $errorCode = Arr::get($response, 'd.err_code');
@@ -933,40 +838,5 @@ class BotController extends BackendController
         }
 
         return $userMethods;
-    }
-
-    /**
-     * @param bool $format
-     * @return array
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    protected function _getBalance($format = false)
-    {
-        // get balance
-        try {
-            $refreshToken = Session::get(self::REFRESH_TOKEN);
-            $headers = ['Authorization' => 'Bearer ' . $refreshToken];
-            $response = $this->requestApi(Common::getConfig('aresbo.api_url.get_balance'), [], 'GET', $headers, true);
-            $demoBalance = Arr::get($response, 'd.demoBalance');
-            $availableBalance = Arr::get($response, 'd.availableBalance');
-            $usdtAvailableBalance = Arr::get($response, 'd.usdtAvailableBalance');
-            $balance = [
-                'demo_balance' => $demoBalance,
-                'available_balance' => $availableBalance,
-                'usdt_available_balance' => $usdtAvailableBalance,
-            ];
-            if ($format) {
-                $balance = [
-                    'demo_balance' => blank($demoBalance) || $demoBalance <= 0 ? 0 : number_format($demoBalance, 2),
-                    'available_balance' => blank($availableBalance) || $availableBalance <= 0 ? 0 : number_format($availableBalance, 2),
-                    'usdt_available_balance' => blank($usdtAvailableBalance) || $usdtAvailableBalance <= 0 ? 0 : number_format($usdtAvailableBalance, 2),
-                ];
-            }
-        } catch (\Exception $exception) {
-            Log::error($exception);
-            return [];
-        }
-
-        return $balance;
     }
 }

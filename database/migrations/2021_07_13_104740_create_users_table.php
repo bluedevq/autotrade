@@ -26,6 +26,8 @@ class CreateUsersTable extends Migration
             $table->dateTime('forgot_password_expired');
             $table->text('verify_token');
             $table->dateTime('verify_expired');
+            $table->integer('parent_id');
+            $table->smallInteger('role');
             $table->smallInteger('status');
             $table->timestamps();
             $table->softDeletes();
