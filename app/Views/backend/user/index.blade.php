@@ -96,6 +96,9 @@
             </tbody>
         </table>
     </div>
+    <div class="row mt-2 mx-auto">
+        {{ $paginator->appends(request()->all())->links('layouts.backend.elements._paging') }}
+    </div>
     <div class="modal delete-confirm">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-danger">
