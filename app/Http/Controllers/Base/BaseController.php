@@ -130,7 +130,9 @@ class BaseController extends Controller
 
     public function getParams()
     {
-        return request()->all();
+        $params = request()->all();
+        unset($params['_token']);
+        return $params;
     }
 
     public function getParam($key, $default = null)

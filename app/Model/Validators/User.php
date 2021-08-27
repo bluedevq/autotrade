@@ -35,7 +35,12 @@ trait User
 
     public function rules()
     {
-        return $this->_getRuleDefaults();
+        $rules = $this->_getRuleDefaults();
+        $params = $this->getParams();
+        if (Arr::get($params, 'id') && blank(Arr::get($params, 'password'))) {
+            unset($rules['password']);
+        }
+        return $rules;
     }
 
     public function getRule($field)

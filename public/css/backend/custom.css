@@ -461,6 +461,10 @@ input[type=number] {
     vertical-align: middle;
 }
 
+.bootstrap-datetimepicker-widget {
+    color: #000 !important;
+}
+
 @media (min-width: 767px) {
     .sp {
         display: none;

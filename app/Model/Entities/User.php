@@ -2,6 +2,7 @@
 
 namespace App\Model\Entities;
 
+use App\Helper\Common;
 use App\Model\Base\Auth\UserAuthenticate;
 use App\Model\Presenters\PUser;
 
@@ -26,8 +27,13 @@ class User extends UserAuthenticate
         return $this->password;
     }
 
-    public function getExpiredDate()
+    public function botUserQueues()
     {
-        return $this->expired_date;
+        return $this->hasMany(BotQueue::class, 'user_id', 'id');
+    }
+
+    public function getList(array $params = [], array $columns = [])
+    {
+        return $this->search($params, $columns)->with(['botUserQueues.botUser'])->paginate(Common::getConfig('pagination.' . $this->getTable(), Common::getConfig('pagination.default')));
     }
 }

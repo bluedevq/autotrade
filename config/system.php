@@ -1,5 +1,7 @@
 <?php
 return [
+    // use ssl
+    'use_ssl' => env('USE_SSL', false),
     // migrate
     'default_auth_id' => 1,
     'created_at_column' => ['field' => 'ins_datetime'],

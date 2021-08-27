@@ -9,12 +9,14 @@ return [
     ],
     // role
     'user_role' => [
-        'admin' => 0,
-        'normal' => 1,
+        'supper_admin' => 0,
+        'admin' => 1,
+        'normal' => 2,
     ],
     'user_role_text' => [
         0 => 'Admin',
-        1 => 'Tài khoản thường',
+        1 => 'Quản lý',
+        2 => 'Thường',
     ],
     // mail config
     'mail' => [
@@ -35,7 +37,7 @@ return [
         'forgot_password' => 3,
     ],
     'user_status_text' => [
-        0 => 'Dừng',
+        0 => 'Dừng hoạt động',
         1 => 'Đang hoạt động',
         2 => 'Chưa xác nhận',
         3 => 'Lấy lại mật khẩu',

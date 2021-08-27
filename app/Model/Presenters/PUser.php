@@ -3,6 +3,7 @@
 namespace App\Model\Presenters;
 
 use App\Helper\Common;
+use Carbon\Carbon;
 
 trait PUser
 {
@@ -11,7 +12,25 @@ trait PUser
         return $this->name;
     }
 
-    public function getRole()
+    public function getExpiredDate()
+    {
+        $expiredDate = Carbon::parse($this->expired_date);
+        if ($expiredDate->lessThan(Carbon::now())) {
+            return '<span class="text-danger-custom">Đã hết hạn</span>';
+        }
+        return $expiredDate->format('H:i:s d/m/Y');
+    }
+
+    public function getBotUsers()
+    {
+        $result = [];
+        foreach ($this->botUserQueues as $botQueue) {
+            $result[] = $botQueue->botUser->nick_name;
+        }
+        return implode('<br/>', $result);
+    }
+
+    public function getRoleText()
     {
         return Common::getConfig('user_role_text.' . $this->role);
     }

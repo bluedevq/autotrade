@@ -18,4 +18,9 @@ class BotQueue extends BaseModel
     protected $fillable = [
         'user_id', 'bot_user_id', 'account_type', 'profit', 'stop_loss', 'take_profit', 'status', 'created_at', 'updated_at', 'deleted_at'
     ];
+
+    public function botUser()
+    {
+        return $this->hasOne(BotUser::class, 'id', 'bot_user_id');
+    }
 }

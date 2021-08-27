@@ -171,7 +171,7 @@ Route::middleware(['auth.backend'])->group(function () {
     });
 
     // management user
-    Route::prefix('user')->group(function () {
+    Route::middleware(['role.backend'])->prefix('user')->group(function () {
         Route::get('/', [
             'as' => 'user.index',
             'uses' => 'UserController@index'

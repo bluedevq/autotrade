@@ -513,7 +513,7 @@ class BotController extends BackendController
         DB::beginTransaction();
         try {
             // check user expired
-            $userExpired = Carbon::parse($user->getExpiredDate())->lessThan(Carbon::now());
+            $userExpired = Carbon::parse($user->expired_date)->lessThan(Carbon::now());
             $botQueue = $this->fetchModel(BotQueue::class)->where('user_id', $user->getAuthIdentifier())
                 ->where('bot_user_id', $botUser->id)
                 ->first();

@@ -8,6 +8,7 @@
     <?php $cssFiles = [
         'lib/bootstrap.min',
         'lib/bootstrap-theme.min',
+        'lib/bootstrap-datetimepicker',
         'lib/fontawesome.min',
         'lib/solid',
         'backend/custom',
@@ -16,6 +17,9 @@
         'lib/jquery.min',
         'lib/bootstrap.min',
         'lib/bootstrap.bundle.min',
+        'lib/moment.min',
+        'lib/moment-with-locales.min',
+        'lib/bootstrap-datetimepicker.min',
         'lib/loadingoverlay.min',
         'lib/fontawesome.min',
         'lib/chart.min',
@@ -23,6 +27,7 @@
     ?>
     {!! loadFiles($jsFiles, '', 'js') !!}
     {!! loadFiles($cssFiles) !!}
+    @stack('styles')
     @include('layouts.backend.structures.head_autoload')
     <!--[if lt IE 9]>
     {{Html::script('https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js')}}

@@ -14,6 +14,7 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middleware = [
+        \App\Http\Middleware\ForceSSL::class,
         \App\Http\Middleware\TrustProxies::class,
         \Fruitcake\Cors\HandleCors::class,
         \App\Http\Middleware\CheckForMaintenanceMode::class,
@@ -63,6 +64,7 @@ class Kernel extends HttpKernel
 
         // backend
         'auth.backend' => \App\Http\Middleware\BackendAuthenticate::class,
+        'role.backend' => \App\Http\Middleware\RoleBackend::class,
 
         // frontend
         'auth.frontend' => \App\Http\Middleware\FrontendAuthenticate::class,

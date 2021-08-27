@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Module\Backend;
 
 use App\Model\Entities\User;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
@@ -31,21 +33,28 @@ class UserController extends BackendController
     {
         // validate data
         $params = $this->getParams();
+        $this->getModel()->setParams($params);
         $rules = $this->getModel()->rules();
         $messages = $this->getModel()->messages();
         $validator = Validator::make($params, $rules, $messages);
         if ($validator->fails()) {
             return $this->_backWithError($validator->errors()->first());
         }
+        if (blank(Arr::get($params, 'password'))) {
+            unset($params['password']);
+        }
 
         // save data
         DB::beginTransaction();
         try {
-            $entity = $this->getModel()->fill($this->getParams());
+            $entity = $this->getModel()->fill($params);
             $create = true;
             if ($entity->id) {
                 $entity->exists = true;
                 $create = false;
+            }
+            if ($entity->password) {
+                $entity->password = Hash::make($entity->password);
             }
             $entity->save();
             DB::commit();
@@ -59,11 +68,29 @@ class UserController extends BackendController
         return $this->_backWithError(new MessageBag(['Lỗi hệ thống. Vui lòng thử lại.']));
     }
 
+    public function delete($id)
+    {
+        DB::beginTransaction();
+        try {
+            $entity = $this->getModel()->where('id', $id)->first();
+            $entity->delete();
+            DB::commit();
+
+            session()->flash('success', ['Xóa thành công.']);
+
+            return $this->_back();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            Log::error($exception);
+        }
+        return $this->_back()->withErrors(new MessageBag(['Xóa thất bại, vui lòng thử lại.']));
+    }
+
     protected function _prepareForm($id = null)
     {
         $entity = $this->getModel();
         if ($id) {
-            $entity = $this->getModel()->where('id', $id)->first();
+            $entity = $this->getModel()->where('id', $id)->with(['botUserQueues.botUser'])->first();
         }
         if (session()->hasOldInput()) {
             $entity->setRawAttributes(session()->getOldInput());

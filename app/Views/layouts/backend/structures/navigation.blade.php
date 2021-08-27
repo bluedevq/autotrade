@@ -13,13 +13,13 @@
                 <li class="nav-item">
                     <a class="nav-link {{ $currentRoute == 'bot.move.money' ? 'active' : '' }}" href="{{ route('bot.move.money') }}"><span class="fas fa-retweet">&nbsp;</span>Chuyển tiền</a>
                 </li>
-                @if (backendGuard()->user()->role == \App\Helper\Common::getConfig('user_role.admin'))
+                @if (backendGuard()->user()->role != \App\Helper\Common::getConfig('user_role.normal'))
                 <li class="nav-item">
                     <a class="nav-link {{ $currentRoute == 'user.index' ? 'active' : '' }}" href="{{ route('user.index') }}"><span class="fas fa-users">&nbsp;</span>Quản lý người dùng</a>
                 </li>
                 @endif
             </ul>
-            <ul class="nav nav-pills">
+            <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" href="javascript:void(0)"><span>Xin chào&nbsp;</span><span class="text-info">{{ backendGuard()->user()->name }}</span></a>
                 </li>

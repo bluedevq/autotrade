@@ -21,11 +21,37 @@
                 </div>
             </div>
             <div class="row mt-2">
+                <div class="col-md-2 col-12">
+                    <label for="role" class="form-label fw-bold" aria-hidden="true">Loại tài khoản</label>
+                </div>
+                <div class="col-md-2 col-12">
+                    <select class="form-select" id="role" name="role_eq">
+                        <option value="">----</option>
+                        @foreach((array)\App\Helper\Common::getConfig('user_role_text') as $value => $roleName)
+                        <option value="{{ $value }}" {{ (string)request()->get('role_eq') ==  (string)$value ? 'selected="selected"' : ''}}>{{ $roleName }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-2 col-12">
+                    <label for="status" class="form-label fw-bold" aria-hidden="true">Trạng thái</label>
+                </div>
+                <div class="col-md-2 col-12">
+                    <select class="form-select" id="status" name="status_eq">
+                        <option value="">----</option>
+                        @foreach((array)\App\Helper\Common::getConfig('user_status_text') as $value => $statusName)
+                        <option value="{{ $value }}" {{ (string)request()->get('status_eq') ===  (string)$value ? 'selected="selected"' : ''}}>{{ $statusName }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="row mt-2">
                 <div class="col-md-2 col-0">&nbsp;</div>
                 <div class="col-md-2 col-12">
                     <button class="btn btn-outline-default-custom reset col-12" type="button"><span class="fas fa-trash" aria-hidden="true">&nbsp;</span>Xóa tìm kiếm</button>
                 </div>
-                <div class="col-md-2 col-12">
+                <div class="col-md-2 col-12 mt-sp-2">
                     <button class="btn btn-outline-primary-custom col-12" type="submit"><span class="fas fa-search" aria-hidden="true">&nbsp;</span>Tìm kiếm</button>
                 </div>
             </div>
@@ -38,10 +64,12 @@
         </div>
     </div>
     <div class="row mt-2">
-        <table class="table table-bordered table-striped table-dark table-hover list-user col-12">
+        <table class="table table-bordered table-striped table-dark table-hover list-user col-12" style="word-break: break-all">
             <thead>
             <th>Email</th>
             <th>Tên người dùng</th>
+            <th>Ngày hết hạn</th>
+            <th>Tài khoản AresBO</th>
             <th>Loại tài khoản</th>
             <th>Trạng thái</th>
             <th></th>
@@ -52,12 +80,15 @@
                     <tr>
                         <td>{{ $entity->email }}</td>
                         <td>{!! $entity->getName() !!}</td>
-                        <td>{!! $entity->getRole() !!}</td>
+                        <td>{!! $entity->getExpiredDate() !!}</td>
+                        <td>{!! $entity->getBotUsers() !!}</td>
+                        <td>{!! $entity->getRoleText() !!}</td>
                         <td>{!! $entity->getStatus() !!}</td>
                         <td class="text-center">
+                        @if (backendGuard()->user()->role == \App\Helper\Common::getConfig('user_role.supper_admin') || $entity->role == \App\Helper\Common::getConfig('user_role.normal') || $entity->id == backendGuard()->user()->id)
                             <a href="{{ route('user.edit', $entity->id) }}" class="btn btn-outline-primary-custom"><span class="fas fa-edit">&nbsp;</span>Sửa</a>
-                            @php $disabled = $entity->id == backendGuard()->user()->id || $entity->role == \App\Helper\Common::getConfig('user_role.admin') @endphp
-                            <a href="javascript:void(0)" @if(!$disabled)onclick="UserController.deleteConfirm('{{ route('user.delete', $entity->id) }}', '{{ $entity->email }}')"@endif class="btn btn-outline-danger-custom {{ $disabled ? 'disabled' : '' }}"><span class="fas fa-trash">&nbsp;</span>Xóa</a>
+                            @if($entity->id != backendGuard()->user()->id)<a href="javascript:void(0)" onclick="UserController.deleteConfirm('{{ route('user.delete', $entity->id) }}', '{{ $entity->email }}')" class="btn btn-outline-danger-custom"><span class="fas fa-trash">&nbsp;</span>Xóa</a>@endif
+                        @endif
                         </td>
                     </tr>
                 @endforeach

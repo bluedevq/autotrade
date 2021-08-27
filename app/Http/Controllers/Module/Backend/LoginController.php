@@ -51,7 +51,7 @@ class LoginController extends BackendController
         if ($user->status != Common::getConfig('user_status.active')) {
             return $this->_backWithError(new MessageBag(['email' => ['Tài khoản chưa được kích hoạt.']]));
         }
-        if (Carbon::parse($user->getExpiredDate())->lessThan(Carbon::now())) {
+        if (Carbon::parse($user->expired_date)->lessThan(Carbon::now())) {
             return $this->_backWithError(new MessageBag(['email' => ['Tài khoản của bạn đã hết hạn. Vui lòng liên hệ admin để được hỗ trợ.']]));
         }
         $userData = [
