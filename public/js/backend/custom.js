@@ -37,11 +37,23 @@ $(document).ready(function () {
 
 /**
  * Admin controller
- * @type {{notification: {success: [], errors: []}}}
+ * @type {{notification: {success: *[], errors: *[]}, showMessage: AdminController.showMessage}}
  */
 let AdminController = {
     notification: {
         success: [],
         errors: [],
+    },
+    // Show toast message
+    showMessage: function (message, type) {
+        if (type === 'error') {
+            $('.toast-message-error .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + message);
+            $('.toast-message-error').toast('show');
+        } else {
+            $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + message);
+            $('.toast-message-success').toast('show');
+        }
+
+        hideLoading();
     },
 };

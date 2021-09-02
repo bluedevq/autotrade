@@ -33,7 +33,7 @@
                     </div>
                 </div>
                 <div class="row m-0 move-money-body">
-                    <div class="col-md-8 col-12 p-2 mx-auto text-center"><span class="changeAmount pointer" onclick="BotController.changeAmount()"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" class="iconTransfer">
+                    <div class="col-md-8 col-12 p-2 mx-auto text-center"><span class="changeAmount pointer" onclick="MoveMoneyController.changeAmount()"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" class="iconTransfer">
                         <g id="Group_10897" data-name="Group 10897" transform="translate(-559.431 -202.553)">
                             <g id="Group_4613" data-name="Group 4613" transform="translate(559.431 202.553)">
                                 <g id="Rectangle_2919" data-name="Rectangle 2919" transform="translate(0)" fill="#e9f0fa" stroke="#e5e5e5" stroke-width="1">
@@ -50,12 +50,12 @@
                     <div class="col-md-8 col-12 mx-auto">
                         <div class="input-group">
                             <input type="number" name="number" class="form-control" id="number" placeholder="Nhập số tiền">
-                            <span class="input-group-text text-danger-custom all-amount" onclick="BotController.moveAllMoney()"><span>Tất cả</span></span>
+                            <span class="input-group-text text-danger-custom all-amount" onclick="MoveMoneyController.moveAllMoney()"><span>Tất cả</span></span>
                         </div>
                     </div>
                     <div class="col-md-8 col-12 mt-4 mx-auto">
                         <input type="hidden" name="move_type" id="move_type" value="1">
-                        <button type="button" class="btn btn-danger col-12" onclick="BotController.moveMoney()">Chuyển Tiền</button>
+                        <button type="button" class="btn btn-danger col-12" onclick="MoveMoneyController.moveMoney()">Chuyển Tiền</button>
                     </div>
                 </div>
             </form>

@@ -60,6 +60,7 @@ class RegisterController extends BackendController
             'password' => Hash::make(Arr::get($params, 'password')),
             'name' => Arr::get($params, 'name'),
             'expired_date' => Carbon::now()->addDays(Common::getConfig('free_days_after_register'))->format('Y-m-d 23:59:59'),
+            'role' => Common::getConfig('user_role.normal'),
             'status' => Common::getConfig('user_status.verify'),
         ];
         DB::beginTransaction();

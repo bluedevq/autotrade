@@ -1,6 +1,6 @@
 /**
  * Bot auto trade
- * @type {{updateStatusMethod: BotController.updateStatusMethod, moveMoney: BotController.moveMoney, data: {listMethodIds: [], listPrices: []}, afterStopAuto: BotController.afterStopAuto, verifyCount: BotController.verifyCount, updatePrices: BotController.updatePrices, editMethod: BotController.editMethod, createMethod: BotController.createMethod, showMessage: BotController.showMessage, login: BotController.login, changeAmount: BotController.changeAmount, saveProfitSetting: BotController.saveProfitSetting, research: BotController.research, profitSettingForm: BotController.profitSettingForm, resetProfitSettingForm: BotController.resetProfitSettingForm, deleteMethod: BotController.deleteMethod, bet: BotController.bet, validateMethod: BotController.validateMethod, pad: (function(*): string), changeAccountBalance: BotController.changeAccountBalance, updateProfit: BotController.updateProfit, selectAllMethod: BotController.selectAllMethod, options: {isRunning: boolean, hasOrder: boolean}, requestCode: BotController.requestCode, showTimeRequestCode: BotController.showTimeRequestCode, afterStartAuto: BotController.afterStartAuto, updateLastOrders: BotController.updateLastOrders, updateMethods: BotController.updateMethods, moveAllMoney: BotController.moveAllMoney, togglePassword: BotController.togglePassword, toggleMethods: BotController.toggleMethods, showTime: BotController.showTime, selectMethod: BotController.selectMethod, getBetTypeText: (function(*): string), deleteMethodConfirm: BotController.deleteMethodConfirm, resetFormMethod: BotController.resetFormMethod, startAuto: BotController.startAuto, config: {volume: number, clockTitle: {bet: string, wait: string}, loginType: {notRequire2fa: number, require2fa: number}, orderStatus: {new: string, lose: string, win: string}, orderTypeText: {up: string, down: string}, moveMoneyType: {walletToTrade: number, tradeToWallet: number}, profit: number, url: {bet: null, statusMethod: null, requestCode: null, login: null, startAuto: null, stopAuto: null, research: null}, startAt: null}, updateNewOrders: BotController.updateNewOrders}}
+ * @type {{updateStatusMethod: BotController.updateStatusMethod, data: {listMethodIds: *[], listPrices: *[]}, afterStopAuto: BotController.afterStopAuto, verifyCount: ((function(*, *=): (boolean|undefined))|*), updatePrices: ((function(*=): (boolean|undefined))|*), editMethod: BotController.editMethod, createMethod: BotController.createMethod, login: BotController.login, saveProfitSetting: BotController.saveProfitSetting, research: BotController.research, profitSettingForm: BotController.profitSettingForm, resetProfitSettingForm: BotController.resetProfitSettingForm, deleteMethod: BotController.deleteMethod, bet: BotController.bet, validateMethod: BotController.validateMethod, pad: (function(*): string), changeAccountBalance: BotController.changeAccountBalance, updateProfit: ((function(*): (boolean|undefined))|*), selectAllMethod: BotController.selectAllMethod, options: {isRunning: boolean, hasOrder: boolean}, requestCode: BotController.requestCode, showTimeRequestCode: ((function(*=): (boolean|undefined))|*), afterStartAuto: BotController.afterStartAuto, updateLastOrders: BotController.updateLastOrders, updateMethods: BotController.updateMethods, togglePassword: BotController.togglePassword, toggleMethods: BotController.toggleMethods, showTime: BotController.showTime, selectMethod: BotController.selectMethod, getBetTypeText: (function(*): string), deleteMethodConfirm: BotController.deleteMethodConfirm, resetFormMethod: BotController.resetFormMethod, startAuto: BotController.startAuto, config: {volume: number, clockTitle: {bet: string, wait: string}, loginType: {notRequire2fa: number, require2fa: number}, orderStatus: {new: string, lose: string, win: string}, orderTypeText: {up: string, down: string}, profit: number, url: {bet: null, statusMethod: null, requestCode: null, login: null, startAuto: null, stopAuto: null, research: null}, startAt: null}, updateNewOrders: BotController.updateNewOrders}}
  */
 let BotController = {
     options: {
@@ -29,10 +29,6 @@ let BotController = {
         orderTypeText: {
             up: 'T',
             down: 'G',
-        },
-        moveMoneyType: {
-            walletToTrade: 1,
-            tradeToWallet: 2
         },
         loginType: {
             notRequire2fa: 0,
@@ -75,7 +71,7 @@ let BotController = {
         }, function (response) {
             // errors
             if (!response.status) {
-                BotController.showMessage(response.data.errors, 'error');
+                AdminController.showMessage(response.data.errors, 'error');
                 return false;
             }
             $('.aresbo-login').hide();
@@ -112,7 +108,7 @@ let BotController = {
         }, function (response) {
             // errors
             if (!response.status) {
-                BotController.showMessage(response.data.errors, 'error');
+                AdminController.showMessage(response.data.errors, 'error');
                 return false;
             }
             // count time if success
@@ -151,11 +147,11 @@ let BotController = {
             },
         }, function (response) {
             if (!response.status) {
-                BotController.showMessage(response.data.errors, 'error');
+                AdminController.showMessage(response.data.errors, 'error');
                 return false;
             }
             BotController.options.isRunning === 'true' ? BotController.afterStopAuto() : BotController.afterStartAuto();
-            BotController.showMessage(response.data.success);
+            AdminController.showMessage(response.data.success);
         });
     },
     afterStartAuto: function () {
@@ -420,7 +416,7 @@ let BotController = {
             },
         }, function (response) {
             if (!response.status) {
-                BotController.showMessage(response.data.errors, 'error');
+                AdminController.showMessage(response.data.errors, 'error');
                 return false;
             }
 
@@ -582,7 +578,7 @@ let BotController = {
             }
             $('#form-method').modal('hide');
             BotController.resetFormMethod();
-            BotController.showMessage(response.data.success);
+            AdminController.showMessage(response.data.success);
         });
     },
     resetFormMethod: function () {
@@ -604,7 +600,7 @@ let BotController = {
         }, function (response) {
             $('#delete-method').modal('hide');
             if (!response.status) {
-                BotController.showMessage(response.data.errors, 'error');
+                AdminController.showMessage(response.data.errors, 'error');
                 return false;
             }
 
@@ -618,7 +614,7 @@ let BotController = {
                 BotController.selectMethod(input);
                 tr.remove();
             }
-            BotController.showMessage(response.data.success);
+            AdminController.showMessage(response.data.success);
         });
     },
     selectMethod: function (input) {
@@ -654,7 +650,7 @@ let BotController = {
             },
         }, function (response) {
             if (!response.status) {
-                BotController.showMessage(response.data.errors, 'error');
+                AdminController.showMessage(response.data.errors, 'error');
                 return false;
             }
 
@@ -668,61 +664,7 @@ let BotController = {
                 input.prop('checked', false);
                 BotController.selectMethod(input);
             }
-            BotController.showMessage(response.data.success);
-        });
-    },
-    // Move money
-    moveAllMoney: function () {
-        let amount = $('.left-header .amount').attr('data-amount');
-        $('#number').val(amount)
-    },
-    changeAmount: function () {
-        let leftHeader = $('.left-header').html(),
-            rightHeader = $('.right-header').html();
-
-        $('.left-header').html(rightHeader);
-        $('.right-header').html(leftHeader);
-        if ($('#move_type').val() == BotController.config.moveMoneyType.walletToTrade) {
-            $('#move_type').val(BotController.config.moveMoneyType.tradeToWallet);
-        } else {
-            $('#move_type').val(BotController.config.moveMoneyType.walletToTrade);
-        }
-    },
-    moveMoney: function () {
-        sendRequest({
-            url: $('.move-money form').data('action'),
-            type: 'POST',
-            data: {
-                amount: $('#number').val(),
-                type: $('#move_type').val(),
-            },
-        }, function (response) {
-            if (!response.status) {
-                if (response.data.url) {
-                    window.location.href = response.data.url;
-                    return false;
-                }
-                BotController.showMessage(response.data.errors, 'error');
-                return false;
-            }
-            let leftAmount = $('.left-header .amount').data('amount');
-            let rightAmount = $('.right-header .amount').data('amount');
-
-            leftAmount = leftAmount - response.data.amount == 0 ? 0 : (parseFloat(leftAmount) - parseFloat(response.data.amount));
-            rightAmount = parseFloat(rightAmount) + parseFloat(response.data.amount);
-            $('.left-header .amount').attr('data-amount', leftAmount);
-            $('.left-header .amount').text(new Intl.NumberFormat(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(leftAmount));
-
-            $('.right-header .amount').attr('data-amount', rightAmount);
-            $('.right-header .amount').text(new Intl.NumberFormat(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(rightAmount));
-
-            BotController.showMessage(response.data.success);
+            AdminController.showMessage(response.data.success);
         });
     },
     // Profit setting
@@ -772,24 +714,12 @@ let BotController = {
             $('.take-profit').empty().text(response.data.take_profit);
             BotController.resetProfitSettingForm();
             $('#update-bot-queue').modal('hide');
-            BotController.showMessage(response.data.success);
+            AdminController.showMessage(response.data.success);
         });
     },
     resetProfitSettingForm: function () {
         $('#bot_stop_loss').val('');
         $('#bot_take_profit').val('');
         $('.validate-profit').empty();
-    },
-    // Show toast message
-    showMessage: function (message, type) {
-        if (type === 'error') {
-            $('.toast-message-error .toast-message-body').empty().html('<i class="fas fa-exclamation-triangle">&nbsp;</i>' + message);
-            $('.toast-message-error').toast('show');
-        } else {
-            $('.toast-message-success .toast-message-body').empty().html('<i class="fas fa-check">&nbsp;</i>' + message);
-            $('.toast-message-success').toast('show');
-        }
-
-        hideLoading();
     },
 };
