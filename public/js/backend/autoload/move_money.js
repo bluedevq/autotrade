@@ -48,7 +48,7 @@ let MoveMoneyController = {
                     window.location.href = response.data.url;
                     return false;
                 }
-                MoveMoneyController.showMessage(response.data.errors, 'error');
+                AdminController.showMessage(response.data.errors, 'error');
                 return false;
             }
             let leftAmount = $('.left-header .amount').data('amount');
