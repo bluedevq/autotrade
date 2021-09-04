@@ -163,6 +163,9 @@ let BotController = {
         $('.bot-status-btn').addClass('btn-danger').removeClass('btn-success');
         $('.bot-status-icon').addClass('fa-stop-circle').removeClass('fa-play-circle');
         $('.bot-status-text').empty().text('Dừng');
+        $('.profit').empty().text('0');
+        $('.volume').empty().text('0');
+        $('.commission').empty().text('0');
     },
     afterStopAuto: function () {
         BotController.options.isRunning = 'false';
@@ -259,6 +262,24 @@ let BotController = {
 
             // update amount
             $('.current-amount').empty().text(betOrder.current_amount);
+
+            // update reward
+            if (betOrder.reward_info) {
+                let rewardDate = new Date(betOrder.reward_info.history.createdDate);
+                $('.total-reward').empty().text(new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(betOrder.reward_info.rewardBalance));
+                $('.reward-time').empty().text(BotController.pad(rewardDate.getHours()) + ':' + BotController.pad(rewardDate.getSeconds()) + ' ' + rewardDate.getDate() + '-' + BotController.pad((rewardDate.getMonth() + 1)) + '-' + rewardDate.getFullYear());
+                $('.distributedAmount').empty().text(new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(betOrder.reward_info.history.distributedAmount));
+                $('.userBlockVolume').empty().text(new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(betOrder.reward_info.history.userBlockVolume));
+            }
 
             // update bot queue if stop loss / take profit
             BotController.updateProfit(betOrder.bot_queue);

@@ -193,7 +193,7 @@ trait ApiResponse
      * @return mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function requestApi($url, $params = [], $method = 'POST', $headers = [], $forceHeader = false)
+    public function requestApi($url, array $params = [], string $method = 'POST', array $headers = [], bool $forceHeader = false)
     {
         if (!$forceHeader) {
             $headers['Content-Type'] = 'application/json';
