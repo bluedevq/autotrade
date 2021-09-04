@@ -855,9 +855,9 @@ class BotController extends BackendController
     {
         $rewardInfo = [];
         // get reward after 10 minutes
-//        if (date('i') % 10 != 0) {
-//            return $rewardInfo;
-//        }
+        if (date('i') % 10 != 0) {
+            return $rewardInfo;
+        }
 
         try {
             $refreshToken = Session::get($this->getSessionKey('refresh_token'));
