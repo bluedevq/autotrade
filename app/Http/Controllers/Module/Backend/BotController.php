@@ -344,6 +344,9 @@ class BotController extends BackendController
             // get current balance after bet
             $currentAmount = $this->_getBalance();
 
+            // get reward histories
+            $rewardInfo = $this->_getRewardInfo();
+
             // mapping result
             $result = $this->_mapOpenOrders([
                 'bot_queue' => $botQueue,
@@ -352,6 +355,7 @@ class BotController extends BackendController
                 'current_amount' => $currentAmount,
                 'account_type' => $botQueue->account_type,
                 'methods' => $methods,
+                'rewardInfo' => $rewardInfo,
             ]);
             $this->setData($result);
             return $this->renderJson();
@@ -710,6 +714,9 @@ class BotController extends BackendController
         $result['current_amount'] = number_format($result['current_amount'], 2);
         $result['bot_queue'] = $botQueue->getAttributes();
 
+        // reward info
+        $result['reward_info'] = Arr::get($params, 'rewardInfo');
+
         // update open orders
         foreach ($listOpenOrders as $index => $openOrder) {
             $result['open_orders'][] = [
@@ -838,5 +845,40 @@ class BotController extends BackendController
         }
 
         return $userMethods;
+    }
+
+    /**
+     * @return array|\ArrayAccess|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    protected function _getRewardInfo()
+    {
+        $rewardInfo = [];
+        // get reward after 10 minutes
+        if (date('i') % 10 != 0) {
+            return $rewardInfo;
+        }
+
+        try {
+            $refreshToken = Session::get($this->getSessionKey('refresh_token'));
+            $headers = ['Authorization' => 'Bearer ' . $refreshToken];
+
+            // get total reward
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.reward_info'), [], 'GET', $headers, true);
+            $rewardInfo = Arr::get($response, 'd');
+
+            // get reward histories
+            $rewardHistoriesData = [
+                'page' => 1,
+                'size' => 5,
+                'total' => 1,
+            ];
+            $response = $this->requestApi(Common::getConfig('aresbo.api_url.reward_histories'), $rewardHistoriesData, 'GET', $headers, true);
+            $rewardInfo['history'] = Arr::get($response, 'd.c.0');
+        } catch (\Exception $exception) {
+            Log::error($exception);
+        }
+
+        return $rewardInfo;
     }
 }

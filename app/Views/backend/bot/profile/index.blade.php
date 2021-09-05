@@ -35,6 +35,14 @@
                     <span class="text-danger">{{ $userExpired && $userExpired->greaterThanOrEqualTo(\Carbon\Carbon::now()) ? $userExpired->format('d-m-Y') : 'Đã hết hạn' }}</span>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-6 col-md-4">
+                    <label class="form-label" aria-hidden="true"><i class="fas fa-clock">&nbsp;</i>Thời gian đã chạy</label>
+                </div>
+                <div class="col-6 col-md-8">
+                    <span class="text-info total-time">00:00:00</span>
+                </div>
+            </div>
         </div>
         <div class="col-md-6 col-12">
             <div class="row">
@@ -69,10 +77,24 @@
             </div>
             <div class="row">
                 <div class="col-6 col-md-4">
-                    <label class="form-label" aria-hidden="true"><i class="fas fa-clock">&nbsp;</i>Thời gian đã chạy</label>
+                    <label class="form-label" aria-hidden="true"><i class="fas fa-gift">&nbsp;</i>Tổng thưởng ALI</label>
                 </div>
                 <div class="col-6 col-md-8">
-                    <span class="text-info total-time">00:00:00</span>
+                    <span class="total-reward">0</span>&nbsp;<img src="{{ public_url('images/backend/ali.svg') }}" height="20" alt="">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6 col-md-4">
+                    <label class="form-label" aria-hidden="true"><i class="fas fa-history">&nbsp;</i>Lịch sử thưởng</label>
+                </div>
+                <div class="col-6 col-md-8">
+                    10 phút gần nhất
+                    <br>
+                    Thời gian: <span class="reward-time"></span>
+                    <br>
+                    Số lượng: <span class="distributedAmount">0</span>&nbsp;<img src="{{ public_url('images/backend/ali.svg') }}" height="20" alt="">
+                    <br>
+                    Khối lượng: <span class="userBlockVolume">0</span>
                 </div>
             </div>
         </div>
