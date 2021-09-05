@@ -39,6 +39,12 @@ class BackendController extends BaseController
         parent::__construct();
     }
 
+    public function index()
+    {
+        $this->setEntities($this->getModel()->getList($this->getParams()));
+        return $this->render();
+    }
+
     public function create()
     {
         $this->_prepareForm();
@@ -147,5 +153,27 @@ class BackendController extends BaseController
         }
 
         return $balance;
+    }
+
+    /**
+     * @param array $except
+     * @return string
+     */
+    protected function _randomColor($except = ['ff0000'])
+    {
+        $color = $this->_randomColorPart() . $this->_randomColorPart() . $this->_randomColorPart();
+        if (in_array($color, $except)) {
+            $color = $this->_randomColor($except);
+        }
+
+        return $color;
+    }
+
+    /**
+     * @return string
+     */
+    protected function _randomColorPart()
+    {
+        return str_pad(dechex(mt_rand(0, 255)), 2, '0', STR_PAD_LEFT);
     }
 }

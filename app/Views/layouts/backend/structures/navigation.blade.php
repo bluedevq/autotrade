@@ -15,6 +15,9 @@
                 </li>
                 @if (backendGuard()->user()->role != \App\Helper\Common::getConfig('user_role.normal'))
                 <li class="nav-item">
+                    <a class="nav-link {{ $currentRoute == 'default.method.index' ? 'active' : '' }}" href="{{ route('default.method.index') }}"><span class="fas fa-list-ol">&nbsp;</span>Quản lý phương pháp mặc định</a>
+                </li>
+                    <li class="nav-item">
                     <a class="nav-link {{ $currentRoute == 'user.index' ? 'active' : '' }}" href="{{ route('user.index') }}"><span class="fas fa-users">&nbsp;</span>Quản lý người dùng</a>
                 </li>
                 @endif
