@@ -25,7 +25,7 @@ trait PUser
     {
         $result = [];
         foreach ($this->botUserQueues as $botQueue) {
-            $result[] = $botQueue->botUser->nick_name;
+            $botQueue->botUser ? $result[] = $botQueue->botUser->nick_name : null;
         }
         return implode('<br/>', $result);
     }
