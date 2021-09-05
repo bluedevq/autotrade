@@ -3,6 +3,7 @@
 namespace App\Model\Entities;
 
 use App\Model\Base\BaseModel;
+use App\Model\Presenters\PBotMethodDefault;
 
 /**
  * Class BotMethodDefault
@@ -10,6 +11,9 @@ use App\Model\Base\BaseModel;
  */
 class BotMethodDefault extends BaseModel
 {
+    use PBotMethodDefault;
+    use \App\Model\Validators\BotMethodDefault;
+
     protected $table = 'bot_method_defaults';
 
     protected $fillable = [

@@ -35,7 +35,7 @@
         </div>
         <div class="row mt-2">
             <div class="col-md-2 col-12">
-                <label for="phone" class="form-label fw-bold" aria-hidden="true">Địa chỉ</label>
+                <label for="address" class="form-label fw-bold" aria-hidden="true">Địa chỉ</label>
             </div>
             <div class="col-md-4 col-12">
                 <textarea class="form-control" name="address" id="address" rows="5">{!! $entity->address !!}</textarea>
@@ -51,7 +51,7 @@
         </div>
         <div class="row mt-2">
             <div class="col-md-2 col-12">
-                <label for="twitch_chanel" class="form-label fw-bold" aria-hidden="true">Loại tài khoản</label>
+                <label for="role" class="form-label fw-bold" aria-hidden="true">Loại tài khoản</label>
             </div>
             <div class="col-md-4 col-12">
                 <select class="form-select" name="role">
@@ -63,7 +63,7 @@
         </div>
         <div class="row mt-2">
             <div class="col-md-2 col-12">
-                <label for="twitch_chanel" class="form-label fw-bold" aria-hidden="true">Trạng thái</label>
+                <label for="status" class="form-label fw-bold" aria-hidden="true">Trạng thái</label>
             </div>
             <div class="col-md-4 col-12">
                 <select class="form-select" name="status">

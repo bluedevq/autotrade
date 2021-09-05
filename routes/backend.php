@@ -193,4 +193,28 @@ Route::middleware(['auth.backend'])->group(function () {
             'uses' => 'UserController@delete'
         ]);
     });
+
+    // management default method
+    Route::prefix('default-method')->group(function () {
+        Route::get('/', [
+            'as' => 'default.method.index',
+            'uses' => 'DefaultMethodController@index'
+        ]);
+        Route::get('/create', [
+            'as' => 'default.method.create',
+            'uses' => 'DefaultMethodController@create'
+        ]);
+        Route::get('/edit/{id}', [
+            'as' => 'default.method.edit',
+            'uses' => 'DefaultMethodController@edit'
+        ]);
+        Route::post('/valid', [
+            'as' => 'default.method.valid',
+            'uses' => 'DefaultMethodController@valid'
+        ]);
+        Route::post('/delete/{id}', [
+            'as' => 'default.method.delete',
+            'uses' => 'DefaultMethodController@delete'
+        ]);
+    });
 });
