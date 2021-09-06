@@ -111,6 +111,11 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'bot.stop_auto',
             'uses' => 'BotController@stopAuto'
         ]);
+        // update last prices
+        Route::post('/update-last-prices', [
+            'as' => 'bot.update.last.prices',
+            'uses' => 'BotController@updateLastPrices'
+        ]);
         // bet auto
         Route::post('/bet', [
             'as' => 'bot.bet',
