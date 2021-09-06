@@ -275,6 +275,27 @@ class BotController extends BackendController
     }
 
     /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function updateLastPrices()
+    {
+        try {
+            // get price
+            list($orderPrices, $resultPrices) = $this->_getListPrices();
+            if (blank($resultPrices)) {
+                return $this->renderErrorJson();
+            }
+            $this->setData(['prices' => $resultPrices]);
+
+            return $this->renderJson();
+        } catch (\Exception $exception) {
+            Log::error($exception);
+            return $this->renderErrorJson();
+        }
+    }
+
+    /**
      * @return \Illuminate\Http\JsonResponse|RedirectResponse
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
@@ -304,7 +325,6 @@ class BotController extends BackendController
             if (blank($resultPrices)) {
                 return $this->renderErrorJson();
             }
-            $this->setData(['prices' => $resultPrices]);
 
             // check bot queue has running
             $botUser = $this->getModel()->where('email', Session::get($this->getSessionKey('bot_user_email')))->first();
@@ -709,9 +729,12 @@ class BotController extends BackendController
         $methods = Arr::get($params, 'methods');
 
         $currentAmount = Arr::get($params, 'current_amount');
-        $accountType = Arr::get($params, 'account_type');
-        $result['current_amount'] = $accountType == Common::getConfig('aresbo.account_demo') ? Arr::get($currentAmount, 'demo_balance') : Arr::get($currentAmount, 'available_balance');
-        $result['current_amount'] = number_format($result['current_amount'], 2);
+        if ($currentAmount) {
+            $accountType = Arr::get($params, 'account_type');
+            $result['current_amount'] = $accountType == Common::getConfig('aresbo.account_demo') ? Arr::get($currentAmount, 'demo_balance') : Arr::get($currentAmount, 'available_balance');
+            $result['current_amount'] = number_format($result['current_amount'], 2);
+        }
+
         $result['bot_queue'] = $botQueue->getAttributes();
 
         // reward info
