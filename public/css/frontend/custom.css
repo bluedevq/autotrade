@@ -1,0 +1,34 @@
+@charset "UTF-8";
+
+html {
+    box-sizing: border-box;
+    min-height: 100%;
+    position: relative;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+}
+
+/*body {*/
+/*    margin-bottom: 60px;*/
+/*    background-color: #171b2c;*/
+/*    color: #fff;*/
+/*    --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";*/
+/*    --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;*/
+/*}*/
+
+/*a {*/
+/*    color: #fff !important;*/
+/*    text-decoration: none;*/
+/*}*/
+
+.footer {
+    position: absolute;
+    text-align: center;
+    bottom: 0;
+    width: 100%;
+    line-height: 60px;
+}

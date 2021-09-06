@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Module\Frontend;
 
 /**
- * Class TestController
+ * Class HomeController
  * @package App\Http\Controllers\Module\Frontend
  */
-class TestController extends FrontendController
+class HomeController extends FrontendController
 {
     public function __construct()
     {
@@ -16,5 +16,6 @@ class TestController extends FrontendController
     public function index()
     {
         return $this->_to('backend.login');
+        return $this->render();
     }
 }

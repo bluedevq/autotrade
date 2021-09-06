@@ -17,14 +17,17 @@ class MoveMoneyController extends BackendController
     use ApiResponse;
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function index()
     {
+        if (!Session::has($this->getSessionKey('refresh_token'))) {
+            return $this->_to('bot.clear_token');
+        }
         $balance = $this->_getBalance();
         if (blank($balance)) {
-            $this->_to('bot.clear_token');
+            return $this->_to('bot.clear_token');
         }
         $this->setViewData(['balance' => $balance]);
         return $this->render();

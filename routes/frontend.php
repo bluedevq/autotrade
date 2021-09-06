@@ -1,3 +1,3 @@
 <?php
 use Illuminate\Support\Facades\Route;
-Route::get('/', 'TestController@index');
+Route::get('/', 'HomeController@index');

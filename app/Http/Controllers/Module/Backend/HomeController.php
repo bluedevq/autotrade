@@ -15,7 +15,7 @@ class HomeController extends BackendController
 
     public function index()
     {
-        return $this->_to('bot.index');
+        $this->setViewData(['disableNavigation' => true]);
         return $this->render();
     }
 }
