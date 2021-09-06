@@ -100,6 +100,7 @@
         <tbody>
         @foreach($entity->botUserQueues as $botQueue)
             @php $botUser = $botQueue->botUser; @endphp
+            @if(!blank($botUser))
             <tr>
                 <td>{{ $botUser->email }}</td>
                 <td>{{ $botUser->nick_name }}</td>
@@ -107,6 +108,7 @@
                 <td>{{ $botUser->rank }}</td>
                 <td>{{ $botUser->updated_at }}</td>
             </tr>
+            @endif
         @endforeach
         </tbody>
     </table>
