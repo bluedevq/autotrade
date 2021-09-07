@@ -371,8 +371,9 @@ class MethodController extends BackendController
         $defaultSize = Common::getConfig('aresbo.chart.chart_default_step_size');
         $range = Common::getConfig('aresbo.chart.chart_step_size');
         $stepSize = intdiv(count($array), $defaultSize) > $range ? intdiv(count($array), $range) : $defaultSize;
+        $lastItem = count($array) - 1;
         foreach ($array as $index => $item) {
-            if ($index == 0 || ($index + 1) % $stepSize == 0 || $index == count($array) - 1) {
+            if ($index == 0 || ($index + 1) % $stepSize == 0 || $index == $lastItem) {
                 continue;
             }
             unset($array[$index]);
