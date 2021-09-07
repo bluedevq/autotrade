@@ -1,6 +1,6 @@
 /**
  * Bot auto trade
- * @type {{updateStatusMethod: BotController.updateStatusMethod, data: {listMethodIds: *[], listPrices: *[]}, afterStopAuto: BotController.afterStopAuto, verifyCount: ((function(*, *=): (boolean|undefined))|*), updatePrices: ((function(*=): (boolean|undefined))|*), editMethod: BotController.editMethod, createMethod: BotController.createMethod, login: BotController.login, saveProfitSetting: BotController.saveProfitSetting, research: BotController.research, profitSettingForm: BotController.profitSettingForm, resetProfitSettingForm: BotController.resetProfitSettingForm, deleteMethod: BotController.deleteMethod, bet: BotController.bet, validateMethod: BotController.validateMethod, pad: (function(*): string), changeAccountBalance: BotController.changeAccountBalance, updateProfit: ((function(*): (boolean|undefined))|*), selectAllMethod: BotController.selectAllMethod, options: {isRunning: boolean, hasOrder: boolean, isUpdated: boolean}, requestCode: BotController.requestCode, showTimeRequestCode: ((function(*=): (boolean|undefined))|*), afterStartAuto: BotController.afterStartAuto, updateLastOrders: BotController.updateLastOrders, updateMethods: BotController.updateMethods, togglePassword: BotController.togglePassword, toggleMethods: BotController.toggleMethods, showTime: BotController.showTime, selectMethod: BotController.selectMethod, getBetTypeText: (function(*): string), updateLastPrices: BotController.updateLastPrices, deleteMethodConfirm: BotController.deleteMethodConfirm, resetFormMethod: BotController.resetFormMethod, startAuto: BotController.startAuto, config: {volume: number, clockTitle: {bet: string, wait: string}, loginType: {notRequire2fa: number, require2fa: number}, orderStatus: {new: string, lose: string, win: string}, orderTypeText: {up: string, down: string}, profit: number, url: {bet: null, updateLastPrices: null, statusMethod: null, requestCode: null, login: null, startAuto: null, stopAuto: null, research: null}, startAt: null}, updateNewOrders: BotController.updateNewOrders}}
+ * @type {{updateStatusMethod: BotController.updateStatusMethod, data: {listMethodIds: *[], listPrices: *[]}, afterStopAuto: BotController.afterStopAuto, verifyCount: ((function(*, *=): (boolean|undefined))|*), updatePrices: ((function(*=): (boolean|undefined))|*), editMethod: BotController.editMethod, createMethod: BotController.createMethod, login: BotController.login, saveProfitSetting: BotController.saveProfitSetting, research: BotController.research, profitSettingForm: BotController.profitSettingForm, resetProfitSettingForm: BotController.resetProfitSettingForm, deleteMethod: BotController.deleteMethod, bet: BotController.bet, validateMethod: BotController.validateMethod, pad: (function(*): string), changeAccountBalance: BotController.changeAccountBalance, updateProfit: ((function(*): (boolean|undefined))|*), selectAllMethod: BotController.selectAllMethod, options: {isRunning: boolean, hasOrder: boolean, isUpdated: boolean}, requestCode: BotController.requestCode, showTimeRequestCode: ((function(*=): (boolean|undefined))|*), afterStartAuto: BotController.afterStartAuto, updateLastOrders: BotController.updateLastOrders, updateMethods: BotController.updateMethods, toggleMethods: BotController.toggleMethods, showTime: BotController.showTime, selectMethod: BotController.selectMethod, getBetTypeText: (function(*): string), updateLastPrices: BotController.updateLastPrices, deleteMethodConfirm: BotController.deleteMethodConfirm, resetFormMethod: BotController.resetFormMethod, startAuto: BotController.startAuto, config: {volume: number, clockTitle: {bet: string, wait: string}, loginType: {notRequire2fa: number, require2fa: number}, orderStatus: {new: string, lose: string, win: string}, orderTypeText: {up: string, down: string}, profit: number, url: {bet: null, updateLastPrices: null, statusMethod: null, requestCode: null, login: null, startAuto: null, stopAuto: null, research: null}, startAt: null}, updateNewOrders: BotController.updateNewOrders}}
  */
 let BotController = {
     options: {
@@ -43,17 +43,6 @@ let BotController = {
     data: {
         listPrices: [],
         listMethodIds: [],
-    },
-    togglePassword: function (button) {
-        let passwordInput = $(button).parent('.input-group').find('input#password');
-        console.log($(passwordInput).attr('type'));
-        if ($(passwordInput).attr('type') == 'text') {
-            $(passwordInput).attr('type', 'password');
-            $(button).find('.show-hide-password').addClass('fa-eye-slash').removeClass('fa-eye');
-        } else if ($(passwordInput).attr('type') == 'password') {
-            $(passwordInput).attr('type', 'text');
-            $(button).find('.show-hide-password').addClass('fa-eye').removeClass('fa-eye-slash');
-        }
     },
     // Login
     login: function () {

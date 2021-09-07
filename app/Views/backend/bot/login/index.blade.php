@@ -14,8 +14,9 @@
                     <div class="col-12">
                         <label for="email" class="form-label" aria-hidden="true">Địa chỉ Email *</label>
                     </div>
-                    <div class="col-12">
-                        <input type="text" name="email" class="form-control" id="email" value="{{ request()->get('email') }}">
+                    <div class="col-12 input-group">
+                        <div class="input-group-addon form-login"><i class="fas fa-envelope"></i></div>
+                        <input type="text" name="email" class="form-control" id="email" value="{{ request()->get('email') }}" placeholder="Email">
                     </div>
                 </div>
             </div>
@@ -25,15 +26,16 @@
                         <label for="password" class="form-label" aria-hidden="true">Mật khẩu *</label>
                     </div>
                     <div class="col-12 input-group">
-                        <input type="password" name="password" class="form-control" id="password" aria-label="password">
-                        <span class="input-group-text password-hover" onclick="BotController.togglePassword(this)"><span class="fas fa-eye-slash show-hide-password"></span></span>
+                        <div class="input-group-addon form-login"><i class="fas fa-unlock-alt"></i></div>
+                        <input type="password" name="password" class="form-control" id="password" aria-label="password" placeholder="Mật khẩu">
+                        <span class="input-group-text password-hover" onclick="AdminController.togglePassword(this)"><span class="fas fa-eye-slash show-hide-password"></span></span>
                     </div>
                 </div>
             </div>
             <div class="mt-4">
                 <div class="row">
                     <div class="col-12">
-                        <button class="btn btn-lg btn-danger btn-block col-12" type="button" onclick="BotController.login()"><span class="fas fa-sign-in-alt">&nbsp;</span>Đăng nhập</button>
+                        <button class="btn btn-danger btn-block col-12" type="button" onclick="BotController.login()"><span class="fas fa-sign-in-alt">&nbsp;</span>Đăng nhập</button>
                         <input type="hidden" name="return_url" value="{{ request()->get('return_url') }}">
                     </div>
                 </div>
