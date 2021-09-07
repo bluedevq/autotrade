@@ -12,15 +12,16 @@
                     <div class="col-12">
                         <label for="email" class="form-label" aria-hidden="true">Địa chỉ Email *</label>
                     </div>
-                    <div class="col-12">
-                        <input type="text" name="email" class="form-control" id="email" aria-label="email" value="{{ old('email') }}" maxlength="255">
+                    <div class="col-12 input-group">
+                        <div class="input-group-addon form-login"><i class="fas fa-envelope"></i></div>
+                        <input type="text" name="email" class="form-control" id="email" aria-label="email" value="{{ old('email') }}" placeholder="Nhập email của bạn" maxlength="255">
                     </div>
                 </div>
             </div>
             <div class="mt-4">
                 <div class="row">
                     <div class="col-12">
-                        <button class="btn btn-lg btn-danger btn-block col-12" type="submit" onclick="showLoading()">Gửi lại email</button>
+                        <button class="btn btn-danger btn-block col-12" type="submit" onclick="showLoading()">Gửi lại email</button>
                     </div>
                 </div>
             </div>
