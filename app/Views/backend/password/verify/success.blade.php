@@ -10,7 +10,8 @@
                     <label for="password" class="form-label" aria-hidden="true">Mật khẩu mới *</label>
                 </div>
                 <div class="col-12 input-group">
-                    <input type="password" name="password" class="form-control" id="password" aria-label="password" maxlength="20">
+                    <div class="input-group-addon form-login"><i class="fas fa-unlock-alt"></i></div>
+                    <input type="password" name="password" class="form-control" id="password" aria-label="password" placeholder="Nhập mật khẩu" maxlength="20">
                     <span class="input-group-text password-hover" onclick="AdminController.togglePassword(this)"><span class="fas fa-eye-slash show-hide-password"></span></span>
                 </div>
             </div>
@@ -19,7 +20,7 @@
             <div class="row">
                 <div class="col-12">
                     <input type="hidden" name="email" class="form-control" id="email" aria-label="email" value="{{ request()->get('email') }}">
-                    <button class="btn btn-lg btn-danger btn-block col-12" type="submit" onclick="showLoading()">Đổi mật khẩu</button>
+                    <button class="btn btn-danger btn-block col-12" type="submit" onclick="showLoading()">Đổi mật khẩu</button>
                 </div>
             </div>
         </div>

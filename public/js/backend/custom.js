@@ -47,7 +47,6 @@ let AdminController = {
     // toggle password
     togglePassword: function (button) {
         let passwordInput = $(button).parent('.input-group').find('input#password');
-        console.log($(passwordInput).attr('type'));
         if ($(passwordInput).attr('type') == 'text') {
             $(passwordInput).attr('type', 'password');
             $(button).find('.show-hide-password').addClass('fa-eye-slash').removeClass('fa-eye');
@@ -67,5 +66,15 @@ let AdminController = {
         }
 
         hideLoading();
+    },
+    verifyCount: function (start, url) {
+        $('.verify-count').empty().text(start + 's');
+        if (start === 0) {
+            window.location.href = url;
+            return true;
+        }
+        setTimeout(function () {
+            AdminController.verifyCount(start - 1, url);
+        }, 1000);
     },
 };

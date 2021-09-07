@@ -24,6 +24,6 @@
 @stop
 @push('scripts')
     <script type="application/javascript">
-        BotController.verifyCount(5, '{{ route('backend.login') }}');
+        AdminController.verifyCount(5, '{{ route('backend.login') }}');
     </script>
 @endpush

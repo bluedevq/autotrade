@@ -117,16 +117,6 @@ let BotController = {
         $('.request-code').empty().text(time + 's');
         setTimeout(BotController.showTimeRequestCode, 1000, time);
     },
-    verifyCount: function (start, url) {
-        $('.verify-count').empty().text(start + 's');
-        if (start === 0) {
-            window.location.href = url;
-            return true;
-        }
-        setTimeout(function () {
-            BotController.verifyCount(start - 1, url);
-        }, 1000);
-    },
     // Start or stop auto
     startAuto: function () {
         let url = BotController.options.isRunning === 'true' ? BotController.config.url.stopAuto : BotController.config.url.startAuto;
