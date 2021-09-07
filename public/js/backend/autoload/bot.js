@@ -294,21 +294,19 @@ let BotController = {
     },
     // Update order, last result
     updateLastOrders: function ($winType, openOrder, closeOrder) {
-        let childrens = $('.bet-result tr.open-order'),
-            openTimeOrder = new Date(openOrder).getMinutes(),
-            closeTimeOrder = new Date(closeOrder).getMinutes();
+        let childrens = $('.bet-result tr.open-order');
 
         if (typeof childrens !== 'undefined' && childrens.length > 0) {
             for (let i = 0; i < childrens.length; i++) {
                 let entity = $(childrens[i]),
-                    timeOrder = new Date(entity.find('.time-order').data('time')).getMinutes(),
+                    timeOrder = entity.find('.time-order').data('time'),
                     lastOrderStatus = entity.find('.order-result').text(),
                     lastOrderAmount = entity.find('.order-amount').data('amount'),
                     lastOrderType = entity.find('.order-type').data('type'),
                     win = $winType === lastOrderType,
                     result = win ? '<span class="fw-bold text-success">' + BotController.config.orderStatus.win + '</span>' : '<span class="fw-bold text-danger">' + BotController.config.orderStatus.lose + '</span>';
 
-                if (timeOrder >= openTimeOrder && timeOrder <= closeTimeOrder && lastOrderStatus == BotController.config.orderStatus.new) {
+                if (timeOrder >= (closeOrder - 60000) && timeOrder <= closeOrder && lastOrderStatus == BotController.config.orderStatus.new) {
                     // update status
                     $(childrens[i]).find('.order-result').empty().html(result);
                     // update profit
