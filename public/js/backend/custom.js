@@ -44,6 +44,18 @@ let AdminController = {
         success: [],
         errors: [],
     },
+    // toggle password
+    togglePassword: function (button) {
+        let passwordInput = $(button).parent('.input-group').find('input#password');
+        console.log($(passwordInput).attr('type'));
+        if ($(passwordInput).attr('type') == 'text') {
+            $(passwordInput).attr('type', 'password');
+            $(button).find('.show-hide-password').addClass('fa-eye-slash').removeClass('fa-eye');
+        } else if ($(passwordInput).attr('type') == 'password') {
+            $(passwordInput).attr('type', 'text');
+            $(button).find('.show-hide-password').addClass('fa-eye').removeClass('fa-eye-slash');
+        }
+    },
     // Show toast message
     showMessage: function (message, type) {
         if (type === 'error') {
