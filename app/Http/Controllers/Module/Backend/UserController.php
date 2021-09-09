@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Module\Backend;
 
 use App\Model\Entities\BotQueue;
 use App\Model\Entities\BotUser;
+use App\Model\Entities\BotUserMethod;
 use App\Model\Entities\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -24,11 +25,11 @@ class UserController extends BackendController
      * @param BotQueue $botQueue
      * @param BotUser $botUser
      */
-    public function __construct(User $user, BotQueue $botQueue, BotUser $botUser)
+    public function __construct(User $user, BotQueue $botQueue, BotUser $botUser, BotUserMethod $botUserMethod)
     {
         parent::__construct();
         $this->setModel($user);
-        $this->registModel($botQueue, $botUser);
+        $this->registModel($botQueue, $botUser, $botUserMethod);
     }
 
     public function index()
@@ -90,8 +91,8 @@ class UserController extends BackendController
             // delete bot user
             foreach ($botUserIds as $botUserId) {
                 $this->fetchModel(BotUser::class)->where('id', $botUserId)->delete();
+                $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botUserId)->delete();
             }
-
             DB::commit();
 
             session()->flash('success', ['Xóa thành công.']);
