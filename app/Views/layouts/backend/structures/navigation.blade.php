@@ -14,14 +14,19 @@
                 <li class="nav-item">
                     <a class="nav-link {{ $currentRoute == 'bot.move.money' ? 'active' : '' }}" href="{{ route('bot.move.money') }}"><span class="fas fa-retweet">&nbsp;</span>Chuyển tiền</a>
                 </li>
-                @if (backendGuard()->user()->role != \App\Helper\Common::getConfig('user_role.normal'))
+                @if (backendGuard()->user()->role == \App\Helper\Common::getConfig('user_role.supper_admin'))
                 <li class="nav-item">
                     <a class="nav-link {{ $currentRoute == 'default.method.index' ? 'active' : '' }}" href="{{ route('default.method.index') }}"><span class="fas fa-list-ol">&nbsp;</span>Quản lý phương pháp</a>
                 </li>
-                    <li class="nav-item">
+                @endif
+                @if (backendGuard()->user()->role != \App\Helper\Common::getConfig('user_role.normal'))
+                <li class="nav-item">
                     <a class="nav-link {{ $currentRoute == 'user.index' ? 'active' : '' }}" href="{{ route('user.index') }}"><span class="fas fa-users">&nbsp;</span>Quản lý người dùng</a>
                 </li>
                 @endif
+                <li class="nav-item">
+                    <a class="nav-link {{ $currentRoute == 'user.profile' ? 'active' : '' }}" href="{{ route('user.profile', backendGuard()->user()->id) }}"><span class="fas fa-cog">&nbsp;</span>Cài đặt</a>
+                </li>
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Module\Backend;
 
+use App\Helper\Common;
 use App\Model\Entities\BotQueue;
 use App\Model\Entities\BotUser;
 use App\Model\Entities\BotUserMethod;
@@ -38,6 +39,12 @@ class UserController extends BackendController
         return $this->render();
     }
 
+    public function profile($id)
+    {
+        $this->_prepareForm($id);
+        return $this->render();
+    }
+
     public function valid()
     {
         // validate data
@@ -68,7 +75,7 @@ class UserController extends BackendController
             $entity->save();
             DB::commit();
             Session::flash('success', [($create ? 'Thêm mới' : 'Chỉnh sửa') . ' thành công.']);
-            return $this->_to('user.edit', $entity->id);
+            return $this->_to($this->getParam('profile') ? 'user.profile' : 'user.edit', $entity->id);
         } catch (\Exception $exception) {
             DB::rollBack();
             Log::error($exception);
@@ -114,7 +121,21 @@ class UserController extends BackendController
         if (session()->hasOldInput()) {
             $entity->setRawAttributes(session()->getOldInput());
         }
-        $this->setViewData(['entity' => $entity]);
+        // role
+        $roles = Common::getConfig('user_role_text');
+        if (backendGuard()->user()->role == Common::getConfig('user_role.admin')) {
+            unset($roles[Common::getConfig('user_role.supper_admin')]);
+        }
+        // status
+        $status = [
+            Common::getConfig('user_status.stop') => Common::getConfig('user_status_text.0'),
+            Common::getConfig('user_status.active') => Common::getConfig('user_status_text.1'),
+        ];
+        $this->setViewData([
+            'entity' => $entity,
+            'status' => $status,
+            'roles' => $roles,
+        ]);
         parent::_prepareForm($id);
     }
 }

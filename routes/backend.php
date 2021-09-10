@@ -189,6 +189,10 @@ Route::middleware(['auth.backend'])->group(function () {
             'as' => 'user.edit',
             'uses' => 'UserController@edit'
         ]);
+        Route::get('/profile/{id}', [
+            'as' => 'user.profile',
+            'uses' => 'UserController@profile'
+        ]);
         Route::post('/valid', [
             'as' => 'user.valid',
             'uses' => 'UserController@valid'

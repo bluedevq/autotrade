@@ -13,7 +13,7 @@ class RoleBackend
 {
     public function handle($request, Closure $next)
     {
-        if (backendGuard()->user()->role == Common::getConfig('user_role.normal')) {
+        if (backendGuard()->user()->role == Common::getConfig('user_role.normal') && !$request->routeIs('user.profile','user.valid')) {
             return redirect(route('bot.index'));
         }
 

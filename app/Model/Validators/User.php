@@ -13,7 +13,7 @@ trait User
             'email' => 'required|email|max:255',
             'password' => 'required|min:8|max:20',
             'name' => 'required|max:255',
-            'phone' => 'nullable|integer',
+            'phone' => 'nullable|digits_between:10,11',
             'sex' => 'nullable|integer|in:0,1',
             'address' => 'nullable'
         ];
@@ -30,6 +30,7 @@ trait User
             'password.max' => 'Mật khẩu không được quá 20 ký tự.',
             'name.required' => 'Vui lòng nhập tên của bạn.',
             'name.max' => 'Vui lòng nhập tên không quá 255 ký tự.',
+            'phone.digits_between' => 'Vui lòng nhập số điện thoại đúng định dạng.',
         ];
     }
 
@@ -39,6 +40,9 @@ trait User
         $params = $this->getParams();
         if (Arr::get($params, 'id') && blank(Arr::get($params, 'password'))) {
             unset($rules['password']);
+        }
+        if (Arr::get($params, 'profile')) {
+            unset($rules['email']);
         }
         return $rules;
     }
