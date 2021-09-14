@@ -153,5 +153,6 @@ return [
             'wallet_to_trade' => 1,
             'trade_to_wallet' => 2,
         ],
+        'delay_time' => 30, // seconds
     ],
 ];

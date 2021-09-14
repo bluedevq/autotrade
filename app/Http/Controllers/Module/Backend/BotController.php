@@ -303,7 +303,7 @@ class BotController extends BackendController
     {
         try {
             // check time to bet
-            if (date('s') > 50) {
+            if (date('s') > (25 + Common::getConfig('aresbo.delay_time'))) {
                 return $this->renderErrorJson();
             }
 

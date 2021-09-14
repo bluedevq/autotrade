@@ -49,7 +49,7 @@ let BotController = {
         profit: 0,
         volume: 0,
         orderWaiting: 30000,
-        delayTime: 24500,
+        delayTime: 30000,
     },
     data: {
         listPrices: [],
@@ -311,15 +311,16 @@ let BotController = {
 
         prices = prices.reverse();
         let lastPricePos = prices.length - 1,
-            updateFirstTime = BotController.data.listPrices.length === 0;
+            updateFirstTime = BotController.data.listPrices.length === 0,
+            lastResult = $('.list-prices .list-inline-item');
 
         for (let i = 0; i < prices.length; i++) {
+            // check last price with new list prices
             if (i === lastPricePos || updateFirstTime) {
                 BotController.data.listPrices.push(prices[i]);
             }
         }
 
-        let lastResult = $('.list-prices .list-inline-item');
         if ($(lastResult[lastResult.length - 1]).data('time') != prices[lastPricePos].open_order) {
             let date = new Date(prices[lastPricePos].open_order - BotController.config.orderWaiting),
                 orderType = prices[lastPricePos].order_result;
