@@ -18,6 +18,7 @@ body {
     color: #fff;
     --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    letter-spacing: 0.01em
 }
 
 a {
@@ -402,12 +403,10 @@ header {
     color: #ff3333;
 }
 
-.order-result .text-success {
-    color: #33cc66 !important;
-}
-
-.order-result .text-danger {
-    color: #ff3333 !important;
+.order-type .order-type-justify {
+    text-align: justify;
+    width: 3.75rem;
+    margin: 0 auto;
 }
 
 #research-method {
