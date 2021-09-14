@@ -15,7 +15,6 @@
     ];
     $jsFiles = [
         'lib/jquery.min',
-        'lib/bootstrap.min',
         'lib/bootstrap.bundle.min',
         'lib/moment.min',
         'lib/moment-with-locales.min',

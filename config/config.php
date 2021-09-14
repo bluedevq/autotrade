@@ -103,7 +103,7 @@ return [
                 1 => 'Hoạt động',
             ],
             'break_item_pc' => 6,
-            'break_item_mobile' => 2,
+            'break_item_mobile' => 1,
         ],
         'method_type' => [
             'value' => [

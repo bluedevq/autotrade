@@ -5,7 +5,7 @@
             <table class="table-bordered text-center mb-2 col-12">
                 <thead>
                 <th>Thời gian</th>
-                <th>PP</th>
+                <th><span class="pc">Phương pháp</span><span class="sp">PP</span></th>
                 <th>Lệnh</th>
                 <th>Tiền</th>
                 <th>Kết quả</th>

@@ -1,6 +1,6 @@
 /**
  * Bot auto trade
- * @type {{updateStatusMethod: BotController.updateStatusMethod, data: {listMethodIds: *[], listPrices: *[]}, afterStopAuto: BotController.afterStopAuto, verifyCount: ((function(*, *=): (boolean|undefined))|*), updatePrices: ((function(*=): (boolean|undefined))|*), editMethod: BotController.editMethod, createMethod: BotController.createMethod, login: BotController.login, saveProfitSetting: BotController.saveProfitSetting, research: BotController.research, profitSettingForm: BotController.profitSettingForm, resetProfitSettingForm: BotController.resetProfitSettingForm, deleteMethod: BotController.deleteMethod, bet: BotController.bet, validateMethod: BotController.validateMethod, pad: (function(*): string), changeAccountBalance: BotController.changeAccountBalance, updateProfit: ((function(*): (boolean|undefined))|*), selectAllMethod: BotController.selectAllMethod, options: {isRunning: boolean, hasOrder: boolean, isUpdated: boolean}, requestCode: BotController.requestCode, showTimeRequestCode: ((function(*=): (boolean|undefined))|*), afterStartAuto: BotController.afterStartAuto, updateLastOrders: BotController.updateLastOrders, updateMethods: BotController.updateMethods, toggleMethods: BotController.toggleMethods, showTime: BotController.showTime, selectMethod: BotController.selectMethod, getBetTypeText: (function(*): string), updateLastPrices: BotController.updateLastPrices, deleteMethodConfirm: BotController.deleteMethodConfirm, resetFormMethod: BotController.resetFormMethod, startAuto: BotController.startAuto, config: {volume: number, clockTitle: {bet: string, wait: string}, loginType: {notRequire2fa: number, require2fa: number}, orderStatus: {new: string, lose: string, win: string}, orderTypeText: {up: string, down: string}, profit: number, url: {bet: null, updateLastPrices: null, statusMethod: null, requestCode: null, login: null, startAuto: null, stopAuto: null, research: null}, startAt: null}, updateNewOrders: BotController.updateNewOrders}}
+ * @type {{updateStatusMethod: BotController.updateStatusMethod, data: {listMethodIds: *[], listPrices: *[]}, afterStopAuto: BotController.afterStopAuto, updatePrices: ((function(*=): (boolean|undefined))|*), editMethod: BotController.editMethod, createMethod: BotController.createMethod, login: BotController.login, saveProfitSetting: BotController.saveProfitSetting, research: BotController.research, profitSettingForm: BotController.profitSettingForm, resetProfitSettingForm: BotController.resetProfitSettingForm, deleteMethod: BotController.deleteMethod, bet: BotController.bet, validateMethod: BotController.validateMethod, pad: (function(*): string), changeAccountBalance: BotController.changeAccountBalance, updateProfit: ((function(*): (boolean|undefined))|*), selectAllMethod: BotController.selectAllMethod, options: {isRunning: boolean, hasOrder: boolean, isUpdated: boolean}, requestCode: BotController.requestCode, showTimeRequestCode: ((function(*=): (boolean|undefined))|*), afterStartAuto: BotController.afterStartAuto, updateLastOrders: BotController.updateLastOrders, updateMethods: BotController.updateMethods, showTime: BotController.showTime, selectMethod: BotController.selectMethod, getBetTypeText: (function(*): string), updateLastPrices: BotController.updateLastPrices, deleteMethodConfirm: BotController.deleteMethodConfirm, resetFormMethod: BotController.resetFormMethod, startAuto: BotController.startAuto, config: {volume: number, clockTitle: {bet: string, wait: string}, loginType: {notRequire2fa: number, require2fa: number}, orderStatus: {new: string, lose: string, win: string}, orderTypeText: {up: string, down: string}, profit: number, url: {bet: null, updateLastPrices: null, statusMethod: null, requestCode: null, login: null, startAuto: null, stopAuto: null, research: null}, startAt: null}, updateNewOrders: BotController.updateNewOrders}}
  */
 let BotController = {
     options: {
@@ -137,16 +137,15 @@ let BotController = {
     },
     afterStartAuto: function () {
         BotController.options.isRunning = 'true';
-        if (BotController.config.startAt == null) {
-            BotController.config.startAt = Date.now();
-        }
+        BotController.config.startAt = Date.now();
         $('.bot-account').attr('disabled', 'disabled').addClass('disabled');
         $('.bot-status-btn').addClass('btn-danger').removeClass('btn-success');
         $('.bot-status-icon').addClass('fa-stop-circle').removeClass('fa-play-circle');
         $('.bot-status-text').empty().text('Dừng');
-        $('.profit').empty().text('0');
+        $('.profit').empty().text('$0');
         $('.volume').empty().text('0');
         $('.commission').empty().text('0');
+        $('.bet-result').empty().html('<tr class="no-item"><td colspan="5">Chưa đặt lệnh nào</td></tr>');
     },
     afterStopAuto: function () {
         BotController.options.isRunning = 'false';
@@ -169,7 +168,7 @@ let BotController = {
     },
     // Bet
     showTime: function () {
-        let date = new Date(),
+        let date = new Date(Date.now() - 23000),
             s = date.getSeconds();
 
         // update time 's bot running
@@ -268,7 +267,8 @@ let BotController = {
             BotController.updateMethods(betOrder.methods);
 
             // update amount
-            $('.current-amount').empty().text(betOrder.current_amount);
+            let accountType = betOrder.bot_queue.account_type;
+            $(accountType == 1 ? '.demo-balance .current-amount' : '.live-balance .current-amount').empty().text(betOrder.current_amount);
 
             // update reward
             if (betOrder.reward_info.length > 0) {
@@ -316,13 +316,13 @@ let BotController = {
                 }
             }
             if (BotController.config.profit > 0) {
-                $('.profit').empty().html('<span class="text-success">' + (new Intl.NumberFormat(undefined, {
+                $('.profit').empty().html('<span class="text-success">$' + (new Intl.NumberFormat(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 }).format(BotController.config.profit)) + '</span>');
             }
             if (BotController.config.profit < 0) {
-                $('.profit').empty().html('<span class="text-danger">' + new Intl.NumberFormat(undefined, {
+                $('.profit').empty().html('<span class="text-danger">$' + new Intl.NumberFormat(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 }).format(BotController.config.profit) + '</span>');
@@ -421,18 +421,8 @@ let BotController = {
             $('.live-balance').removeClass('hide');
         }
     },
+    toggleUserInfo: function () {},
     // List methods
-    toggleMethods: function () {
-        if ($('.list-method').hasClass('not-active')) {
-            $('.list-method').removeClass('not-active').slideDown(500);
-            $('.research-btn').show();
-            $('.action-method-btn').show();
-        } else {
-            $('.list-method').addClass('not-active').slideUp(500);
-            $('.research-btn').hide();
-            $('.action-method-btn').hide();
-        }
-    },
     research: function () {
         sendRequest({
             url: BotController.config.url.research,

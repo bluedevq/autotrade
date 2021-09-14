@@ -25,9 +25,13 @@ a {
     text-decoration: none;
 }
 
+.container {
+    padding: 0.75rem;
+}
+
 .bot-container {
-    padding: 0 .75rem;
-    border: 1px solid #dee2e6;
+    padding: .75rem;
+    border: 1px solid #404040;
     border-radius: .3rem;
 }
 
@@ -62,6 +66,25 @@ a {
 .img-logo {
     object-fit: cover;
     height: 7.5rem;
+}
+
+.form-select:disabled,
+.form-control.disabled {
+    background-color: #bbb;
+    cursor: not-allowed;
+}
+
+.form-control,
+.form-select {
+    background-color: transparent !important;
+    border: 1px solid #404040 !important;
+    color: #fff !important;
+}
+
+.form-select option {
+    background-color: #171b2c !important;
+    border: 1px solid #404040 !important;
+    color: #fff !important;
 }
 
 .custom-label label {
@@ -159,6 +182,7 @@ a {
 
 .toast-message-custom {
     position: fixed !important;
+    top: 68px !important;
 }
 
 .register a {
@@ -171,6 +195,44 @@ a {
 
 .verify-count {
     font-size: 1.3rem;
+}
+
+header {
+    background-image: -webkit-linear-gradient(top, #c46c11 0, #ff9933 100%);
+    background-image: -o-linear-gradient(top, #c46c11 0, #ff9933 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#c46c11), to(#ff9933));
+    background-image: linear-gradient(to bottom, #c46c11 0, #ff9933 100%);
+    background-repeat: repeat-x;
+    border-color: #ff9933;
+}
+
+.top-menu a.nav-link {
+    text-align: left;
+    color: #fff !important;
+}
+
+.top-menu .navbar-nav.user-info .nav-item:last-of-type a.nav-link {
+    text-align: left;
+}
+
+.top-menu a.nav-link:hover {
+    color: #171b2c !important;
+}
+
+.top-menu .dropdown-menu {
+    min-width: 20rem;
+    padding: 0.5rem;
+    background-image: -webkit-linear-gradient(top, #c46c11 0, #ff9933 100%);
+    background-image: -o-linear-gradient(top, #c46c11 0, #ff9933 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#c46c11), to(#ff9933));
+    background-image: linear-gradient(to bottom, #c46c11 0, #ff9933 100%);
+    background-repeat: repeat-x;
+    border-color: #ff9933;
+}
+
+.top-menu .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+    background-color: inherit;
+    background-image: inherit;
 }
 
 .rank .text-warning {
@@ -187,12 +249,6 @@ a {
 
 .profit .text-danger {
     color: #ff3333 !important;
-}
-
-.form-select:disabled,
-.form-control.disabled {
-    background-color: #bbb;
-    cursor: not-allowed;
 }
 
 .action-method-btn .disabled {
@@ -299,18 +355,20 @@ a {
     color: #ffffff;
 }
 
-.top-menu a.nav-link {
-    text-align: left;
-    color: #fff;
+#update-bot-queue .form-control,
+#update-bot-queue .form-select,
+#form-method .form-control,
+#form-method .form-select {
+    background-color: transparent !important;
+    border: 1px solid #404040 !important;
+    color: #000 !important;
 }
 
-.top-menu .nav-item:hover {
-    border-radius: .3rem;
-    background-color: #bbbbbb;
-}
-
-.top-menu .nav-item:hover a.nav-link {
-    color: #0f0f0f !important;
+#update-bot-queue .form-select option,
+#form-method .form-select option {
+    background-color: transparent !important;
+    border: 1px solid #404040 !important;
+    color: #000 !important;
 }
 
 .list-prices {
@@ -437,6 +495,12 @@ input[type=number] {
     color: #212529;
 }
 
+.input-group-text.password-hover {
+    border: 1px solid #404040;
+    background-color: transparent;
+    color: #fff;
+}
+
 .input-group-addon.form-login {
     padding: 10px 12px;
     font-size: 14px;
@@ -444,7 +508,7 @@ input[type=number] {
     line-height: 1;
     color: #fff;
     text-align: center;
-    border: 1px solid #ccc;
+    border: 1px solid #404040;
     border-radius: 4px;
     white-space: nowrap;
     vertical-align: middle;
@@ -487,12 +551,25 @@ input[type=number] {
         display: revert;
     }
 
+    .pc.row {
+        display: flex;
+    }
+
     .mt-sp-2 {
         margin-top: auto;
     }
 
     .top-menu a {
         text-align: center;
+    }
+
+    .top-menu .navbar-nav.user-info .nav-item:last-of-type {
+        background-color: #171b2c;
+        border-radius: 0.3rem;
+    }
+
+    .top-menu .navbar-nav.user-info .nav-item:last-of-type a.nav-link {
+        color: #c46c11 !important;
     }
 
     .list-prices::-webkit-scrollbar {

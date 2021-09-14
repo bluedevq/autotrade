@@ -1,6 +1,13 @@
 <div class="mt-2 text-break">
-    <h3>Thông tin tài khoản</h3>
     <div class="row">
+        <div class="col-md-10 col-8">
+            <h3 class="mb-0" data-bs-toggle="collapse" href=".botUserProfile" role="button" aria-expanded="true" aria-controls="collapseExample">Thông tin tài khoản</h3>
+        </div>
+        <div class="col-md-2 col-4 text-end sp">
+            <span class="align-middle"><span class="profit">$0</span></span>
+        </div>
+    </div>
+    <div class="row mt-2 collapse botUserProfile show">
         <div class="col-md-6 col-12">
             <div class="row">
                 <div class="col-6 col-md-4">
@@ -10,7 +17,7 @@
                     <span class="">{{ $botUserInfo->nick_name }}</span>
                 </div>
             </div>
-            <div class="row">
+            <div class="pc row">
                 <div class="col-6 col-md-4">
                     <label class="form-label" aria-hidden="true"><i class="fas fa-user-friends">&nbsp;</i>Người giới thiệu</label>
                 </div>
@@ -18,7 +25,7 @@
                     <span class="">{{ $botUserInfo->reference_name }}</span>
                 </div>
             </div>
-            <div class="row">
+            <div class="pc row">
                 <div class="col-6 col-md-4">
                     <label class="form-label" aria-hidden="true"><i class="fas fa-medal">&nbsp;&nbsp;</i>Cấp bậc</label>
                 </div>
@@ -50,11 +57,10 @@
                     <label class="form-label" aria-hidden="true"><i class="fas fa-funnel-dollar">&nbsp;</i>Số dư hiện tại</label>
                 </div>
                 <div class="col-6 col-md-8">
-                    @php $liveAccount = isset($botQueue) && $botQueue && $botQueue->account_type == \App\Helper\Common::getConfig('aresbo.account_live') ? true: false; @endphp
-                    <div class="account-balance demo-balance {{ $liveAccount ? 'hide' : ''}}">
+                    <div class="account-balance demo-balance {{ $isRunning && $accountType ==  $demoType ? '' : 'hide'}}">
                         <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ $botUserInfo->demo_balance > 0 ? number_format($botUserInfo->demo_balance, 2) : 0 }}</span>
                     </div>
-                    <div class="account-balance live-balance {{ $liveAccount ? '' : 'hide'}}">
+                    <div class="account-balance live-balance {{ $isRunning && $accountType ==  $liveType ? '' : 'hide'}}">
                         <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ $botUserInfo->available_balance > 0 ? number_format($botUserInfo->available_balance, 2) : 0 }}</span>
                     </div>
                 </div>
@@ -64,7 +70,7 @@
                     <label class="form-label" aria-hidden="true"><i class="fas fa-hand-holding-usd">&nbsp;</i>Lợi nhuận</label>
                 </div>
                 <div class="col-6 col-md-8">
-                    <i class="fas fa-dollar-sign">&nbsp;</i><span class="profit">0</span>
+                    <span class="profit">$0</span>
                 </div>
             </div>
             <div class="row">
