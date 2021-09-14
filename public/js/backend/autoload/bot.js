@@ -1,6 +1,15 @@
+$(document).ready(function () {
+    $('.botUserProfile').on('hide.bs.collapse', function () {
+        $('.profit-collapse').removeClass('hide');
+    });
+    $('.botUserProfile').on('show.bs.collapse', function () {
+        $('.profit-collapse').addClass('hide');
+    });
+});
+
 /**
  * Bot auto trade
- * @type {{updateStatusMethod: BotController.updateStatusMethod, data: {listMethodIds: *[], listPrices: *[]}, afterStopAuto: BotController.afterStopAuto, updatePrices: ((function(*=): (boolean|undefined))|*), editMethod: BotController.editMethod, createMethod: BotController.createMethod, login: BotController.login, saveProfitSetting: BotController.saveProfitSetting, research: BotController.research, profitSettingForm: BotController.profitSettingForm, resetProfitSettingForm: BotController.resetProfitSettingForm, deleteMethod: BotController.deleteMethod, bet: BotController.bet, validateMethod: BotController.validateMethod, pad: (function(*): string), changeAccountBalance: BotController.changeAccountBalance, updateProfit: ((function(*): (boolean|undefined))|*), selectAllMethod: BotController.selectAllMethod, options: {isRunning: boolean, hasOrder: boolean, isUpdated: boolean}, requestCode: BotController.requestCode, showTimeRequestCode: ((function(*=): (boolean|undefined))|*), afterStartAuto: BotController.afterStartAuto, updateLastOrders: BotController.updateLastOrders, updateMethods: BotController.updateMethods, showTime: BotController.showTime, selectMethod: BotController.selectMethod, getBetTypeText: (function(*): string), updateLastPrices: BotController.updateLastPrices, deleteMethodConfirm: BotController.deleteMethodConfirm, toggleUserInfo: BotController.toggleUserInfo, resetFormMethod: BotController.resetFormMethod, startAuto: BotController.startAuto, config: {volume: number, clockTitle: {bet: string, wait: string}, loginType: {notRequire2fa: number, require2fa: number}, orderStatus: {new: string, lose: string, win: string}, orderTypeText: {up: string, down: string}, profit: number, url: {bet: null, updateLastPrices: null, statusMethod: null, requestCode: null, login: null, startAuto: null, stopAuto: null, research: null}, startAt: null}, updateNewOrders: BotController.updateNewOrders}}
+ * @type {{updateStatusMethod: BotController.updateStatusMethod, data: {listMethodIds: *[], listPrices: *[]}, afterStopAuto: BotController.afterStopAuto, updatePrices: ((function(*=): (boolean|undefined))|*), editMethod: BotController.editMethod, createMethod: BotController.createMethod, login: BotController.login, saveProfitSetting: BotController.saveProfitSetting, research: BotController.research, profitSettingForm: BotController.profitSettingForm, resetProfitSettingForm: BotController.resetProfitSettingForm, deleteMethod: BotController.deleteMethod, bet: BotController.bet, validateMethod: BotController.validateMethod, pad: (function(*): string), changeAccountBalance: BotController.changeAccountBalance, updateProfit: ((function(*): (boolean|undefined))|*), selectAllMethod: BotController.selectAllMethod, options: {isRunning: boolean, hasOrder: boolean, isUpdated: boolean}, requestCode: BotController.requestCode, showTimeRequestCode: ((function(*=): (boolean|undefined))|*), afterStartAuto: BotController.afterStartAuto, updateLastOrders: BotController.updateLastOrders, updateMethods: BotController.updateMethods, showTime: BotController.showTime, selectMethod: BotController.selectMethod, getBetTypeText: (function(*): string), updateLastPrices: BotController.updateLastPrices, deleteMethodConfirm: BotController.deleteMethodConfirm, resetFormMethod: BotController.resetFormMethod, startAuto: BotController.startAuto, config: {volume: number, clockTitle: {bet: string, wait: string}, loginType: {notRequire2fa: number, require2fa: number}, orderStatus: {new: string, lose: string, win: string}, orderWaiting: number, delayTime: number, orderTypeText: {up: string, down: string}, profit: number, url: {bet: null, updateLastPrices: null, statusMethod: null, requestCode: null, login: null, startAuto: null, stopAuto: null, research: null}, startAt: null}, updateNewOrders: BotController.updateNewOrders}}
  */
 let BotController = {
     options: {
@@ -39,6 +48,8 @@ let BotController = {
         startAt: null,
         profit: 0,
         volume: 0,
+        orderWaiting: 30000,
+        delayTime: 24500,
     },
     data: {
         listPrices: [],
@@ -168,7 +179,7 @@ let BotController = {
     },
     // Bet
     showTime: function () {
-        let date = new Date(Date.now() - 24500),
+        let date = new Date(Date.now() - BotController.config.delayTime),
             s = date.getSeconds();
 
         // update time 's bot running
@@ -293,7 +304,39 @@ let BotController = {
         });
     },
     // Update order, last result
-    updateLastOrders: function ($winType, close_order) {
+    updatePrices: function (prices) {
+        if (typeof prices == 'undefined') {
+            return false;
+        }
+
+        prices = prices.reverse();
+        let lastPricePos = prices.length - 1,
+            updateFirstTime = BotController.data.listPrices.length === 0;
+
+        for (let i = 0; i < prices.length; i++) {
+            if (i === lastPricePos || updateFirstTime) {
+                BotController.data.listPrices.push(prices[i]);
+            }
+        }
+
+        let lastResult = $('.list-prices .list-inline-item');
+        if ($(lastResult[lastResult.length - 1]).data('time') != prices[lastPricePos].open_order) {
+            let date = new Date(prices[lastPricePos].open_order - BotController.config.orderWaiting),
+                orderType = prices[lastPricePos].order_result;
+
+            date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth() + 1) + '-' + BotController.pad(date.getFullYear());
+            let listPrices = '<li class="list-inline-item new" data-time="' + prices[lastPricePos].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>';
+            // clear list prices and update new list prices
+            $('.list-prices').append(listPrices);
+        }
+
+        // auto scroll to right
+        $('.list-prices').scrollLeft(document.getElementsByClassName('list-prices')[0].scrollWidth);
+
+        // update last order
+        BotController.updateLastOrders(prices);
+    },
+    updateLastOrders: function (prices) {
         let childrens = $('.bet-result tr.open-order');
 
         if (typeof childrens !== 'undefined' && childrens.length > 0) {
@@ -302,17 +345,22 @@ let BotController = {
                     timeOrder = entity.find('.time-order').data('time'),
                     lastOrderStatus = entity.find('.order-result').text(),
                     lastOrderAmount = entity.find('.order-amount').data('amount'),
-                    lastOrderType = entity.find('.order-type').data('type'),
-                    win = $winType === lastOrderType,
-                    result = win ? '<span class="fw-bold text-success-custom">' + BotController.config.orderStatus.win + '</span>' : '<span class="fw-bold text-danger-custom">' + BotController.config.orderStatus.lose + '</span>';
+                    lastOrderType = entity.find('.order-type').data('type');
+                for (let j = 0; j < prices.length; j++) {
+                    let winType = prices[j].order_result == BotController.config.orderTypeText.up ? 'UP' : 'DOWN',
+                        isWin = winType === lastOrderType,
+                        openOrder = prices[j].open_order - BotController.config.orderWaiting,
+                        closeOrder = prices[j].close_order - BotController.config.orderWaiting,
+                        result = isWin ? '<span class="fw-bold text-success-custom">' + BotController.config.orderStatus.win + '</span>' : '<span class="fw-bold text-danger-custom">' + BotController.config.orderStatus.lose + '</span>';
 
-                if (new Date(timeOrder).getMinutes() == (new Date(close_order).getMinutes() - 1) && lastOrderStatus == BotController.config.orderStatus.new) {
-                    // update status
-                    $(childrens[i]).find('.order-result').empty().html(result);
-                    // update profit
-                    BotController.config.profit += win ? (lastOrderAmount * 0.95) : (-1 * lastOrderAmount);
+                    if (timeOrder >= openOrder && timeOrder <= closeOrder && lastOrderStatus == BotController.config.orderStatus.new) {
+                        // update status
+                        $(childrens[i]).find('.order-result').empty().html(result);
+                        // update profit
+                        BotController.config.profit += isWin ? (lastOrderAmount * 0.95) : (-1 * lastOrderAmount);
 
-                    $(childrens[i]).removeClass('open-order');
+                        $(childrens[i]).removeClass('open-order');
+                    }
                 }
             }
             if (BotController.config.profit > 0) {
@@ -362,38 +410,6 @@ let BotController = {
             maximumFractionDigits: 2
         }).format(BotController.config.volume / 100));
     },
-    updatePrices: function (prices) {
-        if (typeof prices == 'undefined') {
-            return false;
-        }
-
-        prices = prices.reverse();
-        let lastPricePos = prices.length - 1,
-            updateFirstTime = BotController.data.listPrices.length === 0;
-
-        for (let i = 0; i < prices.length; i++) {
-            if (i === lastPricePos || updateFirstTime) {
-                BotController.data.listPrices.push(prices[i]);
-            }
-        }
-
-        let lastResult = $('.list-prices .list-inline-item');
-        if ($(lastResult[lastResult.length - 1]).data('time') != prices[lastPricePos].open_order) {
-            let date = new Date(prices[lastPricePos].open_order),
-                orderType = prices[lastPricePos].order_result;
-
-            date = BotController.pad(date.getHours()) + ':' + BotController.pad(date.getMinutes()) + ' ' + BotController.pad(date.getDate()) + '-' + BotController.pad(date.getMonth() + 1) + '-' + BotController.pad(date.getFullYear());
-            let listPrices = '<li class="list-inline-item new" data-time="' + prices[lastPricePos].open_order + '" data-bs-toggle="tooltip" data-bs-placement="top" title="' + date + '"><span class="candle-item fas fa-circle candle-' + (orderType == BotController.config.orderTypeText.up ? 'success' : 'danger') + '">&nbsp;</span></li>';
-            // clear list prices and update new list prices
-            $('.list-prices').append(listPrices);
-        }
-
-        // auto scroll to right
-        $('.list-prices').scrollLeft(document.getElementsByClassName('list-prices')[0].scrollWidth);
-
-        // update last order
-        BotController.updateLastOrders(prices[lastPricePos].order_result == BotController.config.orderTypeText.up ? 'UP' : 'DOWN', prices[lastPricePos].close_order);
-    },
     updateMethods: function (methods) {
         for (let i = 0; i < methods.length; i++) {
             // update method profit
@@ -421,7 +437,6 @@ let BotController = {
             $('.live-balance').removeClass('hide');
         }
     },
-    toggleUserInfo: function () {},
     // List methods
     research: function () {
         sendRequest({

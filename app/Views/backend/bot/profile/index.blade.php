@@ -1,9 +1,9 @@
 <div class="mt-2 text-break">
     <div class="row">
-        <div class="col-md-10 col-8">
+        <div class="col-md-10 col-9">
             <h3 class="mb-0" data-bs-toggle="collapse" href=".botUserProfile" role="button" aria-expanded="true" aria-controls="collapseExample">Thông tin tài khoản</h3>
         </div>
-        <div class="col-md-2 col-4 text-end sp">
+        <div class="col-md-2 col-3 profit-collapse hide">
             <span class="align-middle"><span class="profit">$0</span></span>
         </div>
     </div>
@@ -36,7 +36,7 @@
             </div>
             <div class="row">
                 <div class="col-6 col-md-4">
-                    <label class="form-label" aria-hidden="true"><i class="fas fa-calendar-times">&nbsp;&nbsp;</i>Hết hạn</label>
+                    <label class="form-label" aria-hidden="true"><i class="fas fa-calendar-times">&nbsp;&nbsp;</i>Ngày hết hạn</label>
                 </div>
                 <div class="col-6 col-md-8 expired-date">
                     <span class="text-danger">{{ $userExpired && $userExpired->greaterThanOrEqualTo(\Carbon\Carbon::now()) ? $userExpired->format('d-m-Y') : 'Đã hết hạn' }}</span>
