@@ -57,7 +57,7 @@
                     <label class="form-label" aria-hidden="true"><i class="fas fa-funnel-dollar">&nbsp;</i>Số dư hiện tại</label>
                 </div>
                 <div class="col-6 col-md-8">
-                    <div class="account-balance demo-balance {{ $isRunning && $accountType ==  $demoType ? '' : 'hide'}}">
+                    <div class="account-balance demo-balance {{ !$isRunning || ($isRunning && $accountType ==  $demoType) ? '' : 'hide'}}">
                         <i class="fas fa-dollar-sign">&nbsp;</i><span class="current-amount">{{ $botUserInfo->demo_balance > 0 ? number_format($botUserInfo->demo_balance, 2) : 0 }}</span>
                     </div>
                     <div class="account-balance live-balance {{ $isRunning && $accountType ==  $liveType ? '' : 'hide'}}">
