@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Module\Backend;
 
+use App\Helper\Common;
 use App\Model\Entities\BotQueue;
 use App\Model\Entities\BotUser;
+use App\Model\Entities\BotUserMethod;
 use App\Model\Entities\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -24,16 +26,22 @@ class UserController extends BackendController
      * @param BotQueue $botQueue
      * @param BotUser $botUser
      */
-    public function __construct(User $user, BotQueue $botQueue, BotUser $botUser)
+    public function __construct(User $user, BotQueue $botQueue, BotUser $botUser, BotUserMethod $botUserMethod)
     {
         parent::__construct();
         $this->setModel($user);
-        $this->registModel($botQueue, $botUser);
+        $this->registModel($botQueue, $botUser, $botUserMethod);
     }
 
     public function index()
     {
         $this->setEntities($this->getModel()->getList($this->getParams()));
+        return $this->render();
+    }
+
+    public function profile($id)
+    {
+        $this->_prepareForm($id);
         return $this->render();
     }
 
@@ -67,7 +75,7 @@ class UserController extends BackendController
             $entity->save();
             DB::commit();
             Session::flash('success', [($create ? 'Thêm mới' : 'Chỉnh sửa') . ' thành công.']);
-            return $this->_to('user.edit', $entity->id);
+            return $this->_to($this->getParam('profile') ? 'user.profile' : 'user.edit', $entity->id);
         } catch (\Exception $exception) {
             DB::rollBack();
             Log::error($exception);
@@ -90,8 +98,8 @@ class UserController extends BackendController
             // delete bot user
             foreach ($botUserIds as $botUserId) {
                 $this->fetchModel(BotUser::class)->where('id', $botUserId)->delete();
+                $this->fetchModel(BotUserMethod::class)->where('bot_user_id', $botUserId)->delete();
             }
-
             DB::commit();
 
             session()->flash('success', ['Xóa thành công.']);
@@ -113,7 +121,21 @@ class UserController extends BackendController
         if (session()->hasOldInput()) {
             $entity->setRawAttributes(session()->getOldInput());
         }
-        $this->setViewData(['entity' => $entity]);
+        // role
+        $roles = Common::getConfig('user_role_text');
+        if (backendGuard()->user()->role == Common::getConfig('user_role.admin')) {
+            unset($roles[Common::getConfig('user_role.supper_admin')]);
+        }
+        // status
+        $status = [
+            Common::getConfig('user_status.stop') => Common::getConfig('user_status_text.0'),
+            Common::getConfig('user_status.active') => Common::getConfig('user_status_text.1'),
+        ];
+        $this->setViewData([
+            'entity' => $entity,
+            'status' => $status,
+            'roles' => $roles,
+        ]);
         parent::_prepareForm($id);
     }
 }

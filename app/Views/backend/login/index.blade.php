@@ -45,13 +45,13 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-2 register">
-                <div class="row">
-                    <div class="col-12 text-start">
-                        <a href="{{ route('backend.password.forgot') }}">Quên mật khẩu?</a>
-                    </div>
-                </div>
-            </div>
+{{--            <div class="mt-2 register">--}}
+{{--                <div class="row">--}}
+{{--                    <div class="col-12 text-start">--}}
+{{--                        <a href="{{ route('backend.password.forgot') }}">Quên mật khẩu?</a>--}}
+{{--                    </div>--}}
+{{--                </div>--}}
+{{--            </div>--}}
         </form>
     </div>
 @stop

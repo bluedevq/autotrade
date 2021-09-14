@@ -7,14 +7,6 @@ $(document).ready(function () {
         $(this).off('submit').submit();
     });
 
-    $('.navbar-toggler').on('click', function () {
-        if ($('.navbar-collapse').hasClass('not-active')) {
-            $('.navbar-collapse').removeClass('not-active').slideDown(400);
-        } else {
-            $('.navbar-collapse').addClass('not-active').slideUp(400);
-        }
-    });
-
     // reset form method
     $('#form-method').on('hide.bs.modal', function (e) {
         BotController.resetFormMethod();

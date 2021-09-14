@@ -303,26 +303,7 @@ class BotController extends BackendController
     {
         try {
             // check time to bet
-            if (date('s') > 25) {
-                return $this->renderErrorJson();
-            }
-
-            // get new refresh token after 30 minutes
-            if (date('i') % 20 == 0) {
-                $newRefreshToken = $this->_getToken();
-                // check status
-                if (!Arr::get($newRefreshToken, 'ok')) {
-                    $this->setData(['url' => route('bot.clear_token')]);
-                    return $this->renderErrorJson();
-                }
-                // save token
-                Session::put($this->getSessionKey('access_token'), Arr::get($newRefreshToken, 'd.access_token'));
-                Session::put($this->getSessionKey('refresh_token'), Arr::get($newRefreshToken, 'd.refresh_token'));
-            }
-
-            // get price
-            list($orderPrices, $resultPrices) = $this->_getListPrices();
-            if (blank($resultPrices)) {
+            if (date('s') > (25 + Common::getConfig('aresbo.delay_time'))) {
                 return $this->renderErrorJson();
             }
 
@@ -349,6 +330,12 @@ class BotController extends BackendController
                 return $this->renderErrorJson();
             }
 
+            // get price
+            list($orderPrices, $resultPrices) = $this->_getListPrices();
+            if (blank($resultPrices)) {
+                return $this->renderErrorJson();
+            }
+
             // research method to get bet order data
             $orderData = $this->_getOrderData($botQueue, $methods, $resultPrices);
             if (blank($orderData)) {
@@ -363,6 +350,25 @@ class BotController extends BackendController
 
             // get current balance after bet
             $currentAmount = $this->_getBalance();
+
+            // get new refresh token after 30 minutes
+            if (date('i') % 20 == 0) {
+                $newRefreshToken = $this->_getToken();
+                // check status
+                if (!Arr::get($newRefreshToken, 'ok')) {
+                    $this->setData(['url' => route('bot.clear_token')]);
+                    return $this->renderErrorJson();
+                }
+                // save token
+                $accessToken = Arr::get($newRefreshToken, 'd.access_token');
+                $refreshToken = Arr::get($newRefreshToken, 'd.refresh_token');
+                Session::put($this->getSessionKey('access_token'), $accessToken);
+                Session::put($this->getSessionKey('refresh_token'), $refreshToken);
+                $botUser->access_token = $accessToken;
+                $botUser->refresh_token = $refreshToken;
+                $botQueue->account_type == Common::getConfig('aresbo.account_demo') ? $botUser->demo_balance = Arr::get($currentAmount, 'demo_balance') : $botUser->available_balance = Arr::get($currentAmount, 'available_balance');
+                $botUser->save();
+            }
 
             // get reward histories
             $rewardInfo = $this->_getRewardInfo();

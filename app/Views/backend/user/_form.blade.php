@@ -55,7 +55,7 @@
             </div>
             <div class="col-md-4 col-12">
                 <select class="form-select" name="role">
-                    @foreach((array)\App\Helper\Common::getConfig('user_role_text') as $value => $roleName)
+                    @foreach($roles as $value => $roleName)
                     <option value="{{ $value }}" {{ $entity->role ==  $value ? 'selected="selected"' : ''}}>{{ $roleName }}</option>
                     @endforeach
                 </select>
@@ -67,7 +67,7 @@
             </div>
             <div class="col-md-4 col-12">
                 <select class="form-select" name="status">
-                    @foreach((array)\App\Helper\Common::getConfig('user_status_text') as $value => $statusName)
+                    @foreach($status as $value => $statusName)
                     <option value="{{ $value }}" {{ $entity->status ==  $value ? 'selected="selected"' : ''}}>{{ $statusName }}</option>
                     @endforeach
                 </select>
@@ -85,8 +85,8 @@
         </div>
     </form>
 </div>
-<hr>
 @if(!blank($entity->botUserQueues))
+<hr>
 <div class="row mt-2">
     <h3 class="p-0">Các tài khoản AresBO</h3>
     <table class="table table-bordered table-striped table-dark table-hover col-12 mt-2" style="word-break: break-all">

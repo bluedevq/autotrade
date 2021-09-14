@@ -103,7 +103,7 @@ return [
                 1 => 'Hoạt động',
             ],
             'break_item_pc' => 6,
-            'break_item_mobile' => 2,
+            'break_item_mobile' => 1,
         ],
         'method_type' => [
             'value' => [
@@ -153,5 +153,6 @@ return [
             'wallet_to_trade' => 1,
             'trade_to_wallet' => 2,
         ],
+        'delay_time' => 30, // seconds
     ],
 ];

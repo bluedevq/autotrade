@@ -31,6 +31,7 @@ class PasswordController extends BackendController
 
     public function index()
     {
+        return $this->_to('bot.index');
         Session::forget(self::FORGOT_PASSWORD_EMAIL);
         return $this->render();
     }
