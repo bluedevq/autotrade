@@ -11,12 +11,12 @@
                 <li class="nav-item">
                     <a class="nav-link {{ $currentRoute == 'bot.index' ? 'active' : '' }}" href="{{ route('bot.index') }}"><span class="fas fa-robot">&nbsp;</span>AresBo Bot</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ $currentRoute == 'bot.move.money' ? 'active' : '' }}" href="{{ route('bot.move.money') }}"><span class="fas fa-retweet">&nbsp;</span>Chuyển tiền</a>
-                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link" data-bs-toggle="dropdown" href="javascript:void(0)" role="button" aria-expanded="false"><span class="fas fa-cog">&nbsp;</span>Cài đặt</a>
                     <ul class="dropdown-menu">
+                        <li class="nav-item">
+                            <a class="nav-link {{ $currentRoute == 'bot.move.money' ? 'active' : '' }}" href="{{ route('bot.move.money') }}"><span class="fas fa-retweet">&nbsp;</span>Chuyển tiền</a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link {{ $currentRoute == 'user.profile' ? 'active' : '' }}" href="{{ route('user.profile', backendGuard()->user()->id) }}"><span class="fas fa-user">&nbsp;</span>Thông tin tài khoản</a>
                         </li>
